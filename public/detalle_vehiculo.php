@@ -285,10 +285,11 @@ if (!$vehiculo_id) {
                     </div>
                 <?php else: ?>
                     <div class="space-y-4">
-                        <?php foreach ($solicitudes_historicas as $index => $solicitud): ?>
-                            <div class="border border-cambridge2 rounded-lg overflow-hidden">
-                                <button class="w-full bg-cambridge1 text-white px-4 py-3 text-left font-semibold hover:bg-cambridge2 transition flex justify-between items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $solicitud['solicitud_id']; ?>" aria-expanded="<?php echo ($index === 0) ? 'true' : 'false'; ?>" aria-controls="collapse<?php echo $solicitud['solicitud_id']; ?>">
-                                    <span>Solicitud #<?php echo htmlspecialchars($solicitud['solicitud_id']); ?> - <?php echo htmlspecialchars($solicitud['evento']); ?> (<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>)</span>
+                        <?php foreach (
+                            $solicitudes_historicas as $index => $solicitud): ?>
+                            <div class="border border-cambridge2 rounded-lg bg-parchment p-4 shadow-sm">
+                                <div class="flex flex-wrap justify-between items-center mb-2">
+                                    <span class="font-semibold text-darkpurple">Solicitud #<?php echo htmlspecialchars($solicitud['solicitud_id']); ?> - <?php echo htmlspecialchars($solicitud['evento']); ?> (<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>)</span>
                                     <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
                                         switch ($solicitud['estatus_solicitud']) {
                                             case 'pendiente':
@@ -311,95 +312,95 @@ if (!$vehiculo_id) {
                                                 break;
                                         }
                                     ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
-                                </button>
-                                <div id="collapse<?php echo $solicitud['solicitud_id']; ?>" class="collapse <?php echo ($index === 0) ? 'show' : ''; ?>" data-bs-parent="#accordionSolicitudes">
-                                    <div class="p-4 bg-parchment">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                            <p><span class="font-semibold text-darkpurple">Solicitante:</span> <?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></p>
-                                            <p><span class="font-semibold text-darkpurple">Fechas Solicitadas:</span> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?> a <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></p>
-                                            <p><span class="font-semibold text-darkpurple">Evento:</span> <?php echo htmlspecialchars($solicitud['evento']); ?></p>
-                                            <p><span class="font-semibold text-darkpurple">Destino:</span> <?php echo htmlspecialchars($solicitud['destino']); ?></p>
-                                        </div>
-                                        <p class="mb-2"><span class="font-semibold text-darkpurple">Descripción:</span> <?php echo htmlspecialchars($solicitud['descripcion']); ?></p>
-                                        <p class="mb-4"><span class="font-semibold text-darkpurple">Observaciones del Gestor:</span> <?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? 'Ninguna.'); ?></p>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    <p><span class="font-semibold text-darkpurple">Solicitante:</span> <?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></p>
+                                    <p><span class="font-semibold text-darkpurple">Fechas Solicitadas:</span> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?> a <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></p>
+                                    <p><span class="font-semibold text-darkpurple">Evento:</span> <?php echo htmlspecialchars($solicitud['evento']); ?></p>
+                                    <p><span class="font-semibold text-darkpurple">Destino:</span> <?php echo htmlspecialchars($solicitud['destino']); ?></p>
+                                </div>
+                                <p class="mb-2"><span class="font-semibold text-darkpurple">Descripción:</span> <?php echo htmlspecialchars($solicitud['descripcion']); ?></p>
+                                <p class="mb-4"><span class="font-semibold text-darkpurple">Observaciones del Gestor:</span> <?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? 'Ninguna.'); ?></p>
 
-                                        <?php if (!empty($solicitud['fecha_salida_real'])): ?>
-                                            <h6>Registro de Salida:</h6>
-                                            <p><strong>Fecha/Hora Salida Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_real'])); ?></p>
-                                            <p><strong>KM Salida:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_salida'])); ?></p>
-                                            <p><strong>Nivel Combustible Salida:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_salida']); ?>%</p>
-                                            <p><strong>Obs. Salida:</strong> <?php echo htmlspecialchars($solicitud['observaciones_salida'] ?? 'Ninguna.'); ?></p>
-                                            <?php
-                                            $fotos_salida_urls = json_decode($solicitud['fotos_salida_medidores_url'] ?? '[]', true);
-                                            if (!empty($fotos_salida_urls)):
-                                            ?>
-                                                <div class="row mb-3">
-                                                    <p><strong>Fotos de Salida (Medidores):</strong></p>
+                                <?php if (!empty($solicitud['fecha_salida_real'])): ?>
+                                    <div class="mb-2">
+                                        <h6 class="font-semibold text-cambridge1">Registro de Salida:</h6>
+                                        <p><strong>Fecha/Hora Salida Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_real'])); ?></p>
+                                        <p><strong>KM Salida:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_salida'])); ?></p>
+                                        <p><strong>Nivel Combustible Salida:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_salida']); ?>%</p>
+                                        <p><strong>Obs. Salida:</strong> <?php echo htmlspecialchars($solicitud['observaciones_salida'] ?? 'Ninguna.'); ?></p>
+                                        <?php
+                                        $fotos_salida_urls = json_decode($solicitud['fotos_salida_medidores_url'] ?? '[]', true);
+                                        if (!empty($fotos_salida_urls)):
+                                        ?>
+                                            <div class="mb-2">
+                                                <p><strong>Fotos de Salida (Medidores):</strong></p>
+                                                <div class="flex flex-wrap gap-2">
                                                     <?php foreach ($fotos_salida_urls as $url): ?>
-                                                        <div class="col-4 col-md-3 mb-2">
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Salida">
-                                                            </a>
-                                                        </div>
+                                                        <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
+                                                            <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Salida">
+                                                        </a>
                                                     <?php endforeach; ?>
                                                 </div>
-                                            <?php endif; ?>
-                                            <?php
-                                            $fotos_salida_observaciones_urls = json_decode($solicitud['fotos_salida_observaciones_url'] ?? '[]', true);
-                                            if (!empty($fotos_salida_observaciones_urls)):
-                                            ?>
-                                                <div class="row mb-3">
-                                                    <p><strong>Fotos de Salida (Observaciones):</strong></p>
-                                                    <?php foreach ($fotos_salida_observaciones_urls as $url): ?>
-                                                        <div class="col-4 col-md-3 mb-2">
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Salida">
-                                                            </a>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endif; ?>
+                                            </div>
                                         <?php endif; ?>
-
-                                        <?php if (!empty($solicitud['fecha_regreso_real'])): ?>
-                                            <h6>Registro de Regreso:</h6>
-                                            <p><strong>Fecha/Hora Regreso Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_real'])); ?></p>
-                                            <p><strong>KM Regreso:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_regreso'])); ?></p>
-                                            <p><strong>Nivel Combustible Regreso:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_regreso']); ?>%</p>
-                                            <p><strong>Obs. Regreso:</strong> <?php echo htmlspecialchars($solicitud['observaciones_regreso'] ?? 'Ninguna.'); ?></p>
-                                            <?php
-                                            $fotos_regreso_medidores = json_decode($solicitud['fotos_regreso_medidores_url'] ?? '[]', true);
-                                            if (!empty($fotos_regreso_medidores)):
-                                            ?>
-                                                <div class="row mb-3">
-                                                    <p><strong>Fotos de Regreso (Medidores):</strong></p>
-                                                    <?php foreach ($fotos_regreso_medidores as $url): ?>
-                                                        <div class="col-4 col-md-3 mb-2">
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Regreso Medidores">
-                                                            </a>
-                                                        </div>
+                                        <?php
+                                        $fotos_salida_observaciones_urls = json_decode($solicitud['fotos_salida_observaciones_url'] ?? '[]', true);
+                                        if (!empty($fotos_salida_observaciones_urls)):
+                                        ?>
+                                            <div class="mb-2">
+                                                <p><strong>Fotos de Salida (Observaciones):</strong></p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <?php foreach ($fotos_salida_observaciones_urls as $url): ?>
+                                                        <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
+                                                            <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Salida">
+                                                        </a>
                                                     <?php endforeach; ?>
                                                 </div>
-                                            <?php endif; ?>
-                                            <?php
-                                            $fotos_regreso_observaciones = json_decode($solicitud['fotos_regreso_observaciones_url'] ?? '[]', true);
-                                            if (!empty($fotos_regreso_observaciones)):
-                                            ?>
-                                                <div class="row mb-3">
-                                                    <p><strong>Fotos de Regreso (Observaciones):</strong></p>
-                                                    <?php foreach ($fotos_regreso_observaciones as $url): ?>
-                                                        <div class="col-4 col-md-3 mb-2">
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Regreso Observaciones">
-                                                            </a>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endif; ?>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
-                                </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($solicitud['fecha_regreso_real'])): ?>
+                                    <div class="mb-2">
+                                        <h6 class="font-semibold text-cambridge1">Registro de Regreso:</h6>
+                                        <p><strong>Fecha/Hora Regreso Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_real'])); ?></p>
+                                        <p><strong>KM Regreso:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_regreso'])); ?></p>
+                                        <p><strong>Nivel Combustible Regreso:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_regreso']); ?>%</p>
+                                        <p><strong>Obs. Regreso:</strong> <?php echo htmlspecialchars($solicitud['observaciones_regreso'] ?? 'Ninguna.'); ?></p>
+                                        <?php
+                                        $fotos_regreso_medidores = json_decode($solicitud['fotos_regreso_medidores_url'] ?? '[]', true);
+                                        if (!empty($fotos_regreso_medidores)):
+                                        ?>
+                                            <div class="mb-2">
+                                                <p><strong>Fotos de Regreso (Medidores):</strong></p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <?php foreach ($fotos_regreso_medidores as $url): ?>
+                                                        <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
+                                                            <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Regreso Medidores">
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php
+                                        $fotos_regreso_observaciones = json_decode($solicitud['fotos_regreso_observaciones_url'] ?? '[]', true);
+                                        if (!empty($fotos_regreso_observaciones)):
+                                        ?>
+                                            <div class="mb-2">
+                                                <p><strong>Fotos de Regreso (Observaciones):</strong></p>
+                                                <div class="flex flex-wrap gap-2">
+                                                    <?php foreach ($fotos_regreso_observaciones as $url): ?>
+                                                        <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
+                                                            <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Regreso Observaciones">
+                                                        </a>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>

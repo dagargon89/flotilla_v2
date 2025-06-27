@@ -233,11 +233,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div>
                         <label for="fecha_salida_solicitada" class="block text-sm font-medium text-darkpurple mb-1">Fecha y Hora de Salida Deseada</label>
-                        <input type="datetime-local" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_salida_solicitada" name="fecha_salida_solicitada" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                        <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_salida_solicitada" name="fecha_salida_solicitada" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" placeholder="Selecciona fecha y hora" autocomplete="off" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
                     </div>
                     <div>
                         <label for="fecha_regreso_solicitada" class="block text-sm font-medium text-darkpurple mb-1">Fecha y Hora de Regreso Deseada</label>
-                        <input type="datetime-local" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_regreso_solicitada" name="fecha_regreso_solicitada" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                        <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_regreso_solicitada" name="fecha_regreso_solicitada" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" placeholder="Selecciona fecha y hora" autocomplete="off" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
                     </div>
                     <div>
                         <label for="evento" class="block text-sm font-medium text-darkpurple mb-1">Evento</label>
@@ -277,13 +277,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Eliminar Bootstrap y Bootstrap Icons -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script src="js/main.js"></script>
     <script>
-        // Inicializa Flatpickr para los inputs de fecha
+        // Inicializa Flatpickr para los inputs de fecha con formato amigable y español
         const flatpickrSalida = flatpickr("#fecha_salida_solicitada", {
             enableTime: true,
-            dateFormat: "Y-m-dTH:i",
+            dateFormat: "d/m/Y H:i",
             minDate: "today",
+            time_24hr: true,
+            locale: "es",
             defaultDate: new Date(),
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
@@ -293,8 +296,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
         const flatpickrRegreso = flatpickr("#fecha_regreso_solicitada", {
             enableTime: true,
-            dateFormat: "Y-m-dTH:i",
+            dateFormat: "d/m/Y H:i",
             minDate: "today",
+            time_24hr: true,
+            locale: "es",
             defaultDate: new Date().fp_incr(1)
         });
 
@@ -360,13 +365,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         data.occupied_ranges.forEach(range => {
                             const listItem = document.createElement('li');
-                            listItem.className = 'list-group-item';
+                            listItem.className = 'border border-cambridge1 bg-parchment rounded-lg p-4 mb-2 shadow-sm';
                             listItem.innerHTML = `
-                                <strong>Ocupado desde:</strong> ${formatDateTime(range.fecha_salida_solicitada)}<br>
-                                <strong>Hasta:</strong> ${formatDateTime(range.fecha_regreso_solicitada)}<br>
-                                <strong>Evento:</strong> ${range.evento || 'N/A'}<br>
-                                <strong>Descripción:</strong> ${range.descripcion || 'N/A'}<br>
-                                <strong>Solicitado por:</strong> ${range.solicitante_nombre || 'Desconocido'}
+                                <div class="space-y-1">
+                                    <div><strong>Ocupado desde:</strong> ${formatDateTime(range.fecha_salida_solicitada)}</div>
+                                    <div><strong>Hasta:</strong> ${formatDateTime(range.fecha_regreso_solicitada)}</div>
+                                    <div><strong>Evento:</strong> ${range.evento || 'N/A'}</div>
+                                    <div><strong>Descripción:</strong> ${range.descripcion || 'N/A'}</div>
+                                    <div><strong>Solicitado por:</strong> ${range.solicitante_nombre || 'Desconocido'}</div>
+                                </div>
                             `;
                             occupiedDatesList.appendChild(listItem);
                         });
