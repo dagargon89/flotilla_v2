@@ -161,12 +161,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solicitar Vehículo - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -175,91 +194,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Solicitar un Vehículo</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Solicitar un Vehículo</h1>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado'): ?>
-            <div class="alert alert-warning text-center" role="alert">
+            <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4 text-center" role="alert">
                 <strong>¡Tu cuenta está <?php echo htmlspecialchars(ucfirst($current_user_estatus_usuario)); ?>!</strong> No puedes solicitar vehículos en este momento. Contacta al administrador para más información.
             </div>
-            <p class="text-center">Estatus de tu cuenta: <span class="badge bg-<?php echo ($current_user_estatus_usuario === 'suspendido' ? 'danger' : 'warning text-dark'); ?>"><?php echo htmlspecialchars(ucfirst($current_user_estatus_usuario)); ?></span></p>
+            <p class="text-center mb-6">Estatus de tu cuenta: <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold <?php echo ($current_user_estatus_usuario === 'suspendido' ? 'bg-red-500 text-white' : 'bg-yellow-500 text-white'); ?>"><?php echo htmlspecialchars(ucfirst($current_user_estatus_usuario)); ?></span></p>
         <?php endif; ?>
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card p-4 shadow-sm">
-                    <form action="solicitar_vehiculo.php" method="POST">
-                        <div class="mb-3">
-                            <label for="vehiculo_id" class="form-label">Selecciona el Vehículo</label>
-                            <select class="form-select" id="vehiculo_id" name="vehiculo_id" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
-                                <option value="">-- Selecciona un vehículo --</option>
-                                <?php foreach ($vehiculos_flotilla as $vehiculo): ?>
-                                    <option value="<?php echo htmlspecialchars($vehiculo['id']); ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>" <?php echo ($selected_vehiculo_id == $vehiculo['id']) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo'] . ' (' . $vehiculo['placas'] . ')'); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <input type="hidden" name="vehiculo_info_display" id="vehiculo_info_display">
-                        </div>
-                        <div class="mb-3">
-                            <label for="fecha_salida_solicitada" class="form-label">Fecha y Hora de Salida Deseada</label>
-                            <input type="datetime-local" class="form-control" id="fecha_salida_solicitada" name="fecha_salida_solicitada" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="fecha_regreso_solicitada" class="form-label">Fecha y Hora de Regreso Deseada</label>
-                            <input type="datetime-local" class="form-control" id="fecha_regreso_solicitada" name="fecha_regreso_solicitada" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="evento" class="form-label">Evento</label>
-                            <input type="text" class="form-control" id="evento" name="evento" value="<?php echo htmlspecialchars($evento); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">Descripción del Viaje</label>
-                            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required><?php echo htmlspecialchars($descripcion); ?></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="destino" class="form-label">Destino / Ruta</label>
-                            <input type="text" class="form-control" id="destino" name="destino" value="<?php echo htmlspecialchars($destino); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
-                        </div>
-                        <button type="submit" class="btn btn-primary" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?>>Enviar Solicitud</button>
-                    </form>
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+                <form action="solicitar_vehiculo.php" method="POST" class="space-y-4">
+                    <div>
+                        <label for="vehiculo_id" class="block text-sm font-medium text-darkpurple mb-1">Selecciona el Vehículo</label>
+                        <select class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="vehiculo_id" name="vehiculo_id" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                            <option value="">-- Selecciona un vehículo --</option>
+                            <?php foreach ($vehiculos_flotilla as $vehiculo): ?>
+                                <option value="<?php echo htmlspecialchars($vehiculo['id']); ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>" <?php echo ($selected_vehiculo_id == $vehiculo['id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo'] . ' (' . $vehiculo['placas'] . ')'); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="hidden" name="vehiculo_info_display" id="vehiculo_info_display">
+                    </div>
+                    <div>
+                        <label for="fecha_salida_solicitada" class="block text-sm font-medium text-darkpurple mb-1">Fecha y Hora de Salida Deseada</label>
+                        <input type="datetime-local" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_salida_solicitada" name="fecha_salida_solicitada" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                    </div>
+                    <div>
+                        <label for="fecha_regreso_solicitada" class="block text-sm font-medium text-darkpurple mb-1">Fecha y Hora de Regreso Deseada</label>
+                        <input type="datetime-local" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_regreso_solicitada" name="fecha_regreso_solicitada" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                    </div>
+                    <div>
+                        <label for="evento" class="block text-sm font-medium text-darkpurple mb-1">Evento</label>
+                        <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="evento" name="evento" value="<?php echo htmlspecialchars($evento); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                    </div>
+                    <div>
+                        <label for="descripcion" class="block text-sm font-medium text-darkpurple mb-1">Descripción del Viaje</label>
+                        <textarea class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="descripcion" name="descripcion" rows="3" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required><?php echo htmlspecialchars($descripcion); ?></textarea>
+                    </div>
+                    <div>
+                        <label for="destino" class="block text-sm font-medium text-darkpurple mb-1">Destino / Ruta</label>
+                        <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="destino" name="destino" value="<?php echo htmlspecialchars($destino); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 rounded-lg bg-darkpurple text-white font-semibold hover:bg-mountbatten transition" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?>>Enviar Solicitud</button>
+                </form>
             </div>
-            <div class="col-md-6">
-                <div class="card p-4 shadow-sm h-100">
-                    <h5 class="card-title">Próximas Ocupaciones del Vehículo Seleccionado</h5>
-                    <div id="availability_list_container" style="display: none;">
-                        <ul class="list-group mb-3" id="occupied_dates_list">
-                        </ul>
-                        <p class="text-muted small mt-2" id="occupied_dates_hint"></p>
-                    </div>
-                    <div class="alert alert-info text-center" id="no_vehicle_selected_message" style="display: block;">
-                        Selecciona un vehículo para ver sus próximas ocupaciones.
-                    </div>
-                    <div class="alert alert-info text-center" id="no_occupied_dates_message" style="display: none;">
-                        ¡Este vehículo no tiene ocupaciones registradas para el futuro cercano!
-                    </div>
-                    <div class="alert alert-info text-center" id="no_vehicles_message" style="display: <?php echo empty($vehiculos_flotilla) ? 'block' : 'none'; ?>;">
-                        No hay vehículos disponibles para solicitar en este momento.
-                    </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+                <h5 class="text-lg font-semibold text-darkpurple mb-4">Próximas Ocupaciones del Vehículo Seleccionado</h5>
+                <div id="availability_list_container" class="hidden">
+                    <ul class="space-y-2 mb-4" id="occupied_dates_list">
+                    </ul>
+                    <p class="text-sm text-mountbatten" id="occupied_dates_hint"></p>
+                </div>
+                <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center" id="no_vehicle_selected_message">
+                    Selecciona un vehículo para ver sus próximas ocupaciones.
+                </div>
+                <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center hidden" id="no_occupied_dates_message">
+                    ¡Este vehículo no tiene ocupaciones registradas para el futuro cercano!
+                </div>
+                <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center <?php echo empty($vehiculos_flotilla) ? 'block' : 'hidden'; ?>" id="no_vehicles_message">
+                    No hay vehículos disponibles para solicitar en este momento.
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
     <script>

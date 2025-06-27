@@ -284,9 +284,27 @@ if (isset($_GET['error'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Solicitudes - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         #vehicle-status {
             padding: 4px 8px;
@@ -303,7 +321,7 @@ if (isset($_GET['error'])) {
     </style>
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -312,163 +330,125 @@ if (isset($_GET['error'])) {
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Mis Solicitudes y Historial de Uso</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Mis Solicitudes y Historial de Uso</h1>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (empty($solicitudes_usuario)): ?>
-            <div class="alert alert-info" role="alert">
-                Aún no has realizado ninguna solicitud de vehículo o no tienes historial de uso. ¡Anímate a <a href="solicitar_vehiculo.php">solicitar uno</a>!
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
+                Aún no has realizado ninguna solicitud de vehículo o no tienes historial de uso. ¡Anímate a <a href="solicitar_vehiculo.php" class="font-semibold underline">solicitar uno</a>!
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID Sol.</th>
-                            <th>Salida Deseada</th>
-                            <th>Regreso Deseada</th>
-                            <th>Evento</th>
-                            <th>Descripción</th>
-                            <th>Vehículo Asignado</th>
-                            <th>Estatus</th>
-                            <th>Estado Vehículo</th> <!-- Nueva columna para el estado del vehículo -->
-                            <th>Acciones</th>
-                            <th>Ver Detalles</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($solicitudes_usuario as $solicitud): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($solicitud['solicitud_id']); ?></td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?></td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></td>
-                                <td><?php echo htmlspecialchars($solicitud['evento']); ?></td>
-                                <td><?php echo htmlspecialchars($solicitud['descripcion']); ?></td>
-                                <td>
-                                    <?php if ($solicitud['marca']): ?>
-                                        <?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>
-                                    <?php else: ?>
-                                        <span class="text-muted">Sin asignar</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php
-                                    $status_class = '';
-                                    switch ($solicitud['estatus_solicitud']) {
-                                        case 'pendiente':
-                                            $status_class = 'badge bg-warning text-dark';
-                                            break;
-                                        case 'aprobada':
-                                            $status_class = 'badge bg-success';
-                                            break;
-                                        case 'rechazada':
-                                            $status_class = 'badge bg-danger';
-                                            break;
-                                        case 'en_curso':
-                                            $status_class = 'badge bg-primary';
-                                            break;
-                                        case 'completada':
-                                            $status_class = 'badge bg-secondary';
-                                            break;
-                                        case 'cancelada':
-                                            $status_class = 'badge bg-info';
-                                            break;
-                                    }
-                                    ?>
-                                    <span class="<?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
-                                </td>
-                                <td>
-                                    <span id="vehicle-status-<?php echo htmlspecialchars($solicitud['vehiculo_id']); ?>" class="text-nowrap">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-cambridge2">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-cambridge1 text-white">
+                                <th class="px-4 py-3 text-left">ID Sol.</th>
+                                <th class="px-4 py-3 text-left">Salida Deseada</th>
+                                <th class="px-4 py-3 text-left">Regreso Deseada</th>
+                                <th class="px-4 py-3 text-left">Evento</th>
+                                <th class="px-4 py-3 text-left">Descripción</th>
+                                <th class="px-4 py-3 text-left">Vehículo Asignado</th>
+                                <th class="px-4 py-3 text-left">Estatus</th>
+                                <th class="px-4 py-3 text-left">Estado Vehículo</th>
+                                <th class="px-4 py-3 text-left">Acciones</th>
+                                <th class="px-4 py-3 text-left">Ver Detalles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($solicitudes_usuario as $solicitud): ?>
+                                <tr class="border-b border-cambridge2 hover:bg-parchment">
+                                    <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($solicitud['solicitud_id']); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($solicitud['evento']); ?></td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo htmlspecialchars($solicitud['descripcion']); ?></td>
+                                    <td class="px-4 py-3">
+                                        <?php if ($solicitud['marca']): ?>
+                                            <span class="font-semibold"><?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-mountbatten">Sin asignar</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-4 py-3">
                                         <?php
-                                        // Mostrar estado del vehículo si está disponible
-                                        if (!empty($solicitud['vehiculo_id'])) {
-                                            // Aquí se puede agregar lógica para determinar el estado del vehículo si es necesario
-                                            echo 'Disponible'; // Estado por defecto, cambiar según la lógica
-                                        } else {
-                                            echo 'Sin asignar';
+                                        $status_class = '';
+                                        switch ($solicitud['estatus_solicitud']) {
+                                            case 'pendiente':
+                                                $status_class = 'bg-yellow-500 text-white';
+                                                break;
+                                            case 'aprobada':
+                                                $status_class = 'bg-green-500 text-white';
+                                                break;
+                                            case 'rechazada':
+                                                $status_class = 'bg-red-500 text-white';
+                                                break;
+                                            case 'en_curso':
+                                                $status_class = 'bg-cambridge1 text-white';
+                                                break;
+                                            case 'completada':
+                                                $status_class = 'bg-gray-500 text-white';
+                                                break;
+                                            case 'cancelada':
+                                                $status_class = 'bg-blue-500 text-white';
+                                                break;
                                         }
                                         ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?php
-                                    // Determinar qué botón mostrar según el estatus
-                                    if ($solicitud['estatus_solicitud'] === 'aprobada' && empty($solicitud['historial_id'])):
-                                    ?>
-                                        <div class="table-actions-cell">
-                                            <button type="button" class="btn btn-primary btn-sm"
-                                                <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?>
-                                                data-bs-toggle="modal" data-bs-target="#useVehicleModal"
-                                                data-action="marcar_salida"
-                                                data-solicitud-id="<?php echo htmlspecialchars($solicitud['solicitud_id']); ?>"
-                                                data-vehiculo-id="<?php echo htmlspecialchars($solicitud['vehiculo_id']); ?>"
-                                                data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' - ' . $solicitud['placas']); ?>"
-                                                data-kilometraje-actual="<?php echo htmlspecialchars($solicitud['kilometraje_actual'] ?? 0); ?>">
-                                                <i class="bi bi-box-arrow-right"></i> Marcar Salida
-                                            </button>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <?php
+                                        // Determinar el estado del vehículo basado en el historial
+                                        $vehicle_status = 'Sin uso';
+                                        $vehicle_status_class = 'bg-gray-500 text-white';
+                                        
+                                        if ($solicitud['historial_id']) {
+                                            if ($solicitud['fecha_salida_real'] && !$solicitud['fecha_regreso_real']) {
+                                                $vehicle_status = 'En uso';
+                                                $vehicle_status_class = 'bg-cambridge1 text-white';
+                                            } elseif ($solicitud['fecha_regreso_real']) {
+                                                $vehicle_status = 'Completado';
+                                                $vehicle_status_class = 'bg-green-500 text-white';
+                                            }
+                                        }
+                                        ?>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $vehicle_status_class; ?>"><?php echo $vehicle_status; ?></span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-wrap gap-1">
+                                            <?php if ($solicitud['estatus_solicitud'] === 'aprobada' && !$solicitud['historial_id']): ?>
+                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#salidaVehiculoModal" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-placas="<?php echo htmlspecialchars($solicitud['placas']); ?>">
+                                                    <i class="bi bi-play-circle"></i> Salida
+                                                </button>
+                                            <?php elseif ($solicitud['estatus_solicitud'] === 'en_curso' && $solicitud['fecha_salida_real'] && !$solicitud['fecha_regreso_real']): ?>
+                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-bs-toggle="modal" data-bs-target="#regresoVehiculoModal" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-placas="<?php echo htmlspecialchars($solicitud['placas']); ?>" data-km-salida="<?php echo $solicitud['kilometraje_salida']; ?>">
+                                                    <i class="bi bi-stop-circle"></i> Regreso
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
-                                    <?php elseif ($solicitud['estatus_solicitud'] === 'en_curso' && !empty($solicitud['historial_id'])): ?>
-                                        <div class="table-actions-cell">
-                                            <button type="button" class="btn btn-secondary btn-sm"
-                                                <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?>
-                                                data-bs-toggle="modal" data-bs-target="#useVehicleModal"
-                                                data-action="marcar_regreso"
-                                                data-solicitud-id="<?php echo htmlspecialchars($solicitud['solicitud_id']); ?>"
-                                                data-vehiculo-id="<?php echo htmlspecialchars($solicitud['vehiculo_id']); ?>"
-                                                data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' - ' . $solicitud['placas']); ?>"
-                                                data-kilometraje-actual="<?php echo htmlspecialchars($solicitud['kilometraje_actual'] ?? 0); ?>">
-                                                <i class="bi bi-box-arrow-in-left"></i> Marcar Regreso
-                                            </button>
-                                        </div>
-                                    <?php else: ?>
-                                        <span class="text-muted">N/A</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <div class="table-actions-cell">
-                                        <button type="button" class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#viewDetailsModal"
-                                            data-solicitud-id="<?php echo htmlspecialchars($solicitud['solicitud_id']); ?>"
-                                            data-fecha-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
-                                            data-fecha-regreso="<?php echo htmlspecialchars($solicitud['fecha_regreso_solicitada'] ?? ''); ?>"
-                                            data-evento="<?php echo htmlspecialchars($solicitud['evento']); ?>"
-                                            data-descripcion="<?php echo htmlspecialchars($solicitud['descripcion']); ?>"
-                                            data-destino="<?php echo htmlspecialchars($solicitud['destino']); ?>"
-                                            data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>"
-                                            data-estatus="<?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?>"
-                                            data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? ''); ?>"
-                                            data-historial-id="<?php echo htmlspecialchars($solicitud['historial_id'] ?? ''); ?>"
-                                            data-km-salida="<?php echo htmlspecialchars($solicitud['kilometraje_salida'] ?? ''); ?>"
-                                            data-gas-salida="<?php echo htmlspecialchars($solicitud['nivel_combustible_salida'] ?? ''); ?>"
-                                            data-fecha-salida-real="<?php echo htmlspecialchars($solicitud['fecha_salida_real'] ?? ''); ?>"
-                                            data-obs-salida="<?php echo htmlspecialchars($solicitud['observaciones_salida'] ?? ''); ?>"
-                                            data-fotos-salida-medidores="<?php echo htmlspecialchars($solicitud['fotos_salida_medidores_url'] ?? '[]'); ?>"
-                                            data-fotos-salida-observaciones="<?php echo htmlspecialchars($solicitud['fotos_salida_observaciones_url'] ?? '[]'); ?>"
-                                            data-km-regreso="<?php echo htmlspecialchars($solicitud['kilometraje_regreso'] ?? ''); ?>"
-                                            data-gas-regreso="<?php echo htmlspecialchars($solicitud['nivel_combustible_regreso'] ?? ''); ?>"
-                                            data-fecha-regreso-real="<?php echo htmlspecialchars($solicitud['fecha_regreso_real'] ?? ''); ?>"
-                                            data-obs-regreso="<?php echo htmlspecialchars($solicitud['observaciones_regreso'] ?? ''); ?>"
-                                            data-fotos-regreso-medidores="<?php echo htmlspecialchars($solicitud['fotos_regreso_medidores_url'] ?? '[]'); ?>"
-                                            data-fotos-regreso-observaciones="<?php echo htmlspecialchars($solicitud['fotos_regreso_observaciones_url'] ?? '[]'); ?>">
-                                            <i class="bi bi-eye"></i> Ver Detalles
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#detallesSolicitudModal" data-solicitud="<?php echo htmlspecialchars(json_encode($solicitud)); ?>">
+                                            <i class="bi bi-eye"></i> Ver
                                         </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -581,7 +561,7 @@ if (isset($_GET['error'])) {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="js/main.js"></script>
     <script>
         // JavaScript para manejar el modal de Marcar Salida/Regreso

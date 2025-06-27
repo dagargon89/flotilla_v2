@@ -242,14 +242,28 @@ $report_data_json = json_encode($report_data);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes y Estadísticas - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -258,189 +272,156 @@ $report_data_json = json_encode($report_data);
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Reportes y Estadísticas de la Flotilla</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Reportes y Estadísticas de la Flotilla</h1>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header">
-                Filtros de Reporte
-            </div>
-            <div class="card-body">
-                <form action="reportes.php" method="GET">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="start_date" class="form-label">Fecha de Inicio (Salida)</label>
-                            <input type="date" class="form-control" id="start_date" name="start_date" value="<?php echo htmlspecialchars($filter_start_date); ?>">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="end_date" class="form-label">Fecha de Fin (Salida)</label>
-                            <input type="date" class="form-control" id="end_date" name="end_date" value="<?php echo htmlspecialchars($filter_end_date); ?>">
-                        </div>
-                        <div class="col-md-3">
-                            <label for="vehiculo_id" class="form-label">Vehículo</label>
-                            <select class="form-select" id="vehiculo_id" name="vehiculo_id">
-                                <option value="">Todos los vehículos</option>
-                                <?php foreach ($vehiculos_para_filtro as $vehiculo_opt): ?>
-                                    <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>" <?php echo ($filter_vehiculo_id == $vehiculo_opt['id']) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="estatus_solicitud" class="form-label">Estatus de Solicitud</label>
-                            <select class="form-select" id="estatus_solicitud" name="estatus_solicitud">
-                                <option value="">Todos los estatus</option>
-                                <option value="pendiente" <?php echo ($filter_estatus_solicitud == 'pendiente') ? 'selected' : ''; ?>>Pendiente</option>
-                                <option value="aprobada" <?php echo ($filter_estatus_solicitud == 'aprobada') ? 'selected' : ''; ?>>Aprobada</option>
-                                <option value="rechazada" <?php echo ($filter_estatus_solicitud == 'rechazada') ? 'selected' : ''; ?>>Rechazada</option>
-                                <option value="en_curso" <?php echo ($filter_estatus_solicitud == 'en_curso') ? 'selected' : ''; ?>>En Curso</option>
-                                <option value="completada" <?php echo ($filter_estatus_solicitud == 'completada') ? 'selected' : ''; ?>>Completada</option>
-                                <option value="cancelada" <?php echo ($filter_estatus_solicitud == 'cancelada') ? 'selected' : ''; ?>>Cancelada</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
-                            <a href="reportes.php" class="btn btn-secondary">Limpiar Filtros</a>
-                        </div>
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2 mb-6">
+            <h3 class="text-lg font-semibold text-darkpurple mb-4">Filtros de Reporte</h3>
+            <form action="reportes.php" method="GET">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-darkpurple mb-1">Fecha de Inicio (Salida)</label>
+                        <input type="date" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="start_date" name="start_date" value="<?php echo htmlspecialchars($filter_start_date); ?>">
                     </div>
-                </form>
+                    <div>
+                        <label for="end_date" class="block text-sm font-medium text-darkpurple mb-1">Fecha de Fin (Salida)</label>
+                        <input type="date" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="end_date" name="end_date" value="<?php echo htmlspecialchars($filter_end_date); ?>">
+                    </div>
+                    <div>
+                        <label for="vehiculo_id" class="block text-sm font-medium text-darkpurple mb-1">Vehículo</label>
+                        <select class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="vehiculo_id" name="vehiculo_id">
+                            <option value="">Todos los vehículos</option>
+                            <?php foreach ($vehiculos_para_filtro as $vehiculo_opt): ?>
+                                <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>" <?php echo ($filter_vehiculo_id == $vehiculo_opt['id']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="estatus_solicitud" class="block text-sm font-medium text-darkpurple mb-1">Estatus de Solicitud</label>
+                        <select class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="estatus_solicitud" name="estatus_solicitud">
+                            <option value="">Todos los estatus</option>
+                            <option value="pendiente" <?php echo ($filter_estatus_solicitud == 'pendiente') ? 'selected' : ''; ?>>Pendiente</option>
+                            <option value="aprobada" <?php echo ($filter_estatus_solicitud == 'aprobada') ? 'selected' : ''; ?>>Aprobada</option>
+                            <option value="rechazada" <?php echo ($filter_estatus_solicitud == 'rechazada') ? 'selected' : ''; ?>>Rechazada</option>
+                            <option value="en_curso" <?php echo ($filter_estatus_solicitud == 'en_curso') ? 'selected' : ''; ?>>En Curso</option>
+                            <option value="completada" <?php echo ($filter_estatus_solicitud == 'completada') ? 'selected' : ''; ?>>Completada</option>
+                            <option value="cancelada" <?php echo ($filter_estatus_solicitud == 'cancelada') ? 'selected' : ''; ?>>Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-darkpurple text-white px-4 py-2 rounded-lg font-semibold hover:bg-mountbatten transition">Aplicar Filtros</button>
+                    <a href="reportes.php" class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition">Limpiar Filtros</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+                <h3 class="text-lg font-semibold text-darkpurple mb-4">Vehículos por Estatus</h3>
+                <canvas id="vehiculosEstatusChart"></canvas>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+                <h3 class="text-lg font-semibold text-darkpurple mb-4">Kilómetros Recorridos por Vehículo</h3>
+                <canvas id="kilometrosVehiculoChart"></canvas>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+                <h3 class="text-lg font-semibold text-darkpurple mb-4">Costos de Mantenimiento por Vehículo</h3>
+                <canvas id="costosMantenimientoChart"></canvas>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+                <h3 class="text-lg font-semibold text-darkpurple mb-4">Uso de Vehículos por Mes</h3>
+                <canvas id="usoVehiculosMesChart"></canvas>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        Vehículos por Estatus
-                    </div>
-                    <div class="card-body">
-                        <canvas id="vehiculosEstatusChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        Kilómetros Recorridos por Vehículo (filtrado por fecha y vehículo)
-                    </div>
-                    <div class="card-body">
-                        <canvas id="kilometrosVehiculoChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        Costos de Mantenimiento por Vehículo (filtrado por fecha y vehículo)
-                    </div>
-                    <div class="card-body">
-                        <canvas id="costosMantenimientoChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        Uso de Vehículos por Mes (filtrado por fecha, vehículo y estatus)
-                    </div>
-                    <div class="card-body">
-                        <canvas id="usoVehiculosMesChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card mt-4 shadow-sm">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                Detalle de Solicitudes Filtradas
-                <button type="button" class="btn btn-success btn-sm" id="downloadCsvBtn">
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-darkpurple">Detalle de Solicitudes Filtradas</h3>
+                <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition" id="downloadCsvBtn">
                     <i class="bi bi-download"></i> Descargar CSV
                 </button>
             </div>
-            <div class="card-body">
-                <?php if (empty($report_data['detalle_solicitudes_filtradas'])): ?>
-                    <div class="alert alert-info text-center" role="alert">
-                        No hay solicitudes que coincidan con los filtros aplicados.
-                    </div>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover table-sm">
-                            <thead>
-                                <tr>
-                                    <th>ID Sol.</th>
-                                    <th>Solicitante</th>
-                                    <th>Salida Deseada</th>
-                                    <th>Regreso Deseada</th>
-                                    <th>Evento</th>
-                                    <th>Descripción</th>
-                                    <th>Destino</th>
-                                    <th>Vehículo Asignado</th>
-                                    <th>Estatus</th>
-                                    <th>KM Salida</th>
-                                    <th>KM Regreso</th>
-                                    <th>KM Recorridos</th>
+            <?php if (empty($report_data['detalle_solicitudes_filtradas'])): ?>
+                <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center" role="alert">
+                    No hay solicitudes que coincidan con los filtros aplicados.
+                </div>
+            <?php else: ?>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-cambridge1 text-white">
+                                <th class="px-4 py-3 text-left">ID Sol.</th>
+                                <th class="px-4 py-3 text-left">Solicitante</th>
+                                <th class="px-4 py-3 text-left">Salida Deseada</th>
+                                <th class="px-4 py-3 text-left">Regreso Deseada</th>
+                                <th class="px-4 py-3 text-left">Evento</th>
+                                <th class="px-4 py-3 text-left">Descripción</th>
+                                <th class="px-4 py-3 text-left">Destino</th>
+                                <th class="px-4 py-3 text-left">Vehículo Asignado</th>
+                                <th class="px-4 py-3 text-left">Estatus</th>
+                                <th class="px-4 py-3 text-left">KM Salida</th>
+                                <th class="px-4 py-3 text-left">KM Regreso</th>
+                                <th class="px-4 py-3 text-left">KM Recorridos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($report_data['detalle_solicitudes_filtradas'] as $solicitud): ?>
+                                <tr class="border-b border-cambridge2 hover:bg-parchment">
+                                    <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($solicitud['solicitud_id']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($solicitud['evento']); ?></td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo htmlspecialchars($solicitud['descripcion']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($solicitud['destino']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?></td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
+                                            switch ($solicitud['estatus_solicitud']) {
+                                                case 'pendiente':
+                                                    echo 'bg-yellow-500 text-white';
+                                                    break;
+                                                case 'aprobada':
+                                                    echo 'bg-green-500 text-white';
+                                                    break;
+                                                case 'rechazada':
+                                                    echo 'bg-red-500 text-white';
+                                                    break;
+                                                case 'en_curso':
+                                                    echo 'bg-cambridge1 text-white';
+                                                    break;
+                                                case 'completada':
+                                                    echo 'bg-gray-500 text-white';
+                                                    break;
+                                                case 'cancelada':
+                                                    echo 'bg-blue-500 text-white';
+                                                    break;
+                                            }
+                                        ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars($solicitud['kilometraje_salida'] ?? 'N/A'); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars($solicitud['kilometraje_regreso'] ?? 'N/A'); ?></td>
+                                    <td class="px-4 py-3 text-sm font-semibold"><?php echo htmlspecialchars($solicitud['kilometros_recorridos'] ?? 'N/A'); ?></td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($report_data['detalle_solicitudes_filtradas'] as $solicitud): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($solicitud['solicitud_id']); ?></td>
-                                        <td><?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></td>
-                                        <td><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?></td>
-                                        <td><?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></td>
-                                        <td><?php echo htmlspecialchars($solicitud['evento']); ?></td>
-                                        <td><?php echo htmlspecialchars($solicitud['descripcion']); ?></td>
-                                        <td><?php echo htmlspecialchars($solicitud['destino']); ?></td>
-                                        <td><?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?></td>
-                                        <td><span class="badge bg-<?php
-                                                                    switch ($solicitud['estatus_solicitud']) {
-                                                                        case 'pendiente':
-                                                                            echo 'warning text-dark';
-                                                                            break;
-                                                                        case 'aprobada':
-                                                                            echo 'success';
-                                                                            break;
-                                                                        case 'rechazada':
-                                                                            echo 'danger';
-                                                                            break;
-                                                                        case 'en_curso':
-                                                                            echo 'primary';
-                                                                            break;
-                                                                        case 'completada':
-                                                                            echo 'secondary';
-                                                                            break;
-                                                                        case 'cancelada':
-                                                                            echo 'info';
-                                                                            break;
-                                                                    }
-                                                                    ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span></td>
-                                        <td><?php echo htmlspecialchars($solicitud['kilometraje_salida'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($solicitud['kilometraje_regreso'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars(
-                                                ($solicitud['kilometraje_regreso'] !== null && $solicitud['kilometraje_salida'] !== null) ?
-                                                    ($solicitud['kilometraje_regreso'] - $solicitud['kilometraje_salida']) : 'N/A'
-                                            ); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php endif; ?>
-            </div>
-
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
         <script src="js/main.js"></script>
         <script>
@@ -688,6 +669,7 @@ $report_data_json = json_encode($report_data);
                 document.body.removeChild(link);
             });
         </script>
+    </div>
 </body>
 
 </html>

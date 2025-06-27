@@ -166,12 +166,26 @@ if ($db) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Vehículos - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -180,102 +194,107 @@ if ($db) {
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Gestión de Vehículos</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Gestión de Vehículos</h1>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
-        <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="add">
             <i class="bi bi-plus-circle"></i> Agregar Nuevo Vehículo
         </button>
 
         <?php if (empty($vehiculos)): ?>
-            <div class="alert alert-info" role="alert">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
                 No hay vehículos registrados en la flotilla.
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Marca</th>
-                            <th>Modelo</th>
-                            <th>Año</th>
-                            <th>Placas</th>
-                            <th>VIN</th>
-                            <th>Combustible</th>
-                            <th>KM Actual</th>
-                            <th>Estatus</th>
-                            <th>Ubicación</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($vehiculos as $vehiculo): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($vehiculo['marca']); ?></td>
-                                <td><?php echo htmlspecialchars($vehiculo['modelo']); ?></td>
-                                <td><?php echo htmlspecialchars($vehiculo['anio']); ?></td>
-                                <td><?php echo htmlspecialchars($vehiculo['placas']); ?></td>
-                                <td><?php echo htmlspecialchars($vehiculo['vin'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?></td>
-                                <td><?php echo htmlspecialchars(number_format($vehiculo['kilometraje_actual'])); ?></td>
-                                <td>
-                                    <?php
-                                    $status_class = '';
-                                    switch ($vehiculo['estatus']) {
-                                        case 'disponible':
-                                            $status_class = 'badge bg-success';
-                                            break;
-                                        case 'en_uso':
-                                            $status_class = 'badge bg-primary';
-                                            break;
-                                        case 'en_mantenimiento':
-                                            $status_class = 'badge bg-warning text-dark';
-                                            break;
-                                        case 'inactivo':
-                                            $status_class = 'badge bg-danger';
-                                            break;
-                                    }
-                                    ?>
-                                    <span class="<?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
-                                </td>
-                                <td><?php echo htmlspecialchars($vehiculo['ubicacion_actual'] ?? 'N/A'); ?></td>
-                                <td>
-                                    <a href="detalle_vehiculo.php?id=<?php echo $vehiculo['id']; ?>" class="btn btn-sm btn-secondary me-1">
-                                        Ver Detalles
-                                    </a> <button type="button" class="btn btn-sm btn-info text-white me-1" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="edit"
-                                        data-id="<?php echo $vehiculo['id']; ?>"
-                                        data-marca="<?php echo htmlspecialchars($vehiculo['marca']); ?>"
-                                        data-modelo="<?php echo htmlspecialchars($vehiculo['modelo']); ?>"
-                                        data-anio="<?php echo htmlspecialchars($vehiculo['anio']); ?>"
-                                        data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>"
-                                        data-vin="<?php echo htmlspecialchars($vehiculo['vin']); ?>"
-                                        data-tipo-combustible="<?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?>"
-                                        data-kilometraje-actual="<?php echo htmlspecialchars($vehiculo['kilometraje_actual']); ?>"
-                                        data-estatus="<?php echo htmlspecialchars($vehiculo['estatus']); ?>"
-                                        data-ubicacion-actual="<?php echo htmlspecialchars($vehiculo['ubicacion_actual']); ?>"
-                                        data-observaciones="<?php echo htmlspecialchars($vehiculo['observaciones']); ?>">
-                                        <i class="bi bi-pencil-square"></i> Editar
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal" data-id="<?php echo $vehiculo['id']; ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>">
-                                        <i class="bi bi-trash"></i> Eliminar
-                                    </button>
-                                </td>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-cambridge2">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-cambridge1 text-white">
+                                <th class="px-4 py-3 text-left">Marca</th>
+                                <th class="px-4 py-3 text-left">Modelo</th>
+                                <th class="px-4 py-3 text-left">Año</th>
+                                <th class="px-4 py-3 text-left">Placas</th>
+                                <th class="px-4 py-3 text-left">VIN</th>
+                                <th class="px-4 py-3 text-left">Combustible</th>
+                                <th class="px-4 py-3 text-left">KM Actual</th>
+                                <th class="px-4 py-3 text-left">Estatus</th>
+                                <th class="px-4 py-3 text-left">Ubicación</th>
+                                <th class="px-4 py-3 text-left">Acciones</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($vehiculos as $vehiculo): ?>
+                                <tr class="border-b border-cambridge2 hover:bg-parchment">
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($vehiculo['marca']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($vehiculo['modelo']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($vehiculo['anio']); ?></td>
+                                    <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($vehiculo['placas']); ?></td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo htmlspecialchars($vehiculo['vin'] ?? 'N/A'); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars(number_format($vehiculo['kilometraje_actual'])); ?></td>
+                                    <td class="px-4 py-3">
+                                        <?php
+                                        $status_class = '';
+                                        switch ($vehiculo['estatus']) {
+                                            case 'disponible':
+                                                $status_class = 'bg-green-500 text-white';
+                                                break;
+                                            case 'en_uso':
+                                                $status_class = 'bg-cambridge1 text-white';
+                                                break;
+                                            case 'en_mantenimiento':
+                                                $status_class = 'bg-yellow-500 text-white';
+                                                break;
+                                            case 'inactivo':
+                                                $status_class = 'bg-red-500 text-white';
+                                                break;
+                                        }
+                                        ?>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo htmlspecialchars($vehiculo['ubicacion_actual'] ?? 'N/A'); ?></td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-wrap gap-1">
+                                            <a href="detalle_vehiculo.php?id=<?php echo $vehiculo['id']; ?>" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition">
+                                                Ver Detalles
+                                            </a>
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="edit"
+                                                data-id="<?php echo $vehiculo['id']; ?>"
+                                                data-marca="<?php echo htmlspecialchars($vehiculo['marca']); ?>"
+                                                data-modelo="<?php echo htmlspecialchars($vehiculo['modelo']); ?>"
+                                                data-anio="<?php echo htmlspecialchars($vehiculo['anio']); ?>"
+                                                data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>"
+                                                data-vin="<?php echo htmlspecialchars($vehiculo['vin']); ?>"
+                                                data-tipo-combustible="<?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?>"
+                                                data-kilometraje-actual="<?php echo htmlspecialchars($vehiculo['kilometraje_actual']); ?>"
+                                                data-estatus="<?php echo htmlspecialchars($vehiculo['estatus']); ?>"
+                                                data-ubicacion-actual="<?php echo htmlspecialchars($vehiculo['ubicacion_actual']); ?>"
+                                                data-observaciones="<?php echo htmlspecialchars($vehiculo['observaciones']); ?>">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </button>
+                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal" data-id="<?php echo $vehiculo['id']; ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -377,7 +396,6 @@ if ($db) {
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
     <script>
         // JavaScript para manejar los modales de agregar/editar vehículo

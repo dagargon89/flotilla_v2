@@ -218,12 +218,27 @@ if ($db) { // $db ya está definida.
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Documentos - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -232,73 +247,77 @@ if ($db) { // $db ya está definida.
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Gestión de Documentos de Vehículos</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Gestión de Documentos de Vehículos</h1>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
-        <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addEditDocumentModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-bs-toggle="modal" data-bs-target="#addEditDocumentModal" data-action="add">
             <i class="bi bi-file-earmark-plus"></i> Cargar Nuevo Documento
         </button>
 
         <?php if (empty($documentos)): ?>
-            <div class="alert alert-info" role="alert">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
                 No hay documentos registrados para los vehículos.
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Vehículo</th>
-                            <th>Nombre Documento</th>
-                            <th>Fecha Vencimiento</th>
-                            <th>Fecha Subida</th>
-                            <th>Subido Por</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($documentos as $doc): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($doc['id']); ?></td>
-                                <td><?php echo htmlspecialchars($doc['marca'] . ' ' . $doc['modelo'] . ' (' . $doc['placas'] . ')'); ?></td>
-                                <td>
-                                    <a href="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-file-earmark"></i> <?php echo htmlspecialchars($doc['nombre_documento']); ?>
-                                    </a>
-                                </td>
-                                <td><?php echo $doc['fecha_vencimiento'] ? date('d/m/Y', strtotime($doc['fecha_vencimiento'])) : 'N/A'; ?></td>
-                                <td><?php echo date('d/m/Y H:i', strtotime($doc['fecha_subida'])); ?></td>
-                                <td><?php echo htmlspecialchars($doc['subido_por_nombre'] ?? 'Desconocido'); ?></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-info text-white me-1" data-bs-toggle="modal" data-bs-target="#addEditDocumentModal" data-action="edit"
-                                        data-id="<?php echo htmlspecialchars($doc['id']); ?>"
-                                        data-vehiculo-id="<?php echo htmlspecialchars($doc['vehiculo_id']); ?>"
-                                        data-nombre-documento="<?php echo htmlspecialchars($doc['nombre_documento']); ?>"
-                                        data-ruta-archivo="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>"
-                                        data-fecha-vencimiento="<?php echo htmlspecialchars($doc['fecha_vencimiento'] ?? ''); ?>">
-                                        Editar
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteDocumentModal" data-id="<?php echo htmlspecialchars($doc['id']); ?>" data-nombre="<?php echo htmlspecialchars($doc['nombre_documento']); ?>" data-placas="<?php echo htmlspecialchars($doc['placas']); ?>">
-                                        Eliminar
-                                    </button>
-                                </td>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-cambridge2">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-cambridge1 text-white">
+                                <th class="px-4 py-3 text-left">ID</th>
+                                <th class="px-4 py-3 text-left">Vehículo</th>
+                                <th class="px-4 py-3 text-left">Nombre Documento</th>
+                                <th class="px-4 py-3 text-left">Fecha Vencimiento</th>
+                                <th class="px-4 py-3 text-left">Fecha Subida</th>
+                                <th class="px-4 py-3 text-left">Subido Por</th>
+                                <th class="px-4 py-3 text-left">Acciones</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($documentos as $doc): ?>
+                                <tr class="border-b border-cambridge2 hover:bg-parchment">
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($doc['id']); ?></td>
+                                    <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($doc['marca'] . ' ' . $doc['modelo'] . ' (' . $doc['placas'] . ')'); ?></td>
+                                    <td class="px-4 py-3">
+                                        <a href="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" target="_blank" class="inline-block bg-cambridge1 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-cambridge2 transition">
+                                            <i class="bi bi-file-earmark"></i> <?php echo htmlspecialchars($doc['nombre_documento']); ?>
+                                        </a>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm"><?php echo $doc['fecha_vencimiento'] ? date('d/m/Y', strtotime($doc['fecha_vencimiento'])) : 'N/A'; ?></td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo date('d/m/Y H:i', strtotime($doc['fecha_subida'])); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars($doc['subido_por_nombre'] ?? 'Desconocido'); ?></td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-wrap gap-1">
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditDocumentModal" data-action="edit"
+                                                data-id="<?php echo htmlspecialchars($doc['id']); ?>"
+                                                data-vehiculo-id="<?php echo htmlspecialchars($doc['vehiculo_id']); ?>"
+                                                data-nombre-documento="<?php echo htmlspecialchars($doc['nombre_documento']); ?>"
+                                                data-ruta-archivo="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>"
+                                                data-fecha-vencimiento="<?php echo htmlspecialchars($doc['fecha_vencimiento'] ?? ''); ?>">
+                                                Editar
+                                            </button>
+                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteDocumentModal" data-id="<?php echo htmlspecialchars($doc['id']); ?>" data-nombre="<?php echo htmlspecialchars($doc['nombre_documento']); ?>" data-placas="<?php echo htmlspecialchars($doc['placas']); ?>">
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -378,7 +397,6 @@ if ($db) { // $db ya está definida.
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
     <script>

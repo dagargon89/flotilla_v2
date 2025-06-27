@@ -74,52 +74,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
 </head>
 
-<body class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-    <div class="card shadow p-4" style="max-width: 500px; width: 100%;">
-        <h2 class="card-title text-center mb-4">Solicitar Cuenta</h2>
+<body class="min-h-screen flex items-center justify-center bg-parchment">
+    <div class="w-full max-w-lg bg-white rounded-xl shadow-lg p-8 border border-cambridge2">
+        <h2 class="text-2xl font-bold text-darkpurple text-center mb-6">Solicitar Cuenta</h2>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
-        <form action="register.php" method="POST">
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre Completo</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" value="<?php echo htmlspecialchars($nombre); ?>" required>
+        <form action="register.php" method="POST" class="space-y-4">
+            <div>
+                <label for="nombre" class="block text-sm font-medium text-darkpurple mb-1">Nombre Completo</label>
+                <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple placeholder-mountbatten bg-parchment outline-none transition" id="nombre" name="nombre" value="<?php echo htmlspecialchars($nombre); ?>" required autocomplete="name">
             </div>
-            <div class="mb-3">
-                <label for="correo_electronico" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="correo_electronico" name="correo_electronico" value="<?php echo htmlspecialchars($correo_electronico); ?>" required>
+            <div>
+                <label for="correo_electronico" class="block text-sm font-medium text-darkpurple mb-1">Correo Electrónico</label>
+                <input type="email" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple placeholder-mountbatten bg-parchment outline-none transition" id="correo_electronico" name="correo_electronico" value="<?php echo htmlspecialchars($correo_electronico); ?>" required autocomplete="email">
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+            <div>
+                <label for="password" class="block text-sm font-medium text-darkpurple mb-1">Contraseña</label>
+                <input type="password" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple placeholder-mountbatten bg-parchment outline-none transition" id="password" name="password" required autocomplete="new-password">
             </div>
-            <div class="mb-3">
-                <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
-                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+            <div>
+                <label for="confirm_password" class="block text-sm font-medium text-darkpurple mb-1">Confirmar Contraseña</label>
+                <input type="password" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple placeholder-mountbatten bg-parchment outline-none transition" id="confirm_password" name="confirm_password" required autocomplete="new-password">
             </div>
-            <button type="submit" class="btn btn-primary w-100">Enviar Solicitud de Cuenta</button>
+            <button type="submit" class="w-full py-2 px-4 rounded-lg bg-darkpurple text-white font-semibold hover:bg-mountbatten transition">Enviar Solicitud de Cuenta</button>
         </form>
 
-        <hr class="my-4">
-        <p class="text-center">¿Ya tienes cuenta? <a href="index.php">Inicia Sesión aquí</a></p>
+        <hr class="my-6 border-cambridge2">
+        <p class="text-center text-sm text-mountbatten">
+            ¿Ya tienes cuenta? <a href="index.php" class="text-cambridge1 hover:underline">Inicia Sesión aquí</a>
+        </p>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 

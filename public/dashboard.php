@@ -100,14 +100,33 @@ if ($db) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
     <link rel="stylesheet" href="css/style.css">
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -116,50 +135,38 @@ if ($db) {
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Bienvenido al Dashboard, <?php echo htmlspecialchars($nombre_usuario); ?></h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Bienvenido al Dashboard, <?php echo htmlspecialchars($nombre_usuario); ?></h1>
 
-        <div class="row">
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Vehículos Disponibles</h5>
-                        <p class="card-text fs-1 fw-bold"><?php echo $vehiculos_disponibles_count; ?></p>
-                        <a href="solicitar_vehiculo.php" class="btn btn-primary">Solicitar Uno</a>
-                    </div>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center border border-cambridge2">
+                <h5 class="text-lg font-semibold text-darkpurple mb-3">Vehículos Disponibles</h5>
+                <p class="text-4xl font-bold text-cambridge1 mb-4"><?php echo $vehiculos_disponibles_count; ?></p>
+                <a href="solicitar_vehiculo.php" class="inline-block bg-darkpurple text-white px-6 py-2 rounded-lg font-semibold hover:bg-mountbatten transition">Solicitar Uno</a>
             </div>
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card text-center shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Mis Solicitudes Pendientes</h5>
-                        <p class="card-text fs-1 fw-bold"><?php echo $mis_solicitudes_pendientes_count; ?></p>
-                        <a href="mis_solicitudes.php" class="btn btn-info text-white">Ver Mis Solicitudes</a>
-                    </div>
-                </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 text-center border border-cambridge2">
+                <h5 class="text-lg font-semibold text-darkpurple mb-3">Mis Solicitudes Pendientes</h5>
+                <p class="text-4xl font-bold text-cambridge1 mb-4"><?php echo $mis_solicitudes_pendientes_count; ?></p>
+                <a href="mis_solicitudes.php" class="inline-block bg-cambridge1 text-white px-6 py-2 rounded-lg font-semibold hover:bg-cambridge2 transition">Ver Mis Solicitudes</a>
             </div>
             <?php if ($rol_usuario === 'flotilla_manager' || $rol_usuario === 'admin'): ?>
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card text-center shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Solicitudes por Aprobar</h5>
-                            <p class="card-text fs-1 fw-bold"><?php echo $solicitudes_por_aprobar_count; ?></p>
-                            <a href="gestion_solicitudes.php" class="btn btn-success">Gestionar Solicitudes</a>
-                        </div>
-                    </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 text-center border border-cambridge2">
+                    <h5 class="text-lg font-semibold text-darkpurple mb-3">Solicitudes por Aprobar</h5>
+                    <p class="text-4xl font-bold text-cambridge1 mb-4"><?php echo $solicitudes_por_aprobar_count; ?></p>
+                    <a href="gestion_solicitudes.php" class="inline-block bg-cambridge2 text-darkpurple px-6 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">Gestionar Solicitudes</a>
                 </div>
             <?php endif; ?>
         </div>
 
-        <div class="card mt-4 p-3 shadow-sm">
-            <h3 class="mb-3">Calendario de Disponibilidad de Vehículos</h3>
-            <div id='calendar' style="height: 500px;"></div>
-            <p class="mt-2 text-muted">Aquí podrás ver qué vehículos están disponibles y cuándo.</p>
+        <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
+            <h3 class="text-xl font-bold text-darkpurple mb-4">Calendario de Disponibilidad de Vehículos</h3>
+            <div id='calendar' class="h-96"></div>
+            <p class="mt-4 text-sm text-mountbatten">Aquí podrás ver qué vehículos están disponibles y cuándo.</p>
         </div>
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <!-- Scripts de FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/locales/es.global.min.js'></script>

@@ -240,12 +240,30 @@ if ($db) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -254,146 +272,148 @@ if ($db) {
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Gestión de Usuarios</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Gestión de Usuarios</h1>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
-        <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addEditUserModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-4" data-bs-toggle="modal" data-bs-target="#addEditUserModal" data-action="add">
             <i class="bi bi-plus-circle"></i> Agregar Nuevo Usuario (Admin)
         </button>
-        <p class="text-muted small">Para solicitudes de cuenta, ve a la tabla de abajo y busca el estatus "Pendiente de Aprobación".</p>
+        <p class="text-sm text-mountbatten mb-6">Para solicitudes de cuenta, ve a la tabla de abajo y busca el estatus "Pendiente de Aprobación".</p>
 
         <?php if (empty($usuarios)): ?>
-            <div class="alert alert-info" role="alert">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
                 No hay usuarios registrados en el sistema.
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Correo Electrónico</th>
-                            <th>Rol</th>
-                            <th>Estatus Cuenta</th>
-                            <th>Estatus Uso</th>
-                            <th>Última Sesión</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($usuarios as $usuario): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($usuario['id']); ?></td>
-                                <td><?php echo htmlspecialchars($usuario['nombre']); ?></td>
-                                <td><?php echo htmlspecialchars($usuario['correo_electronico']); ?></td>
-                                <td>
-                                    <?php
-                                    $rol_class = '';
-                                    switch ($usuario['rol']) {
-                                        case 'admin':
-                                            $rol_class = 'badge bg-danger';
-                                            break;
-                                        case 'flotilla_manager':
-                                            $rol_class = 'badge bg-warning text-dark';
-                                            break;
-                                        case 'empleado':
-                                            $rol_class = 'badge bg-primary';
-                                            break;
-                                    }
-                                    ?>
-                                    <span class="<?php echo $rol_class; ?>"><?php echo htmlspecialchars(ucfirst($usuario['rol'])); ?></span>
-                                </td>
-                                <td>
-                                    <?php
-                                    $estatus_cuenta_class = '';
-                                    switch ($usuario['estatus_cuenta']) {
-                                        case 'pendiente_aprobacion':
-                                            $estatus_cuenta_class = 'badge bg-info';
-                                            break;
-                                        case 'activa':
-                                            $estatus_cuenta_class = 'badge bg-success';
-                                            break;
-                                        case 'rechazada':
-                                            $estatus_cuenta_class = 'badge bg-danger';
-                                            break;
-                                        case 'inactiva':
-                                            $estatus_cuenta_class = 'badge bg-secondary';
-                                            break;
-                                    }
-                                    ?>
-                                    <span class="<?php echo $estatus_cuenta_class; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $usuario['estatus_cuenta']))); ?></span>
-                                </td>
-                                <td>
-                                    <?php
-                                    $estatus_usuario_class = '';
-                                    switch ($usuario['estatus_usuario']) {
-                                        case 'activo':
-                                            $estatus_usuario_class = 'badge bg-success';
-                                            break;
-                                        case 'amonestado':
-                                            $estatus_usuario_class = 'badge bg-warning text-dark';
-                                            break;
-                                        case 'suspendido':
-                                            $estatus_usuario_class = 'badge bg-danger';
-                                            break;
-                                    }
-                                    ?>
-                                    <span class="<?php echo $estatus_usuario_class; ?>"><?php echo htmlspecialchars(ucfirst($usuario['estatus_usuario'])); ?></span>
-                                </td>
-                                <td><?php echo $usuario['ultima_sesion'] ? date('d/m/Y H:i', strtotime($usuario['ultima_sesion'])) : 'Nunca'; ?></td>
-                                <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        <?php if ($usuario['estatus_cuenta'] === 'pendiente_aprobacion'): ?>
-                                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#approveRejectUserModal"
-                                                data-user-id="<?php echo $usuario['id']; ?>" data-action="approve_account" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                                Aprobar
-                                            </button>
-                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#approveRejectUserModal"
-                                                data-user-id="<?php echo $usuario['id']; ?>" data-action="reject_account" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                                Rechazar
-                                            </button>
-                                        <?php endif; ?>
-                                        <button type="button" class="btn btn-sm btn-warning text-dark" data-bs-toggle="modal" data-bs-target="#addAmonestacionModal"
-                                            data-user-id="<?php echo $usuario['id']; ?>" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                            Amonestar
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#viewUserHistoryModal"
-                                            data-user-id="<?php echo $usuario['id']; ?>" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                            Historial Amon.
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-info text-white" data-bs-toggle="modal" data-bs-target="#addEditUserModal" data-action="edit"
-                                            data-id="<?php echo $usuario['id']; ?>"
-                                            data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>"
-                                            data-correo="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>"
-                                            data-rol="<?php echo htmlspecialchars($usuario['rol']); ?>"
-                                            data-estatus-cuenta="<?php echo htmlspecialchars($usuario['estatus_cuenta']); ?>"
-                                            data-estatus-usuario="<?php echo htmlspecialchars($usuario['estatus_usuario']); ?>">
-                                            Editar
-                                        </button>
-                                        <?php if ($usuario['id'] !== $user_id_sesion): ?>
-                                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-id="<?php echo $usuario['id']; ?>" data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                                Eliminar
-                                            </button>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-cambridge2">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-cambridge1 text-white">
+                                <th class="px-4 py-3 text-left">ID</th>
+                                <th class="px-4 py-3 text-left">Nombre</th>
+                                <th class="px-4 py-3 text-left">Correo Electrónico</th>
+                                <th class="px-4 py-3 text-left">Rol</th>
+                                <th class="px-4 py-3 text-left">Estatus Cuenta</th>
+                                <th class="px-4 py-3 text-left">Estatus Uso</th>
+                                <th class="px-4 py-3 text-left">Última Sesión</th>
+                                <th class="px-4 py-3 text-left">Acciones</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($usuarios as $usuario): ?>
+                                <tr class="border-b border-cambridge2 hover:bg-parchment">
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($usuario['id']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($usuario['nombre']); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($usuario['correo_electronico']); ?></td>
+                                    <td class="px-4 py-3">
+                                        <?php
+                                        $rol_class = '';
+                                        switch ($usuario['rol']) {
+                                            case 'admin':
+                                                $rol_class = 'bg-red-500 text-white';
+                                                break;
+                                            case 'flotilla_manager':
+                                                $rol_class = 'bg-yellow-500 text-white';
+                                                break;
+                                            case 'empleado':
+                                                $rol_class = 'bg-cambridge1 text-white';
+                                                break;
+                                        }
+                                        ?>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $rol_class; ?>"><?php echo htmlspecialchars(ucfirst($usuario['rol'])); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <?php
+                                        $estatus_cuenta_class = '';
+                                        switch ($usuario['estatus_cuenta']) {
+                                            case 'pendiente_aprobacion':
+                                                $estatus_cuenta_class = 'bg-blue-500 text-white';
+                                                break;
+                                            case 'activa':
+                                                $estatus_cuenta_class = 'bg-green-500 text-white';
+                                                break;
+                                            case 'rechazada':
+                                                $estatus_cuenta_class = 'bg-red-500 text-white';
+                                                break;
+                                            case 'inactiva':
+                                                $estatus_cuenta_class = 'bg-gray-500 text-white';
+                                                break;
+                                        }
+                                        ?>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $estatus_cuenta_class; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $usuario['estatus_cuenta']))); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <?php
+                                        $estatus_usuario_class = '';
+                                        switch ($usuario['estatus_usuario']) {
+                                            case 'activo':
+                                                $estatus_usuario_class = 'bg-green-500 text-white';
+                                                break;
+                                            case 'amonestado':
+                                                $estatus_usuario_class = 'bg-yellow-500 text-white';
+                                                break;
+                                            case 'suspendido':
+                                                $estatus_usuario_class = 'bg-red-500 text-white';
+                                                break;
+                                        }
+                                        ?>
+                                        <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $estatus_usuario_class; ?>"><?php echo htmlspecialchars(ucfirst($usuario['estatus_usuario'])); ?></span>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo $usuario['ultima_sesion'] ? date('d/m/Y H:i', strtotime($usuario['ultima_sesion'])) : 'Nunca'; ?></td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-wrap gap-1">
+                                            <?php if ($usuario['estatus_cuenta'] === 'pendiente_aprobacion'): ?>
+                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#approveRejectUserModal"
+                                                    data-user-id="<?php echo $usuario['id']; ?>" data-action="approve_account" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                    Aprobar
+                                                </button>
+                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-bs-toggle="modal" data-bs-target="#approveRejectUserModal"
+                                                    data-user-id="<?php echo $usuario['id']; ?>" data-action="reject_account" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                    Rechazar
+                                                </button>
+                                            <?php endif; ?>
+                                            <button type="button" class="bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-yellow-600 transition" data-bs-toggle="modal" data-bs-target="#addAmonestacionModal"
+                                                data-user-id="<?php echo $usuario['id']; ?>" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                Amonestar
+                                            </button>
+                                            <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-bs-toggle="modal" data-bs-target="#viewUserHistoryModal"
+                                                data-user-id="<?php echo $usuario['id']; ?>" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                Historial Amon.
+                                            </button>
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditUserModal" data-action="edit"
+                                                data-id="<?php echo $usuario['id']; ?>"
+                                                data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>"
+                                                data-correo="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>"
+                                                data-rol="<?php echo htmlspecialchars($usuario['rol']); ?>"
+                                                data-estatus-cuenta="<?php echo htmlspecialchars($usuario['estatus_cuenta']); ?>"
+                                                data-estatus-usuario="<?php echo htmlspecialchars($usuario['estatus_usuario']); ?>">
+                                                Editar
+                                            </button>
+                                            <?php if ($usuario['id'] !== $user_id_sesion): ?>
+                                                <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-id="<?php echo $usuario['id']; ?>" data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                    Eliminar
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -559,7 +579,7 @@ if ($db) {
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="js/main.js"></script>
     <script>
         // JavaScript para manejar los modales de agregar/editar usuario

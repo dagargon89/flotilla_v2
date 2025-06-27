@@ -88,45 +88,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
 </head>
 
-<body class="d-flex align-items-center justify-content-center min-vh-100 bg-light">
-    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
-        <h2 class="card-title text-center mb-4">Iniciar Sesión</h2>
+<body class="min-h-screen flex items-center justify-center bg-parchment">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 border border-cambridge2">
+        <h2 class="text-2xl font-bold text-darkpurple text-center mb-6">Iniciar Sesión</h2>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm" role="alert">
                 <?php echo htmlspecialchars($error_message, ENT_QUOTES, 'UTF-8'); ?>
             </div>
         <?php endif; ?>
 
-        <form action="index.php" method="POST">
-            <div class="mb-3">
-                <label for="correo_electronico" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="correo_electronico" name="correo_electronico" required>
+        <form action="index.php" method="POST" class="space-y-4">
+            <div>
+                <label for="correo_electronico" class="block text-sm font-medium text-darkpurple mb-1">Correo Electrónico</label>
+                <input type="email" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple placeholder-mountbatten bg-parchment outline-none transition" id="correo_electronico" name="correo_electronico" required autocomplete="username">
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" name="password" required>
+            <div>
+                <label for="password" class="block text-sm font-medium text-darkpurple mb-1">Contraseña</label>
+                <input type="password" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple placeholder-mountbatten bg-parchment outline-none transition" id="password" name="password" required autocomplete="current-password">
             </div>
-            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+            <button type="submit" class="w-full py-2 px-4 rounded-lg bg-darkpurple text-white font-semibold hover:bg-mountbatten transition">Entrar</button>
         </form>
 
-        <hr class="my-4">
+        <hr class="my-6 border-cambridge2">
 
         <div class="text-center">
-            <button type="button" class="btn btn-outline-secondary w-100 mb-2" disabled>
-                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google icon" class="me-2">
+            <button type="button" class="w-full py-2 px-4 rounded-lg border border-cambridge1 text-cambridge1 font-semibold bg-white flex items-center justify-center gap-2 mb-2 cursor-not-allowed opacity-60" disabled>
+                <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google icon">
                 Iniciar Sesión con Google (próximamente)
             </button>
         </div>
-        <p class="text-center mt-3">¿No tienes cuenta? <a href="register.php">Regístrate aquí</a></p>
+        <p class="text-center mt-4 text-sm text-mountbatten">
+            ¿No tienes cuenta? <a href="register.php" class="text-cambridge1 hover:underline">Regístrate aquí</a>
+        </p>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
 </body>
 

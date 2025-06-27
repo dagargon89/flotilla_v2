@@ -198,13 +198,31 @@ if ($db) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Mantenimientos - Flotilla Interna</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Eliminar Bootstrap y Bootstrap Icons -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> -->
+    <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              darkpurple: '#310A31',
+              mountbatten: '#847996',
+              cambridge1: '#88B7B5',
+              cambridge2: '#A7CAB1',
+              parchment: '#F4ECD6',
+            }
+          }
+        }
+      }
+    </script>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
-<body>
+<body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
     $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
@@ -213,80 +231,84 @@ if ($db) {
     <?php require_once '../app/includes/alert_banner.php'; // Incluir el banner de alertas 
     ?>
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Gestión de Mantenimientos de Vehículos</h1>
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold text-darkpurple mb-6">Gestión de Mantenimientos de Vehículos</h1>
 
         <?php if (!empty($success_message)): ?>
-            <div class="alert alert-success" role="alert">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $success_message; ?>
             </div>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="alert alert-danger" role="alert">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
 
-        <button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addEditMaintenanceModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-bs-toggle="modal" data-bs-target="#addEditMaintenanceModal" data-action="add">
             <i class="bi bi-tools"></i> Registrar Nuevo Mantenimiento
         </button>
 
         <?php if (empty($mantenimientos)): ?>
-            <div class="alert alert-info" role="alert">
+            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
                 No hay mantenimientos registrados.
             </div>
         <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Vehículo</th>
-                            <th>Tipo de Mantenimiento</th>
-                            <th>Fecha</th>
-                            <th>KM</th>
-                            <th>Costo</th>
-                            <th>Taller</th>
-                            <th>Próx. KM</th>
-                            <th>Próx. Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($mantenimientos as $mantenimiento): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($mantenimiento['id']); ?></td>
-                                <td><?php echo htmlspecialchars($mantenimiento['marca'] . ' ' . $mantenimiento['modelo'] . ' (' . $mantenimiento['placas'] . ')'); ?></td>
-                                <td><?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($mantenimiento['fecha_mantenimiento'])); ?></td>
-                                <td><?php echo htmlspecialchars(number_format($mantenimiento['kilometraje_mantenimiento'])); ?></td>
-                                <td><?php echo $mantenimiento['costo'] !== null ? '$' . number_format($mantenimiento['costo'], 2) : 'N/A'; ?></td>
-                                <td><?php echo htmlspecialchars($mantenimiento['taller'] ?? 'N/A'); ?></td>
-                                <td><?php echo $mantenimiento['proximo_mantenimiento_km'] !== null ? htmlspecialchars(number_format($mantenimiento['proximo_mantenimiento_km'])) . ' KM' : 'N/A'; ?></td>
-                                <td><?php echo $mantenimiento['proximo_mantenimiento_fecha'] !== null ? date('d/m/Y', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : 'N/A'; ?></td>
-                                <td>
-                                    <button type="button" class="btn btn-sm btn-info text-white me-1" data-bs-toggle="modal" data-bs-target="#addEditMaintenanceModal" data-action="edit"
-                                        data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>"
-                                        data-vehiculo-id="<?php echo htmlspecialchars($mantenimiento['vehiculo_id']); ?>"
-                                        data-tipo-mantenimiento="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>"
-                                        data-fecha-mantenimiento="<?php echo date('Y-m-d\TH:i', strtotime($mantenimiento['fecha_mantenimiento'])); ?>"
-                                        data-kilometraje-mantenimiento="<?php echo htmlspecialchars($mantenimiento['kilometraje_mantenimiento']); ?>"
-                                        data-costo="<?php echo htmlspecialchars($mantenimiento['costo'] ?? ''); ?>"
-                                        data-taller="<?php echo htmlspecialchars($mantenimiento['taller'] ?? ''); ?>"
-                                        data-observaciones="<?php echo htmlspecialchars($mantenimiento['observaciones'] ?? ''); ?>"
-                                        data-proximo-mantenimiento-km="<?php echo htmlspecialchars($mantenimiento['proximo_mantenimiento_km'] ?? ''); ?>"
-                                        data-proximo-mantenimiento-fecha="<?php echo htmlspecialchars($mantenimiento['proximo_mantenimiento_fecha'] ? date('Y-m-d', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : ''); ?>">
-                                        Editar
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteMaintenanceModal" data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>" data-tipo="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>" data-placas="<?php echo htmlspecialchars($mantenimiento['placas']); ?>">
-                                        Eliminar
-                                    </button>
-                                </td>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-cambridge2">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-cambridge1 text-white">
+                                <th class="px-4 py-3 text-left">ID</th>
+                                <th class="px-4 py-3 text-left">Vehículo</th>
+                                <th class="px-4 py-3 text-left">Tipo de Mantenimiento</th>
+                                <th class="px-4 py-3 text-left">Fecha</th>
+                                <th class="px-4 py-3 text-left">KM</th>
+                                <th class="px-4 py-3 text-left">Costo</th>
+                                <th class="px-4 py-3 text-left">Taller</th>
+                                <th class="px-4 py-3 text-left">Próx. KM</th>
+                                <th class="px-4 py-3 text-left">Próx. Fecha</th>
+                                <th class="px-4 py-3 text-left">Acciones</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($mantenimientos as $mantenimiento): ?>
+                                <tr class="border-b border-cambridge2 hover:bg-parchment">
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($mantenimiento['id']); ?></td>
+                                    <td class="px-4 py-3 font-semibold"><?php echo htmlspecialchars($mantenimiento['marca'] . ' ' . $mantenimiento['modelo'] . ' (' . $mantenimiento['placas'] . ')'); ?></td>
+                                    <td class="px-4 py-3"><?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo date('d/m/Y', strtotime($mantenimiento['fecha_mantenimiento'])); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars(number_format($mantenimiento['kilometraje_mantenimiento'])); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo $mantenimiento['costo'] !== null ? '$' . number_format($mantenimiento['costo'], 2) : 'N/A'; ?></td>
+                                    <td class="px-4 py-3 text-sm text-mountbatten"><?php echo htmlspecialchars($mantenimiento['taller'] ?? 'N/A'); ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo $mantenimiento['proximo_mantenimiento_km'] !== null ? htmlspecialchars(number_format($mantenimiento['proximo_mantenimiento_km'])) . ' KM' : 'N/A'; ?></td>
+                                    <td class="px-4 py-3 text-sm"><?php echo $mantenimiento['proximo_mantenimiento_fecha'] !== null ? date('d/m/Y', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : 'N/A'; ?></td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex flex-wrap gap-1">
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditMaintenanceModal" data-action="edit"
+                                                data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>"
+                                                data-vehiculo-id="<?php echo htmlspecialchars($mantenimiento['vehiculo_id']); ?>"
+                                                data-tipo-mantenimiento="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>"
+                                                data-fecha-mantenimiento="<?php echo date('Y-m-d\TH:i', strtotime($mantenimiento['fecha_mantenimiento'])); ?>"
+                                                data-kilometraje-mantenimiento="<?php echo htmlspecialchars($mantenimiento['kilometraje_mantenimiento']); ?>"
+                                                data-costo="<?php echo htmlspecialchars($mantenimiento['costo'] ?? ''); ?>"
+                                                data-taller="<?php echo htmlspecialchars($mantenimiento['taller'] ?? ''); ?>"
+                                                data-observaciones="<?php echo htmlspecialchars($mantenimiento['observaciones'] ?? ''); ?>"
+                                                data-proximo-mantenimiento-km="<?php echo htmlspecialchars($mantenimiento['proximo_mantenimiento_km'] ?? ''); ?>"
+                                                data-proximo-mantenimiento-fecha="<?php echo htmlspecialchars($mantenimiento['proximo_mantenimiento_fecha'] ? date('Y-m-d', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : ''); ?>">
+                                                Editar
+                                            </button>
+                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteMaintenanceModal" data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>" data-tipo="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>" data-placas="<?php echo htmlspecialchars($mantenimiento['placas']); ?>">
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -382,7 +404,7 @@ if ($db) {
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
     <script>
