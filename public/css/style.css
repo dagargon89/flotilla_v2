@@ -1,0 +1,30 @@
+/* public/css/style.css */
+body {
+    font-family: Arial, sans-serif;
+}
+.card {
+    border-radius: 15px;
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+/* Estilos para organizar botones de acción en tablas */
+.table-actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+/* Estilo para iconos dentro de botones */
+.btn i.bi {
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}

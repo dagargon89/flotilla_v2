@@ -1,0 +1,36 @@
+# Ignore environment configuration files
+.env
+
+# Ignore vendor directories
+/vendor/
+/node_modules/
+
+# Ignore log files
+*.log
+logs/*.log
+
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore IDE/editor specific files
+.idea/
+.vscode/
+*.swp
+*~
+*.sublime-project
+*.sublime-workspace
+
+# Ignore build artifacts or compiled files (example)
+/build/
+/dist/
+/public/build/
+
+# Ignore sensitive files or backups
+*.sql
+*.bak
+*.old
+
+# Specific to this project if any other files need ignoring
+# e.g. /uploads/ if user uploads are stored there and not versioned.
