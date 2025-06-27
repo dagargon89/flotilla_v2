@@ -184,317 +184,290 @@ if (!$vehiculo_id) {
     ?>
 
     <div class="container mx-auto px-4 py-6">
-        <?php if (!empty($error_message)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
-                <?php echo $error_message; ?>
-            </div>
-            <a href="gestion_vehiculos.php" class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition">Regresar a Gestión de Vehículos</a>
-        <?php elseif (!$vehiculo): ?>
-            <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded mb-4" role="alert">
-                Vehículo no encontrado o no válido.
-            </div>
-            <a href="gestion_vehiculos.php" class="bg-gray-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-600 transition">Regresar a Gestión de Vehículos</a>
-        <?php else: ?>
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-darkpurple">Detalle de Vehículo: <?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo'] . ' (' . $vehiculo['placas'] . ')'); ?></h1>
-                <a href="gestion_vehiculos.php" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">
-                    <i class="bi bi-arrow-left"></i> Volver a Gestión
-                </a>
-            </div>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-darkpurple">Detalle del Vehículo</h1>
+            <a href="gestion_vehiculos.php" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">
+                <i class="bi bi-arrow-left"></i> Volver a Gestión
+            </a>
+        </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-darkpurple">Información General</h3>
-                    <button type="button" class="bg-cambridge1 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditVehicleModal" data-action="edit"
-                        data-id="<?php echo $vehiculo['id']; ?>"
-                        data-marca="<?php echo htmlspecialchars($vehiculo['marca']); ?>"
-                        data-modelo="<?php echo htmlspecialchars($vehiculo['modelo']); ?>"
-                        data-anio="<?php echo htmlspecialchars($vehiculo['anio']); ?>"
-                        data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>"
-                        data-vin="<?php echo htmlspecialchars($vehiculo['vin']); ?>"
-                        data-tipo-combustible="<?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?>"
-                        data-kilometraje-actual="<?php echo htmlspecialchars($vehiculo['kilometraje_actual']); ?>"
-                        data-estatus="<?php echo htmlspecialchars($vehiculo['estatus']); ?>"
-                        data-ubicacion-actual="<?php echo htmlspecialchars($vehiculo['ubicacion_actual']); ?>"
-                        data-observaciones="<?php echo htmlspecialchars($vehiculo['observaciones']); ?>">
-                        Editar Vehículo
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Marca:</span> <?php echo htmlspecialchars($vehiculo['marca']); ?></p>
+        <!-- Layout de dos columnas -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Columna izquierda: Información General -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2 sticky top-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-darkpurple">Información General</h3>
+                        <button type="button" class="bg-cambridge1 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditVehicleModal" data-action="edit"
+                            data-id="<?php echo $vehiculo['id']; ?>"
+                            data-marca="<?php echo htmlspecialchars($vehiculo['marca']); ?>"
+                            data-modelo="<?php echo htmlspecialchars($vehiculo['modelo']); ?>"
+                            data-anio="<?php echo htmlspecialchars($vehiculo['anio']); ?>"
+                            data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>"
+                            data-vin="<?php echo htmlspecialchars($vehiculo['vin']); ?>"
+                            data-tipo-combustible="<?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?>"
+                            data-kilometraje-actual="<?php echo htmlspecialchars($vehiculo['kilometraje_actual']); ?>"
+                            data-estatus="<?php echo htmlspecialchars($vehiculo['estatus']); ?>"
+                            data-ubicacion-actual="<?php echo htmlspecialchars($vehiculo['ubicacion_actual']); ?>"
+                            data-observaciones="<?php echo htmlspecialchars($vehiculo['observaciones']); ?>">
+                            Editar
+                        </button>
                     </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Modelo:</span> <?php echo htmlspecialchars($vehiculo['modelo']); ?></p>
-                    </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Año:</span> <?php echo htmlspecialchars($vehiculo['anio']); ?></p>
-                    </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Placas:</span> <?php echo htmlspecialchars($vehiculo['placas']); ?></p>
-                    </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">VIN:</span> <?php echo htmlspecialchars($vehiculo['vin'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Tipo de Combustible:</span> <?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?></p>
-                    </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Kilometraje Actual:</span> <?php echo htmlspecialchars(number_format($vehiculo['kilometraje_actual'])); ?> KM</p>
-                    </div>
-                    <div>
-                        <p class="mb-2">
-                            <span class="font-semibold text-darkpurple">Estatus:</span>
-                            <?php
-                            $status_class = '';
+                    
+                    <!-- Información principal destacada -->
+                    <div class="mb-6 p-4 bg-parchment rounded-lg">
+                        <h4 class="text-lg font-bold text-darkpurple mb-2"><?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo']); ?></h4>
+                        <p class="text-2xl font-bold text-cambridge1 mb-2"><?php echo htmlspecialchars($vehiculo['placas']); ?></p>
+                        <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full <?php
                             switch ($vehiculo['estatus']) {
-                                case 'disponible':
-                                    $status_class = 'bg-green-500 text-white';
-                                    break;
-                                case 'en_uso':
-                                    $status_class = 'bg-cambridge1 text-white';
-                                    break;
-                                case 'en_mantenimiento':
-                                    $status_class = 'bg-yellow-500 text-white';
-                                    break;
-                                case 'inactivo':
-                                    $status_class = 'bg-red-500 text-white';
-                                    break;
+                                case 'disponible': echo 'bg-green-500 text-white'; break;
+                                case 'en_uso': echo 'bg-cambridge1 text-white'; break;
+                                case 'en_mantenimiento': echo 'bg-yellow-500 text-white'; break;
+                                case 'inactivo': echo 'bg-red-500 text-white'; break;
                             }
-                            ?>
-                            <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
-                        </p>
+                        ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
                     </div>
-                    <div>
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Ubicación Actual:</span> <?php echo htmlspecialchars($vehiculo['ubicacion_actual'] ?? 'N/A'); ?></p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Observaciones:</span> <?php echo htmlspecialchars($vehiculo['observaciones'] ?? 'Ninguna.'); ?></p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <p class="mb-2"><span class="font-semibold text-darkpurple">Fecha de Registro:</span> <?php echo date('d/m/Y H:i', strtotime($vehiculo['fecha_registro'])); ?></p>
+
+                    <!-- Detalles técnicos -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="font-medium text-darkpurple">Año:</span>
+                            <span class="text-gray-700"><?php echo htmlspecialchars($vehiculo['anio']); ?></span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="font-medium text-darkpurple">Combustible:</span>
+                            <span class="text-gray-700"><?php echo htmlspecialchars($vehiculo['tipo_combustible']); ?></span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="font-medium text-darkpurple">Kilometraje:</span>
+                            <span class="text-gray-700"><?php echo htmlspecialchars(number_format($vehiculo['kilometraje_actual'])); ?> KM</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="font-medium text-darkpurple">VIN:</span>
+                            <span class="text-gray-700 text-sm"><?php echo htmlspecialchars($vehiculo['vin'] ?? 'N/A'); ?></span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="font-medium text-darkpurple">Ubicación:</span>
+                            <span class="text-gray-700"><?php echo htmlspecialchars($vehiculo['ubicacion_actual'] ?? 'N/A'); ?></span>
+                        </div>
+                        <div class="pt-2">
+                            <span class="font-medium text-darkpurple">Observaciones:</span>
+                            <p class="text-gray-700 text-sm mt-1"><?php echo htmlspecialchars($vehiculo['observaciones'] ?? 'Ninguna.'); ?></p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
-                <h3 class="text-lg font-semibold text-darkpurple mb-4">Historial de Solicitudes y Uso</h3>
-                <?php if (empty($solicitudes_historicas)): ?>
-                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center" role="alert">
-                        Este vehículo no tiene solicitudes o historial de uso registrado.
+            <!-- Columna derecha: Historiales -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Historial de Solicitudes -->
+                <div class="bg-white rounded-xl shadow-lg border border-cambridge2">
+                    <div class="p-6 border-b border-gray-100">
+                        <h3 class="text-xl font-semibold text-darkpurple">Historial de Solicitudes y Uso</h3>
+                        <p class="text-sm text-gray-600 mt-1">Registro completo de solicitudes y uso del vehículo</p>
                     </div>
-                <?php else: ?>
-                    <div class="space-y-4">
-                        <?php foreach (
-                            $solicitudes_historicas as $index => $solicitud): ?>
-                            <div class="border border-cambridge2 rounded-lg bg-parchment shadow-sm">
-                                <!-- Header colapsable -->
-                                <div class="flex flex-wrap justify-between items-center p-4 cursor-pointer hover:bg-cambridge1 hover:bg-opacity-20 transition" onclick="toggleSolicitud(<?php echo $index; ?>)">
-                                    <div class="flex items-center gap-3">
-                                        <svg id="icon-<?php echo $index; ?>" class="w-5 h-5 text-darkpurple transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                                        </svg>
-                                        <span class="font-semibold text-darkpurple">Solicitud #<?php echo htmlspecialchars($solicitud['solicitud_id']); ?> - <?php echo htmlspecialchars($solicitud['evento']); ?> (<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>)</span>
-                                    </div>
-                                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
-                                        switch ($solicitud['estatus_solicitud']) {
-                                            case 'pendiente':
-                                                echo 'bg-yellow-500 text-white';
-                                                break;
-                                            case 'aprobada':
-                                                echo 'bg-green-500 text-white';
-                                                break;
-                                            case 'rechazada':
-                                                echo 'bg-red-500 text-white';
-                                                break;
-                                            case 'en_curso':
-                                                echo 'bg-cambridge2 text-darkpurple';
-                                                break;
-                                            case 'completada':
-                                                echo 'bg-gray-500 text-white';
-                                                break;
-                                            case 'cancelada':
-                                                echo 'bg-blue-500 text-white';
-                                                break;
-                                        }
-                                    ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
-                                </div>
-                                
-                                <!-- Contenido colapsable -->
-                                <div id="content-<?php echo $index; ?>" class="hidden px-4 pb-4">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                        <p><span class="font-semibold text-darkpurple">Solicitante:</span> <?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></p>
-                                        <p><span class="font-semibold text-darkpurple">Fechas Solicitadas:</span> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?> a <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></p>
-                                        <p><span class="font-semibold text-darkpurple">Evento:</span> <?php echo htmlspecialchars($solicitud['evento']); ?></p>
-                                        <p><span class="font-semibold text-darkpurple">Destino:</span> <?php echo htmlspecialchars($solicitud['destino']); ?></p>
-                                    </div>
-                                    <p class="mb-2"><span class="font-semibold text-darkpurple">Descripción:</span> <?php echo htmlspecialchars($solicitud['descripcion']); ?></p>
-                                    <p class="mb-4"><span class="font-semibold text-darkpurple">Observaciones del Gestor:</span> <?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? 'Ninguna.'); ?></p>
-
-                                    <?php if (!empty($solicitud['fecha_salida_real'])): ?>
-                                        <div class="mb-2">
-                                            <h6 class="font-semibold text-cambridge1">Registro de Salida:</h6>
-                                            <p><strong>Fecha/Hora Salida Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_real'])); ?></p>
-                                            <p><strong>KM Salida:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_salida'])); ?></p>
-                                            <p><strong>Nivel Combustible Salida:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_salida']); ?>%</p>
-                                            <p><strong>Obs. Salida:</strong> <?php echo htmlspecialchars($solicitud['observaciones_salida'] ?? 'Ninguna.'); ?></p>
-                                            <?php
-                                            $fotos_salida_urls = json_decode($solicitud['fotos_salida_medidores_url'] ?? '[]', true);
-                                            if (!empty($fotos_salida_urls)):
-                                            ?>
-                                                <div class="mb-2">
-                                                    <p><strong>Fotos de Salida (Medidores):</strong></p>
-                                                    <div class="flex flex-wrap gap-2">
-                                                        <?php foreach ($fotos_salida_urls as $url): ?>
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Salida">
-                                                            </a>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
-                                            <?php
-                                            $fotos_salida_observaciones_urls = json_decode($solicitud['fotos_salida_observaciones_url'] ?? '[]', true);
-                                            if (!empty($fotos_salida_observaciones_urls)):
-                                            ?>
-                                                <div class="mb-2">
-                                                    <p><strong>Fotos de Salida (Observaciones):</strong></p>
-                                                    <div class="flex flex-wrap gap-2">
-                                                        <?php foreach ($fotos_salida_observaciones_urls as $url): ?>
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Salida">
-                                                            </a>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-
-                                    <?php if (!empty($solicitud['fecha_regreso_real'])): ?>
-                                        <div class="mb-2">
-                                            <h6 class="font-semibold text-cambridge1">Registro de Regreso:</h6>
-                                            <p><strong>Fecha/Hora Regreso Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_real'])); ?></p>
-                                            <p><strong>KM Regreso:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_regreso'])); ?></p>
-                                            <p><strong>Nivel Combustible Regreso:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_regreso']); ?>%</p>
-                                            <p><strong>Obs. Regreso:</strong> <?php echo htmlspecialchars($solicitud['observaciones_regreso'] ?? 'Ninguna.'); ?></p>
-                                            <?php
-                                            $fotos_regreso_medidores = json_decode($solicitud['fotos_regreso_medidores_url'] ?? '[]', true);
-                                            if (!empty($fotos_regreso_medidores)):
-                                            ?>
-                                                <div class="mb-2">
-                                                    <p><strong>Fotos de Regreso (Medidores):</strong></p>
-                                                    <div class="flex flex-wrap gap-2">
-                                                        <?php foreach ($fotos_regreso_medidores as $url): ?>
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Regreso Medidores">
-                                                            </a>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
-                                            <?php
-                                            $fotos_regreso_observaciones = json_decode($solicitud['fotos_regreso_observaciones_url'] ?? '[]', true);
-                                            if (!empty($fotos_regreso_observaciones)):
-                                            ?>
-                                                <div class="mb-2">
-                                                    <p><strong>Fotos de Regreso (Observaciones):</strong></p>
-                                                    <div class="flex flex-wrap gap-2">
-                                                        <?php foreach ($fotos_regreso_observaciones as $url): ?>
-                                                            <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                <img src="<?php echo htmlspecialchars($url); ?>" class="h-20 rounded shadow-sm" alt="Foto Regreso Observaciones">
-                                                            </a>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
+                    <div class="p-6">
+                        <?php if (empty($solicitudes_historicas)): ?>
+                            <div class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg text-center">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Este vehículo no tiene solicitudes o historial de uso registrado.
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-            </div>
+                        <?php else: ?>
+                            <div class="space-y-3">
+                                <?php foreach ($solicitudes_historicas as $index => $solicitud): ?>
+                                    <div class="border border-gray-200 rounded-lg bg-gray-50 shadow-sm hover:shadow-md transition-shadow">
+                                        <!-- Header colapsable -->
+                                        <div class="flex flex-wrap justify-between items-center p-4 cursor-pointer hover:bg-white hover:bg-opacity-50 transition" onclick="toggleSolicitud(<?php echo $index; ?>)">
+                                            <div class="flex items-center gap-3">
+                                                <svg id="icon-<?php echo $index; ?>" class="w-5 h-5 text-darkpurple transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                                <div>
+                                                    <span class="font-semibold text-darkpurple">Solicitud #<?php echo htmlspecialchars($solicitud['solicitud_id']); ?></span>
+                                                    <p class="text-sm text-gray-600"><?php echo htmlspecialchars($solicitud['evento']); ?> - <?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></p>
+                                                </div>
+                                            </div>
+                                            <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
+                                                switch ($solicitud['estatus_solicitud']) {
+                                                    case 'pendiente': echo 'bg-yellow-500 text-white'; break;
+                                                    case 'aprobada': echo 'bg-green-500 text-white'; break;
+                                                    case 'rechazada': echo 'bg-red-500 text-white'; break;
+                                                    case 'en_curso': echo 'bg-cambridge2 text-darkpurple'; break;
+                                                    case 'completada': echo 'bg-gray-500 text-white'; break;
+                                                    case 'cancelada': echo 'bg-blue-500 text-white'; break;
+                                                }
+                                            ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
+                                        </div>
+                                        
+                                        <!-- Contenido colapsable -->
+                                        <div id="content-<?php echo $index; ?>" class="hidden px-4 pb-4 bg-white">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pt-2">
+                                                <p><span class="font-semibold text-darkpurple">Solicitante:</span> <?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></p>
+                                                <p><span class="font-semibold text-darkpurple">Fechas Solicitadas:</span> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?> a <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></p>
+                                                <p><span class="font-semibold text-darkpurple">Evento:</span> <?php echo htmlspecialchars($solicitud['evento']); ?></p>
+                                                <p><span class="font-semibold text-darkpurple">Destino:</span> <?php echo htmlspecialchars($solicitud['destino']); ?></p>
+                                            </div>
+                                            <p class="mb-2"><span class="font-semibold text-darkpurple">Descripción:</span> <?php echo htmlspecialchars($solicitud['descripcion']); ?></p>
+                                            <p class="mb-4"><span class="font-semibold text-darkpurple">Observaciones del Gestor:</span> <?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? 'Ninguna.'); ?></p>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
-                <h3 class="text-lg font-semibold text-darkpurple mb-4">Historial de Mantenimientos</h3>
-                <?php if (empty($mantenimientos_historicos)): ?>
-                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center" role="alert">
-                        Este vehículo no tiene mantenimientos registrados.
-                    </div>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Fecha</th>
-                                    <th>KM</th>
-                                    <th>Costo</th>
-                                    <th>Taller</th>
-                                    <th>Observaciones</th>
-                                    <th>Próx. KM</th>
-                                    <th>Próx. Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($mantenimientos_historicos as $mantenimiento): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?></td>
-                                        <td><?php echo date('d/m/Y', strtotime($mantenimiento['fecha_mantenimiento'])); ?></td>
-                                        <td><?php echo htmlspecialchars(number_format($mantenimiento['kilometraje_mantenimiento'])); ?></td>
-                                        <td><?php echo $mantenimiento['costo'] !== null ? '$' . number_format($mantenimiento['costo'], 2) : 'N/A'; ?></td>
-                                        <td><?php echo htmlspecialchars($mantenimiento['taller'] ?? 'N/A'); ?></td>
-                                        <td><?php echo htmlspecialchars($mantenimiento['observaciones'] ?? 'N/A'); ?></td>
-                                        <td><?php echo $mantenimiento['proximo_mantenimiento_km'] !== null ? htmlspecialchars(number_format($mantenimiento['proximo_mantenimiento_km'])) . ' KM' : 'N/A'; ?></td>
-                                        <td><?php echo $mantenimiento['proximo_mantenimiento_fecha'] !== null ? date('d/m/Y', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : 'N/A'; ?></td>
-                                    </tr>
+                                            <?php if (!empty($solicitud['fecha_salida_real'])): ?>
+                                                <div class="mb-4 p-3 bg-green-50 rounded-lg">
+                                                    <h6 class="font-semibold text-green-700 mb-2">Registro de Salida:</h6>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                                        <p><strong>Fecha/Hora:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_real'])); ?></p>
+                                                        <p><strong>KM Salida:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_salida'])); ?></p>
+                                                        <p><strong>Combustible:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_salida']); ?>%</p>
+                                                        <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($solicitud['observaciones_salida'] ?? 'Ninguna.'); ?></p>
+                                                    </div>
+                                                    <?php
+                                                    $fotos_salida_urls = json_decode($solicitud['fotos_salida_medidores_url'] ?? '[]', true);
+                                                    if (!empty($fotos_salida_urls)):
+                                                    ?>
+                                                        <div class="mt-3">
+                                                            <p class="text-sm font-medium text-green-700 mb-2">Fotos de Medidores:</p>
+                                                            <div class="flex flex-wrap gap-2">
+                                                                <?php foreach ($fotos_salida_urls as $url): ?>
+                                                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
+                                                                        <img src="<?php echo htmlspecialchars($url); ?>" class="h-16 w-16 object-cover rounded shadow-sm" alt="Foto Salida">
+                                                                    </a>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($solicitud['fecha_regreso_real'])): ?>
+                                                <div class="mb-4 p-3 bg-blue-50 rounded-lg">
+                                                    <h6 class="font-semibold text-blue-700 mb-2">Registro de Regreso:</h6>
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                                        <p><strong>Fecha/Hora:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_real'])); ?></p>
+                                                        <p><strong>KM Regreso:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_regreso'])); ?></p>
+                                                        <p><strong>Combustible:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_regreso']); ?>%</p>
+                                                        <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($solicitud['observaciones_regreso'] ?? 'Ninguna.'); ?></p>
+                                                    </div>
+                                                    <?php
+                                                    $fotos_regreso_medidores = json_decode($solicitud['fotos_regreso_medidores_url'] ?? '[]', true);
+                                                    if (!empty($fotos_regreso_medidores)):
+                                                    ?>
+                                                        <div class="mt-3">
+                                                            <p class="text-sm font-medium text-blue-700 mb-2">Fotos de Medidores:</p>
+                                                            <div class="flex flex-wrap gap-2">
+                                                                <?php foreach ($fotos_regreso_medidores as $url): ?>
+                                                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
+                                                                        <img src="<?php echo htmlspecialchars($url); ?>" class="h-16 w-16 object-cover rounded shadow-sm" alt="Foto Regreso">
+                                                                    </a>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
                                 <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
 
-            <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
-                <h3 class="text-lg font-semibold text-darkpurple mb-4">Documentos del Vehículo</h3>
-                <a href="gestion_documentos.php?vehiculo_id=<?php echo $vehiculo['id']; ?>" class="bg-cambridge2 text-white px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">
-                    <i class="bi bi-plus-circle"></i> Gestionar Documentos
-                </a>
-                <?php if (empty($documentos_vehiculo)): ?>
-                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center" role="alert">
-                        Este vehículo no tiene documentos cargados.
+                <!-- Historial de Mantenimientos -->
+                <div class="bg-white rounded-xl shadow-lg border border-cambridge2">
+                    <div class="p-6 border-b border-gray-100">
+                        <h3 class="text-xl font-semibold text-darkpurple">Historial de Mantenimientos</h3>
+                        <p class="text-sm text-gray-600 mt-1">Registro de servicios y mantenimientos realizados</p>
                     </div>
-                <?php else: ?>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Nombre</th>
-                                    <th>Vencimiento</th>
-                                    <th>Subido</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($documentos_vehiculo as $doc): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($doc['nombre_documento']); ?></td>
-                                        <td><?php echo $doc['fecha_vencimiento'] ? date('d/m/Y', strtotime($doc['fecha_vencimiento'])) : 'N/A'; ?></td>
-                                        <td><?php echo date('d/m/Y', strtotime($doc['fecha_subida'])); ?></td>
-                                        <td>
-                                            <a href="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" target="_blank" class="bg-cambridge2 text-white px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">Ver</a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                    <div class="p-6">
+                        <?php if (empty($mantenimientos_historicos)): ?>
+                            <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg text-center">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Este vehículo no tiene mantenimientos registrados.
+                            </div>
+                        <?php else: ?>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-200">
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Tipo</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Fecha</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">KM</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Costo</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Taller</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <?php foreach ($mantenimientos_historicos as $mantenimiento): ?>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-4 py-3"><?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?></td>
+                                                <td class="px-4 py-3"><?php echo date('d/m/Y', strtotime($mantenimiento['fecha_mantenimiento'])); ?></td>
+                                                <td class="px-4 py-3"><?php echo htmlspecialchars(number_format($mantenimiento['kilometraje_mantenimiento'])); ?></td>
+                                                <td class="px-4 py-3"><?php echo $mantenimiento['costo'] !== null ? '$' . number_format($mantenimiento['costo'], 2) : 'N/A'; ?></td>
+                                                <td class="px-4 py-3"><?php echo htmlspecialchars($mantenimiento['taller'] ?? 'N/A'); ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
-            </div>
+                </div>
 
-        <?php endif; ?>
+                <!-- Documentos del Vehículo -->
+                <div class="bg-white rounded-xl shadow-lg border border-cambridge2">
+                    <div class="p-6 border-b border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-semibold text-darkpurple">Documentos del Vehículo</h3>
+                                <p class="text-sm text-gray-600 mt-1">Documentación legal y técnica del vehículo</p>
+                            </div>
+                            <a href="gestion_documentos.php?vehiculo_id=<?php echo $vehiculo['id']; ?>" class="bg-cambridge2 text-white px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">
+                                <i class="bi bi-plus-circle"></i> Gestionar
+                            </a>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <?php if (empty($documentos_vehiculo)): ?>
+                            <div class="bg-purple-50 border border-purple-200 text-purple-700 px-4 py-3 rounded-lg text-center">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Este vehículo no tiene documentos cargados.
+                            </div>
+                        <?php else: ?>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b border-gray-200">
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Nombre</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Vencimiento</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Subido</th>
+                                            <th class="px-4 py-3 text-left font-semibold text-darkpurple">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <?php foreach ($documentos_vehiculo as $doc): ?>
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="px-4 py-3"><?php echo htmlspecialchars($doc['nombre_documento']); ?></td>
+                                                <td class="px-4 py-3"><?php echo $doc['fecha_vencimiento'] ? date('d/m/Y', strtotime($doc['fecha_vencimiento'])) : 'N/A'; ?></td>
+                                                <td class="px-4 py-3"><?php echo date('d/m/Y', strtotime($doc['fecha_subida'])); ?></td>
+                                                <td class="px-4 py-3">
+                                                    <a href="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" target="_blank" class="bg-cambridge2 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-cambridge1 transition">Ver</a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal para Agregar/Editar Vehículo -->
