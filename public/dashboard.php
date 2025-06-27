@@ -91,6 +91,25 @@ if ($db) {
         error_log("Error al cargar datos del dashboard: " . $e->getMessage());
     }
 }
+
+// --- NUEVO: Obtener vehículos por estatus para mostrar tarjetas separadas ---
+$vehiculos_por_estatus = [
+    'disponible' => [],
+    'en_uso' => [],
+    'en_mantenimiento' => [],
+    'inactivo' => []
+];
+if ($db) {
+    try {
+        $stmt = $db->query("SELECT id, marca, modelo, placas, estatus FROM vehiculos ORDER BY marca, modelo");
+        $todos_vehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($todos_vehiculos as $vehiculo) {
+            $vehiculos_por_estatus[$vehiculo['estatus']][] = $vehiculo;
+        }
+    } catch (PDOException $e) {
+        error_log("Error al cargar vehículos para tarjetas de estatus: " . $e->getMessage());
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -156,6 +175,47 @@ if ($db) {
                     <a href="gestion_solicitudes.php" class="inline-block bg-cambridge2 text-darkpurple px-6 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition">Gestionar Solicitudes</a>
                 </div>
             <?php endif; ?>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <?php
+            $estatus_labels = [
+                'disponible' => 'Disponibles',
+                'en_uso' => 'En Uso',
+                'en_mantenimiento' => 'En Mantenimiento',
+                'inactivo' => 'Inactivos'
+            ];
+            $estatus_colors = [
+                'disponible' => 'bg-green-100 border-green-400 text-green-700',
+                'en_uso' => 'bg-cambridge1 border-cambridge2 text-darkpurple',
+                'en_mantenimiento' => 'bg-yellow-100 border-yellow-400 text-yellow-700',
+                'inactivo' => 'bg-red-100 border-red-400 text-red-700'
+            ];
+            foreach ($vehiculos_por_estatus as $estatus => $lista): ?>
+                <div class="bg-white rounded-xl shadow-lg p-6 border <?php echo $estatus_colors[$estatus]; ?>">
+                    <h5 class="text-lg font-semibold mb-3"><?php echo $estatus_labels[$estatus]; ?></h5>
+                    <p class="text-4xl font-bold mb-4"><?php echo count($lista); ?></p>
+                    <?php if (count($lista) > 0): ?>
+                        <ul class="text-sm space-y-1 max-h-32 overflow-y-auto">
+                            <?php foreach ($lista as $vehiculo): ?>
+                                <li class="flex items-center gap-2">
+                                    <span class="inline-block w-2 h-2 rounded-full <?php
+                                        switch($estatus) {
+                                            case 'disponible': echo 'bg-green-500'; break;
+                                            case 'en_uso': echo 'bg-cambridge2'; break;
+                                            case 'en_mantenimiento': echo 'bg-yellow-500'; break;
+                                            case 'inactivo': echo 'bg-red-500'; break;
+                                        }
+                                    ?>"></span>
+                                    <?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo'] . ' (' . $vehiculo['placas'] . ')'); ?>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php else: ?>
+                        <p class="text-xs text-mountbatten">No hay vehículos en este estatus.</p>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
         </div>
 
         <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
