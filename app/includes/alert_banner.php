@@ -5,13 +5,13 @@
 // y $current_user_recent_amonestaciones_text estén definidas en la página que lo incluye.
 
 if (isset($current_user_estatus_usuario) && ($current_user_estatus_usuario === 'amonestado' || $current_user_estatus_usuario === 'suspendido')):
-    $alert_class = 'alert-warning';
+    $alert_class = 'bg-yellow-100 border-yellow-400 text-yellow-800';
     $alert_icon = '⚠️'; // Icono de advertencia
     $alert_title = '¡ATENCIÓN!';
     $alert_message = '';
 
     if ($current_user_estatus_usuario === 'amonestado') {
-        $alert_class = 'alert-warning';
+        $alert_class = 'bg-yellow-100 border-yellow-400 text-yellow-800';
         $alert_icon = '⚠️';
         $alert_title = '¡Usuario AMONESTADO!';
         $alert_message = 'Tu cuenta ha sido amonestada. Tienes ' . htmlspecialchars($current_user_amonestaciones_count) . ' amonestación(es) registrada(s).';
@@ -20,18 +20,18 @@ if (isset($current_user_estatus_usuario) && ($current_user_estatus_usuario === '
         }
         $alert_message .= ' Continúa con el buen uso de los vehículos para evitar suspensiones.';
     } elseif ($current_user_estatus_usuario === 'suspendido') {
-        $alert_class = 'alert-danger';
+        $alert_class = 'bg-red-100 border-red-400 text-red-800';
         $alert_icon = '🚫'; // Icono de prohibición
         $alert_title = '¡CUENTA SUSPENDIDA!';
         $alert_message = 'Tu cuenta está SUSPENDIDA y NO puedes solicitar ni utilizar vehículos. Contacta al administrador para más detalles.';
     }
 ?>
-    <div class="container mt-3">
-        <div class="alert <?php echo $alert_class; ?> d-flex align-items-center" role="alert">
-            <span class="fs-4 me-3"><?php echo $alert_icon; ?></span>
+    <div class="max-w-3xl mx-auto mt-3">
+        <div class="flex items-center border-l-4 p-4 rounded shadow <?php echo $alert_class; ?>">
+            <span class="text-2xl mr-4"><?php echo $alert_icon; ?></span>
             <div>
-                <h4 class="alert-heading"><?php echo $alert_title; ?></h4>
-                <p class="mb-0"><?php echo $alert_message; ?></p>
+                <div class="font-bold text-lg mb-1"><?php echo $alert_title; ?></div>
+                <div class="text-sm"><?php echo $alert_message; ?></div>
             </div>
         </div>
     </div>

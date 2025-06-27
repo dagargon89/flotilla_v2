@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // public/mis_solicitudes.php - CÓDIGO COMPLETO Y CORREGIDO (Error Undefined $db y Bloqueo Amonestado)
 session_start();
 require_once '../app/config/database.php';
@@ -429,13 +433,11 @@ if (isset($_GET['error'])) {
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
                                             <?php if ($solicitud['estatus_solicitud'] === 'aprobada' && !$solicitud['historial_id']): ?>
-                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="useVehicleModal" data-action="marcar_salida" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-actual="<?php echo $solicitud['kilometraje_actual']; ?>">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-6.518-3.748A1 1 0 007 8.118v7.764a1 1 0 001.234.97l6.518-1.872A1 1 0 0016 13.882V10.118a1 1 0 00-1.248-.95z" /></svg>
+                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="useVehicleModal" data-action="marcar_salida" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-actual="<?php echo $solicitud['kilometraje_actual'] ?? ''; ?>">
                                                     Salida
                                                 </button>
                                             <?php elseif ($solicitud['estatus_solicitud'] === 'en_curso' && $solicitud['fecha_salida_real'] && !$solicitud['fecha_regreso_real']): ?>
-                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="useVehicleModal" data-action="marcar_regreso" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-salida="<?php echo $solicitud['kilometraje_salida']; ?>">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="useVehicleModal" data-action="marcar_regreso" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-salida="<?php echo $solicitud['kilometraje_salida'] ?? ''; ?>">
                                                     Regreso
                                                 </button>
                                             <?php endif; ?>
@@ -443,7 +445,6 @@ if (isset($_GET['error'])) {
                                     </td>
                                     <td class="px-4 py-3">
                                         <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="viewDetailsModal" data-solicitud="<?php echo htmlspecialchars(json_encode($solicitud)); ?>">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                             Ver
                                         </button>
                                     </td>
