@@ -77,7 +77,7 @@ $vehiculos_flotilla = []; // Para el dropdown de vehículos
 // Obtener lista de TODOS los vehículos para el dropdown
 if ($db) { // $db ya está definida.
     try {
-        $stmt_vehiculos = $db->query("SELECT id, marca, modelo, placas FROM vehiculos ORDER BY marca, modelo");
+        $stmt_vehiculos = $db->query("SELECT id, marca, modelo, placas, estatus FROM vehiculos ORDER BY marca, modelo");
         $vehiculos_flotilla = $stmt_vehiculos->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error al cargar vehículos para solicitud: " . $e->getMessage());
@@ -224,8 +224,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="vehiculo_id" name="vehiculo_id" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
                             <option value="">-- Selecciona un vehículo --</option>
                             <?php foreach ($vehiculos_flotilla as $vehiculo): ?>
-                                <option value="<?php echo htmlspecialchars($vehiculo['id']); ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>" <?php echo ($selected_vehiculo_id == $vehiculo['id']) ? 'selected' : ''; ?>>
+                                <option value="<?php echo htmlspecialchars($vehiculo['id']); ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>" data-estatus="<?php echo htmlspecialchars($vehiculo['estatus']); ?>" <?php echo ($selected_vehiculo_id == $vehiculo['id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo'] . ' (' . $vehiculo['placas'] . ')'); ?>
+                                    <?php if ($vehiculo['estatus'] === 'en_mantenimiento'): ?>
+                                        [En Mantenimiento]
+                                    <?php elseif ($vehiculo['estatus'] === 'inactivo'): ?>
+                                        [Inactivo]
+                                    <?php endif; ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -408,6 +413,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             noVehicleSelectedMessage.style.display = 'block';
             noOccupiedDatesMessage.style.display = 'none';
         }
+
+        // --- Lógica para deshabilitar campos según estatus del vehículo ---
+        const fechaSalidaInput = document.getElementById('fecha_salida_solicitada');
+        const fechaRegresoInput = document.getElementById('fecha_regreso_solicitada');
+        const eventoInput = document.getElementById('evento');
+        const descripcionInput = document.getElementById('descripcion');
+        const destinoInput = document.getElementById('destino');
+        const submitBtn = document.querySelector('button[type="submit"]');
+
+        function updateFormByVehicleStatus() {
+            const selectedOption = vehiculoSelect.options[vehiculoSelect.selectedIndex];
+            const estatus = selectedOption.getAttribute('data-estatus');
+            if (estatus === 'en_mantenimiento' || estatus === 'inactivo') {
+                fechaSalidaInput.disabled = true;
+                fechaRegresoInput.disabled = true;
+                eventoInput.disabled = true;
+                descripcionInput.disabled = true;
+                destinoInput.disabled = true;
+                submitBtn.disabled = true;
+                fechaSalidaInput.value = '';
+                fechaRegresoInput.value = '';
+                eventoInput.value = '';
+                descripcionInput.value = '';
+                destinoInput.value = '';
+            } else {
+                fechaSalidaInput.disabled = false;
+                fechaRegresoInput.disabled = false;
+                eventoInput.disabled = false;
+                descripcionInput.disabled = false;
+                destinoInput.disabled = false;
+                submitBtn.disabled = false;
+            }
+        }
+        vehiculoSelect.addEventListener('change', updateFormByVehicleStatus);
+        // Ejecutar al cargar la página si hay uno seleccionado
+        updateFormByVehicleStatus();
     </script>
 </body>
 

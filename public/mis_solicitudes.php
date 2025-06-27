@@ -242,6 +242,7 @@ if ($db) {
                 v.modelo,
                 v.placas,
                 v.id AS vehiculo_id,
+                v.estatus AS vehiculo_estatus,
                 s.fecha_creacion,
                 s.observaciones_aprobacion,
                 hu.id AS historial_id,
@@ -432,9 +433,13 @@ if (isset($_GET['error'])) {
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
-                                            <?php if ($solicitud['estatus_solicitud'] === 'aprobada' && !$solicitud['historial_id']): ?>
+                                            <?php if ($solicitud['estatus_solicitud'] === 'aprobada' && !$solicitud['historial_id'] && ($solicitud['vehiculo_estatus'] !== 'en_mantenimiento' && $solicitud['vehiculo_estatus'] !== 'inactivo')): ?>
                                                 <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="useVehicleModal" data-action="marcar_salida" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-actual="<?php echo $solicitud['kilometraje_actual'] ?? ''; ?>">
                                                     Salida
+                                                </button>
+                                            <?php elseif ($solicitud['estatus_solicitud'] === 'aprobada' && !$solicitud['historial_id'] && ($solicitud['vehiculo_estatus'] === 'en_mantenimiento' || $solicitud['vehiculo_estatus'] === 'inactivo')): ?>
+                                                <button type="button" class="bg-gray-400 text-white px-2 py-1 rounded text-xs font-semibold cursor-not-allowed opacity-60" disabled title="No disponible por estatus del vehículo">
+                                                    Salida (No disponible)
                                                 </button>
                                             <?php elseif ($solicitud['estatus_solicitud'] === 'en_curso' && $solicitud['fecha_salida_real'] && !$solicitud['fecha_regreso_real']): ?>
                                                 <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="useVehicleModal" data-action="marcar_regreso" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-salida="<?php echo $solicitud['kilometraje_salida'] ?? ''; ?>">
@@ -485,8 +490,9 @@ if (isset($_GET['error'])) {
                         </div>
                         <div>
                             <label for="fotos_medidores" class="block text-sm font-medium text-gray-700 mb-2">Fotos de Evidencia del Kilometraje y Nivel de Combustible</label>
-                            <input type="file" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fotos_medidores" name="fotos_medidores[]" accept="image/*" multiple>
-                            <small class="text-sm text-gray-500">Sube fotos claras del tablero mostrando el kilometraje y del medidor de combustible (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
+                            <input type="file" class="w-full px-3 py-2 border border-cambridge1 rounded-lg focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-darkpurple bg-parchment transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cambridge1 file:text-white hover:file:bg-cambridge2" id="fotos_medidores" name="fotos_medidores[]" accept="image/*" multiple capture="environment">
+                            <small class="text-sm text-gray-500">Sube o toma fotos claras del tablero mostrando el kilometraje y del medidor de combustible (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
+                            <div id="preview_fotos_medidores" class="flex flex-wrap gap-2 mt-2"></div>
                         </div>
                         <div>
                             <label for="tiene_observaciones" class="block text-sm font-medium text-gray-700 mb-2">¿Hay observaciones o detalles que reportar?</label>
@@ -498,12 +504,13 @@ if (isset($_GET['error'])) {
                         <div id="seccion_observaciones" class="hidden space-y-4">
                             <div>
                                 <label for="observaciones" class="block text-sm font-medium text-gray-700 mb-2">Observaciones (detalles, golpes, limpieza)</label>
-                                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones" name="observaciones" rows="3"></textarea>
+                                <textarea class="w-full px-3 py-2 border border-cambridge1 rounded-lg focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-darkpurple bg-parchment transition" id="observaciones" name="observaciones" rows="3"></textarea>
                             </div>
                             <div>
                                 <label for="fotos_observaciones" class="block text-sm font-medium text-gray-700 mb-2">Fotos de Evidencia de las Observaciones</label>
-                                <input type="file" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fotos_observaciones" name="fotos_observaciones[]" accept="image/*" multiple>
-                                <small class="text-sm text-gray-500">Sube fotos que evidencien los detalles mencionados en las observaciones (golpes, limpieza, etc.) (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
+                                <input type="file" class="w-full px-3 py-2 border border-cambridge1 rounded-lg focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-darkpurple bg-parchment transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cambridge1 file:text-white hover:file:bg-cambridge2" id="fotos_observaciones" name="fotos_observaciones[]" accept="image/*" multiple capture="environment">
+                                <small class="text-sm text-gray-500">Sube o toma fotos que evidencien los detalles mencionados en las observaciones (golpes, limpieza, etc.) (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
+                                <div id="preview_fotos_observaciones" class="flex flex-wrap gap-2 mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -760,6 +767,53 @@ if (isset($_GET['error'])) {
                     seccionObservaciones.classList.add('hidden');
                 }
             });
+
+            // Previsualización de imágenes para fotos_medidores y fotos_observaciones con opción de eliminar
+            function previewImages(input, previewContainerId) {
+                const preview = document.getElementById(previewContainerId);
+                preview.innerHTML = '';
+                if (input.files) {
+                    // Convertir FileList a Array para manipulación
+                    let filesArray = Array.from(input.files);
+                    filesArray.forEach((file, idx) => {
+                        if (!file.type.startsWith('image/')) return;
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'relative inline-block';
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.className = 'h-20 w-20 object-cover rounded shadow border border-cambridge1';
+                            // Botón de eliminar
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.innerHTML = '&times;';
+                            btn.className = 'absolute top-0 right-0 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow hover:bg-red-700 focus:outline-none';
+                            btn.title = 'Eliminar foto';
+                            btn.onclick = function() {
+                                filesArray.splice(idx, 1);
+                                // Crear un nuevo FileList
+                                const dataTransfer = new DataTransfer();
+                                filesArray.forEach(f => dataTransfer.items.add(f));
+                                input.files = dataTransfer.files;
+                                previewImages(input, previewContainerId);
+                            };
+                            wrapper.appendChild(img);
+                            wrapper.appendChild(btn);
+                            preview.appendChild(wrapper);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+            document.getElementById('fotos_medidores').addEventListener('change', function() {
+                previewImages(this, 'preview_fotos_medidores');
+            });
+            if (document.getElementById('fotos_observaciones')) {
+                document.getElementById('fotos_observaciones').addEventListener('change', function() {
+                    previewImages(this, 'preview_fotos_observaciones');
+                });
+            }
         });
     </script>
 </body>
