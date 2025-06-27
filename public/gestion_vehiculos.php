@@ -209,7 +209,7 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-modal-target="addEditVehicleModal" data-action="add">
             <i class="bi bi-plus-circle"></i> Agregar Nuevo Vehículo
         </button>
 
@@ -271,7 +271,7 @@ if ($db) {
                                             <a href="detalle_vehiculo.php?id=<?php echo $vehiculo['id']; ?>" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition">
                                                 Ver Detalles
                                             </a>
-                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="edit"
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditVehicleModal" data-action="edit"
                                                 data-id="<?php echo $vehiculo['id']; ?>"
                                                 data-marca="<?php echo htmlspecialchars($vehiculo['marca']); ?>"
                                                 data-modelo="<?php echo htmlspecialchars($vehiculo['modelo']); ?>"
@@ -285,7 +285,7 @@ if ($db) {
                                                 data-observaciones="<?php echo htmlspecialchars($vehiculo['observaciones']); ?>">
                                                 <i class="bi bi-pencil-square"></i> Editar
                                             </button>
-                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal" data-id="<?php echo $vehiculo['id']; ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>">
+                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-modal-target="deleteVehicleModal" data-id="<?php echo $vehiculo['id']; ?>" data-placas="<?php echo htmlspecialchars($vehiculo['placas']); ?>">
                                                 <i class="bi bi-trash"></i> Eliminar
                                             </button>
                                         </div>
@@ -298,41 +298,46 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <div class="modal fade" id="addEditVehicleModal" tabindex="-1" aria-labelledby="addEditVehicleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addEditVehicleModalLabel"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_vehiculos.php" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" id="modalActionVehicle">
-                            <input type="hidden" name="id" id="vehicleId">
+        <!-- Modal para Agregar/Editar Vehículo -->
+        <div id="addEditVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="addEditVehicleModalLabel"></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('addEditVehicleModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form action="gestion_vehiculos.php" method="POST">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="action" id="modalActionVehicle">
+                        <input type="hidden" name="id" id="vehicleId">
 
-                            <div class="mb-3">
-                                <label for="marca" class="form-label">Marca</label>
-                                <input type="text" class="form-control" id="marca" name="marca" required>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="marca" class="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="marca" name="marca" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="modelo" class="form-label">Modelo</label>
-                                <input type="text" class="form-control" id="modelo" name="modelo" required>
+                            <div>
+                                <label for="modelo" class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="modelo" name="modelo" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="anio" class="form-label">Año</label>
-                                <input type="number" class="form-control" id="anio" name="anio" min="1900" max="<?php echo date('Y') + 1; ?>" required>
+                            <div>
+                                <label for="anio" class="block text-sm font-medium text-gray-700 mb-2">Año</label>
+                                <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="anio" name="anio" min="1900" max="<?php echo date('Y') + 1; ?>" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="placas" class="form-label">Placas</label>
-                                <input type="text" class="form-control" id="placas" name="placas" required>
+                            <div>
+                                <label for="placas" class="block text-sm font-medium text-gray-700 mb-2">Placas</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="placas" name="placas" required>
                             </div>
-                            <div class="mb-3">
-                                <label for="vin" class="form-label">VIN (Número de Identificación Vehicular)</label>
-                                <input type="text" class="form-control" id="vin" name="vin">
+                            <div>
+                                <label for="vin" class="block text-sm font-medium text-gray-700 mb-2">VIN (Número de Identificación Vehicular)</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vin" name="vin">
                             </div>
-                            <div class="mb-3">
-                                <label for="tipo_combustible" class="form-label">Tipo de Combustible</label>
-                                <select class="form-select" id="tipo_combustible" name="tipo_combustible" required>
+                            <div>
+                                <label for="tipo_combustible" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Combustible</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="tipo_combustible" name="tipo_combustible" required>
                                     <option value="">Selecciona...</option>
                                     <option value="Gasolina">Gasolina</option>
                                     <option value="Diésel">Diésel</option>
@@ -340,57 +345,60 @@ if ($db) {
                                     <option value="Híbrido">Híbrido</option>
                                 </select>
                             </div>
-                            <div class="mb-3">
-                                <label for="kilometraje_actual" class="form-label">Kilometraje Actual</label>
-                                <input type="number" class="form-control" id="kilometraje_actual" name="kilometraje_actual" min="0" required>
+                            <div>
+                                <label for="kilometraje_actual" class="block text-sm font-medium text-gray-700 mb-2">Kilometraje Actual</label>
+                                <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="kilometraje_actual" name="kilometraje_actual" min="0" required>
                             </div>
-                            <div class="mb-3" id="estatusField" style="display: none;">
-                                <label for="estatus" class="form-label">Estatus</label>
-                                <select class="form-select" id="estatus" name="estatus" required>
+                            <div id="estatusField" class="hidden">
+                                <label for="estatus" class="block text-sm font-medium text-gray-700 mb-2">Estatus</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="estatus" name="estatus" required>
                                     <option value="disponible">Disponible</option>
                                     <option value="en_uso">En Uso</option>
                                     <option value="en_mantenimiento">En Mantenimiento</option>
                                     <option value="inactivo">Inactivo</option>
                                 </select>
                             </div>
-                            <div class="mb-3">
-                                <label for="ubicacion_actual" class="form-label">Ubicación Actual</label>
-                                <input type="text" class="form-control" id="ubicacion_actual" name="ubicacion_actual">
-                            </div>
-                            <div class="mb-3">
-                                <label for="observaciones_vehiculo" class="form-label">Observaciones</label>
-                                <textarea class="form-control" id="observaciones_vehiculo" name="observaciones" rows="3"></textarea>
+                            <div>
+                                <label for="ubicacion_actual" class="block text-sm font-medium text-gray-700 mb-2">Ubicación Actual</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="ubicacion_actual" name="ubicacion_actual">
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="submitVehicleBtn"></button>
+                        <div>
+                            <label for="observaciones_vehiculo" class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones_vehiculo" name="observaciones" rows="3"></textarea>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('addEditVehicleModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors" id="submitVehicleBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-labelledby="deleteVehicleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteVehicleModalLabel">Confirmar Eliminación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_vehiculos.php" method="POST">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id" id="deleteVehicleId">
-                        <div class="modal-body">
-                            ¿Estás seguro de que quieres eliminar el vehículo con placas <strong id="deleteVehiclePlacas"></strong>?
-                            Esta acción es irreversible.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                        </div>
-                    </form>
+        <!-- Modal para Eliminar Vehículo -->
+        <div id="deleteVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="deleteVehicleModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('deleteVehicleModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_vehiculos.php" method="POST">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" id="deleteVehicleId">
+                    <div class="p-6">
+                        <p class="text-gray-700">¿Estás seguro de que quieres eliminar el vehículo con placas <strong id="deleteVehiclePlacas"></strong>?</p>
+                        <p class="text-sm text-red-600 mt-2">Esta acción es irreversible.</p>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('deleteVehicleModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Eliminar</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -398,63 +406,87 @@ if ($db) {
 
     <script src="js/main.js"></script>
     <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
         // JavaScript para manejar los modales de agregar/editar vehículo
         document.addEventListener('DOMContentLoaded', function() {
-            var addEditVehicleModal = document.getElementById('addEditVehicleModal');
-            addEditVehicleModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-                var action = button.getAttribute('data-action');
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (modalId === 'addEditVehicleModal') {
+                        setupVehicleModal(action, this);
+                    } else if (modalId === 'deleteVehicleModal') {
+                        setupDeleteVehicleModal(this);
+                    }
+                    
+                    openModal(modalId);
+                });
+            });
 
-                var modalTitle = addEditVehicleModal.querySelector('#addEditVehicleModalLabel');
-                var modalActionInput = addEditVehicleModal.querySelector('#modalActionVehicle');
-                var vehicleIdInput = addEditVehicleModal.querySelector('#vehicleId');
-                var submitBtn = addEditVehicleModal.querySelector('#submitVehicleBtn');
-                var estatusField = addEditVehicleModal.querySelector('#estatusField');
-                var form = addEditVehicleModal.querySelector('form');
+            function setupVehicleModal(action, button) {
+                var modalTitle = document.getElementById('addEditVehicleModalLabel');
+                var modalActionInput = document.getElementById('modalActionVehicle');
+                var vehicleIdInput = document.getElementById('vehicleId');
+                var submitBtn = document.getElementById('submitVehicleBtn');
+                var estatusField = document.getElementById('estatusField');
+                var form = document.querySelector('#addEditVehicleModal form');
 
                 form.reset();
-                estatusField.style.display = 'none';
+                estatusField.classList.add('hidden');
 
                 if (action === 'add') {
                     modalTitle.textContent = 'Agregar Nuevo Vehículo';
                     modalActionInput.value = 'add';
                     submitBtn.textContent = 'Guardar Vehículo';
-                    submitBtn.className = 'btn btn-primary';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
                     vehicleIdInput.value = '';
                 } else if (action === 'edit') {
                     modalTitle.textContent = 'Editar Vehículo';
                     modalActionInput.value = 'edit';
                     submitBtn.textContent = 'Actualizar Vehículo';
-                    submitBtn.className = 'btn btn-info text-white';
-                    estatusField.style.display = 'block';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
+                    estatusField.classList.remove('hidden');
 
                     vehicleIdInput.value = button.getAttribute('data-id');
-                    addEditVehicleModal.querySelector('#marca').value = button.getAttribute('data-marca');
-                    addEditVehicleModal.querySelector('#modelo').value = button.getAttribute('data-modelo');
-                    addEditVehicleModal.querySelector('#anio').value = button.getAttribute('data-anio');
-                    addEditVehicleModal.querySelector('#placas').value = button.getAttribute('data-placas');
-                    addEditVehicleModal.querySelector('#vin').value = button.getAttribute('data-vin') === 'null' ? '' : button.getAttribute('data-vin');
-                    addEditVehicleModal.querySelector('#tipo_combustible').value = button.getAttribute('data-tipo-combustible');
-                    addEditVehicleModal.querySelector('#kilometraje_actual').value = button.getAttribute('data-kilometraje-actual');
-                    addEditVehicleModal.querySelector('#estatus').value = button.getAttribute('data-estatus');
-                    addEditVehicleModal.querySelector('#ubicacion_actual').value = button.getAttribute('data-ubicacion-actual') === 'null' ? '' : button.getAttribute('data-ubicacion-actual');
-                    addEditVehicleModal.querySelector('#observaciones_vehiculo').value = button.getAttribute('data-observaciones') === 'null' ? '' : button.getAttribute('data-observaciones');
+                    document.getElementById('marca').value = button.getAttribute('data-marca');
+                    document.getElementById('modelo').value = button.getAttribute('data-modelo');
+                    document.getElementById('anio').value = button.getAttribute('data-anio');
+                    document.getElementById('placas').value = button.getAttribute('data-placas');
+                    document.getElementById('vin').value = button.getAttribute('data-vin') === 'null' ? '' : button.getAttribute('data-vin');
+                    document.getElementById('tipo_combustible').value = button.getAttribute('data-tipo-combustible');
+                    document.getElementById('kilometraje_actual').value = button.getAttribute('data-kilometraje-actual');
+                    document.getElementById('estatus').value = button.getAttribute('data-estatus');
+                    document.getElementById('ubicacion_actual').value = button.getAttribute('data-ubicacion-actual') === 'null' ? '' : button.getAttribute('data-ubicacion-actual');
+                    document.getElementById('observaciones_vehiculo').value = button.getAttribute('data-observaciones') === 'null' ? '' : button.getAttribute('data-observaciones');
                 }
-            });
+            }
 
-            var deleteVehicleModal = document.getElementById('deleteVehicleModal');
-            if (deleteVehicleModal) {
-                deleteVehicleModal.addEventListener('show.bs.modal', function(event) {
-                    var button = event.relatedTarget;
-                    var vehicleId = button.getAttribute('data-id');
-                    var vehiclePlacas = button.getAttribute('data-placas');
+            function setupDeleteVehicleModal(button) {
+                var vehicleId = button.getAttribute('data-id');
+                var vehiclePlacas = button.getAttribute('data-placas');
 
-                    var modalVehicleId = deleteVehicleModal.querySelector('#deleteVehicleId');
-                    var modalVehiclePlacas = deleteVehicleModal.querySelector('#deleteVehiclePlacas');
-
-                    modalVehicleId.value = vehicleId;
-                    modalVehiclePlacas.textContent = vehiclePlacas;
-                });
+                document.getElementById('deleteVehicleId').value = vehicleId;
+                document.getElementById('deleteVehiclePlacas').textContent = vehiclePlacas;
             }
         });
     </script>

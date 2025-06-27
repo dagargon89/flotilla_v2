@@ -357,7 +357,7 @@ if ($db) {
                                     <td class="px-4 py-3">
                                         <?php if ($solicitud['estatus_solicitud'] === 'pendiente'): ?>
                                             <div class="flex flex-wrap gap-1">
-                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#approveRejectModal"
+                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="approveRejectModal"
                                                         data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="aprobar"
                                                         data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                         data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
@@ -367,7 +367,7 @@ if ($db) {
                                                         data-vehiculo-info-display="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>">
                                                     <i class="bi bi-check-lg"></i> Aprobar
                                                 </button>
-                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-bs-toggle="modal" data-bs-target="#approveRejectModal"
+                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="approveRejectModal"
                                                         data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="rechazar"
                                                         data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                         data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>">
@@ -376,7 +376,7 @@ if ($db) {
                                             </div>
                                         <?php elseif ($solicitud['estatus_solicitud'] === 'aprobada' || $solicitud['estatus_solicitud'] === 'en_curso'): ?>
                                             <div class="flex flex-wrap gap-1">
-                                                <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#editApprovedRequestModal"
+                                                <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="editApprovedRequestModal"
                                                     data-solicitud-id="<?php echo htmlspecialchars($solicitud['solicitud_id']); ?>"
                                                     data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                     data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
@@ -385,7 +385,7 @@ if ($db) {
                                                     data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? ''); ?>">
                                                     <i class="bi bi-pencil-fill"></i> Editar Asignación
                                                 </button>
-                                                <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-bs-toggle="modal" data-bs-target="#viewDetailsModal"
+                                                <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewDetailsModal"
                                                     data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>"
                                                     data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                     data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
@@ -401,7 +401,7 @@ if ($db) {
                                             </div>
                                         <?php else: ?>
                                             <div class="flex flex-wrap gap-1">
-                                                <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-bs-toggle="modal" data-bs-target="#viewDetailsModal"
+                                                <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewDetailsModal"
                                                     data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>"
                                                     data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                     data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
@@ -425,114 +425,123 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <div class="modal fade" id="approveRejectModal" tabindex="-1" aria-labelledby="approveRejectModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="approveRejectModalLabel">Gestionar Solicitud</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_solicitudes.php" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="solicitud_id" id="modalSolicitudId">
-                            <input type="hidden" name="action" id="modalAction">
-                            <input type="hidden" name="vehiculo_info_display_modal" id="vehiculoInfoDisplayModal">
-                            <p>Estás a punto de <strong id="modalActionText"></strong> la solicitud de <strong id="modalUserName"></strong>.</p>
-                            <div id="vehicleAssignmentSection">
-                                <div class="mb-3">
-                                    <label for="vehiculo_asignado_id" class="form-label">Asignar Vehículo Disponible</label>
-                                    <select class="form-select" id="vehiculo_asignado_id" name="vehiculo_asignado_id">
-                                        <option value="">Selecciona un vehículo (Obligatorio para Aprobar)</option>
-                                        <?php foreach ($vehiculos_flotilla_para_modales as $vehiculo_opcion): ?>
-                                            <option value="<?php echo htmlspecialchars($vehiculo_opcion['id']); ?>">
-                                                <?php echo htmlspecialchars($vehiculo_opcion['marca'] . ' ' . $vehiculo_opcion['modelo'] . ' (' . $vehiculo_opcion['placas'] . ')'); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <p class="text-info small">Solo se muestran vehículos que no están asignados actualmente a otras solicitudes *aprobadas* en las fechas solicitadas.</p>
-                            </div>
-                            <div class="mb-3">
-                                <label for="observaciones_aprobacion" class="form-label">Observaciones (Opcional)</label>
-                                <textarea class="form-control" id="observaciones_aprobacion_modal" name="observaciones_aprobacion" rows="3"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn" id="modalSubmitBtn"></button>
-                        </div>
-                    </form>
+        <!-- Modal para Aprobar/Rechazar Solicitud -->
+        <div id="approveRejectModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="approveRejectModalLabel">Gestionar Solicitud</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('approveRejectModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
-            </div>
-        </div>
-
-        <div class="modal fade" id="editApprovedRequestModal" tabindex="-1" aria-labelledby="editApprovedRequestModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editApprovedRequestModalLabel">Editar Solicitud Aprobada</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_solicitudes.php" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" value="edit_approved_request">
-                            <input type="hidden" name="solicitud_id" id="editApprovedSolicitudId">
-                            <p>Editando solicitud de: <strong id="editApprovedUserName"></strong></p>
-
-                            <div class="mb-3">
-                                <label for="vehiculo_id_new" class="form-label">Cambiar Vehículo Asignado</label>
-                                <select class="form-select" id="vehiculo_id_new" name="vehiculo_id_new" required>
-                                    <option value="">Selecciona un vehículo</option>
-                                    <?php foreach ($vehiculos_flotilla_para_modales as $vehiculo_opt): ?>
-                                        <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>">
-                                            <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
+                <form action="gestion_solicitudes.php" method="POST">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="solicitud_id" id="modalSolicitudId">
+                        <input type="hidden" name="action" id="modalAction">
+                        <input type="hidden" name="vehiculo_info_display_modal" id="vehiculoInfoDisplayModal">
+                        <p class="text-gray-700">Estás a punto de <strong id="modalActionText"></strong> la solicitud de <strong id="modalUserName"></strong>.</p>
+                        <div id="vehicleAssignmentSection">
+                            <div>
+                                <label for="vehiculo_asignado_id" class="block text-sm font-medium text-gray-700 mb-2">Asignar Vehículo Disponible</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vehiculo_asignado_id" name="vehiculo_asignado_id">
+                                    <option value="">Selecciona un vehículo (Obligatorio para Aprobar)</option>
+                                    <?php foreach ($vehiculos_flotilla_para_modales as $vehiculo_opcion): ?>
+                                        <option value="<?php echo htmlspecialchars($vehiculo_opcion['id']); ?>">
+                                            <?php echo htmlspecialchars($vehiculo_opcion['marca'] . ' ' . $vehiculo_opcion['modelo'] . ' (' . $vehiculo_opcion['placas'] . ')'); ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="mb-3">
-                                <label for="fecha_salida_new" class="form-label">Nueva Fecha y Hora de Salida</label>
-                                <input type="datetime-local" class="form-control" id="fecha_salida_new" name="fecha_salida_new" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="fecha_regreso_new" class="form-label">Nueva Fecha y Hora de Regreso</label>
-                                <input type="datetime-local" class="form-control" id="fecha_regreso_new" name="fecha_regreso_new" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="observaciones_edit" class="form-label">Observaciones del Gestor (actualizar)</label>
-                                <textarea class="form-control" id="observaciones_edit" name="observaciones_edit" rows="3"></textarea>
-                            </div>
+                            <p class="text-sm text-blue-600">Solo se muestran vehículos que no están asignados actualmente a otras solicitudes *aprobadas* en las fechas solicitadas.</p>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                        <div>
+                            <label for="observaciones_aprobacion" class="block text-sm font-medium text-gray-700 mb-2">Observaciones (Opcional)</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones_aprobacion_modal" name="observaciones_aprobacion" rows="3"></textarea>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('approveRejectModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white rounded-md transition-colors" id="modalSubmitBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewDetailsModalLabel">Detalles de Solicitud</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Modal para Editar Solicitud Aprobada -->
+        <div id="editApprovedRequestModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="editApprovedRequestModalLabel">Editar Solicitud Aprobada</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('editApprovedRequestModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form action="gestion_solicitudes.php" method="POST">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="action" value="edit_approved_request">
+                        <input type="hidden" name="solicitud_id" id="editApprovedSolicitudId">
+                        <p class="text-gray-700">Editando solicitud de: <strong id="editApprovedUserName"></strong></p>
+
+                        <div>
+                            <label for="vehiculo_id_new" class="block text-sm font-medium text-gray-700 mb-2">Cambiar Vehículo Asignado</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vehiculo_id_new" name="vehiculo_id_new" required>
+                                <option value="">Selecciona un vehículo</option>
+                                <?php foreach ($vehiculos_flotilla_para_modales as $vehiculo_opt): ?>
+                                    <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>">
+                                        <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="fecha_salida_new" class="block text-sm font-medium text-gray-700 mb-2">Nueva Fecha y Hora de Salida</label>
+                            <input type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fecha_salida_new" name="fecha_salida_new" required>
+                        </div>
+                        <div>
+                            <label for="fecha_regreso_new" class="block text-sm font-medium text-gray-700 mb-2">Nueva Fecha y Hora de Regreso</label>
+                            <input type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fecha_regreso_new" name="fecha_regreso_new" required>
+                        </div>
+                        <div>
+                            <label for="observaciones_edit" class="block text-sm font-medium text-gray-700 mb-2">Observaciones del Gestor (actualizar)</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones_edit" name="observaciones_edit" rows="3"></textarea>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <p><strong>Solicitante:</strong> <span id="detailUserName"></span></p>
-                        <p><strong>Salida Deseada:</strong> <span id="detailFechaSalida"></span></p>
-                        <p><strong>Regreso Deseado:</strong> <span id="detailFechaRegreso"></span></p>
-                        <p><strong>Evento:</strong> <span id="detailEvento"></span></p>
-                        <p><strong>Descripción:</strong> <span id="detailDescripcion"></span></p>
-                        <p><strong>Destino:</strong> <span id="detailDestino"></span></p>
-                        <p><strong>Vehículo Asignado:</strong> <span id="detailVehiculoAsignado"></span></p>
-                        <p><strong>Estatus:</strong> <span class="badge"></span></p>
-                        <p><strong>Observaciones del Gestor:</strong> <span id="detailObservacionesAprobacion"></span></p>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('editApprovedRequestModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors">Guardar Cambios</button>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal para Ver Detalles -->
+        <div id="viewDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="viewDetailsModalLabel">Detalles de Solicitud</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('viewDetailsModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-3">
+                    <p class="text-gray-700"><strong>Solicitante:</strong> <span id="detailUserName"></span></p>
+                    <p class="text-gray-700"><strong>Salida Deseada:</strong> <span id="detailFechaSalida"></span></p>
+                    <p class="text-gray-700"><strong>Regreso Deseado:</strong> <span id="detailFechaRegreso"></span></p>
+                    <p class="text-gray-700"><strong>Evento:</strong> <span id="detailEvento"></span></p>
+                    <p class="text-gray-700"><strong>Descripción:</strong> <span id="detailDescripcion"></span></p>
+                    <p class="text-gray-700"><strong>Destino:</strong> <span id="detailDestino"></span></p>
+                    <p class="text-gray-700"><strong>Vehículo Asignado:</strong> <span id="detailVehiculoAsignado"></span></p>
+                    <p class="text-gray-700"><strong>Estatus:</strong> <span id="detailEstatus" class="inline-block px-2 py-1 text-xs font-semibold rounded-full"></span></p>
+                    <p class="text-gray-700"><strong>Observaciones del Gestor:</strong> <span id="detailObservacionesAprobacion"></span></p>
+                </div>
+                <div class="flex justify-end p-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('viewDetailsModal')">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -544,6 +553,25 @@ if ($db) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
     <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
         // JavaScript para manejar el modal de Aprobar/Rechazar Solicitud
         document.addEventListener('DOMContentLoaded', function() {
             flatpickr("#fecha_salida_new", {
@@ -557,104 +585,116 @@ if ($db) {
                 minDate: "today"
             });
 
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (modalId === 'approveRejectModal') {
+                        setupApproveRejectModal(action, this);
+                    } else if (modalId === 'editApprovedRequestModal') {
+                        setupEditApprovedRequestModal(this);
+                    } else if (modalId === 'viewDetailsModal') {
+                        setupViewDetailsModal(this);
+                    }
+                    
+                    openModal(modalId);
+                });
+            });
 
-            var approveRejectModal = document.getElementById('approveRejectModal');
-            approveRejectModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
+            function setupApproveRejectModal(action, button) {
                 var solicitudId = button.getAttribute('data-solicitud-id');
-                var action = button.getAttribute('data-action');
-                var userName = button.getAttribute('data-usuario');
-                var salida = button.getAttribute('data-salida');
-                var regreso = button.getAttribute('data-regreso');
+                var usuario = button.getAttribute('data-usuario');
                 var observacionesAprobacion = button.getAttribute('data-observaciones-aprobacion');
-                var vehiculoActualId = button.getAttribute('data-vehiculo-actual-id');
-                var vehiculoInfoDisplay = button.getAttribute('data-vehiculo-info-display');
 
-                var modalSolicitudId = approveRejectModal.querySelector('#modalSolicitudId');
-                var modalAction = approveRejectModal.querySelector('#modalAction');
-                var vehiculoInfoDisplayModal = approveRejectModal.querySelector('#vehiculoInfoDisplayModal');
-                var modalActionText = approveRejectModal.querySelector('#modalActionText');
-                var modalUserName = approveRejectModal.querySelector('#modalUserName');
-                var modalSubmitBtn = approveRejectModal.querySelector('#modalSubmitBtn');
-                var vehiculoAssignmentSection = approveRejectModal.querySelector('#vehicleAssignmentSection');
-                var vehiculoAsignadoSelect = approveRejectModal.querySelector('#vehiculo_asignado_id');
-                var observacionesModal = approveRejectModal.querySelector('#observaciones_aprobacion_modal');
+                document.getElementById('modalSolicitudId').value = solicitudId;
+                document.getElementById('modalAction').value = action;
+                document.getElementById('modalUserName').textContent = usuario;
+                document.getElementById('observaciones_aprobacion_modal').value = observacionesAprobacion || '';
 
-                modalSolicitudId.value = solicitudId;
-                modalAction.value = action;
-                modalUserName.textContent = userName;
-                observacionesModal.value = observacionesAprobacion;
-                vehiculoInfoDisplayModal.value = vehiculoInfoDisplay;
-
-                vehiculoAsignadoSelect.value = vehiculoActualId || '';
+                var modalActionText = document.getElementById('modalActionText');
+                var modalSubmitBtn = document.getElementById('modalSubmitBtn');
+                var vehicleAssignmentSection = document.getElementById('vehicleAssignmentSection');
 
                 if (action === 'aprobar') {
                     modalActionText.textContent = 'APROBAR';
                     modalSubmitBtn.textContent = 'Aprobar Solicitud';
-                    modalSubmitBtn.className = 'btn btn-success';
-                    vehiculoAssignmentSection.style.display = 'block';
-                    vehiculoAsignadoSelect.setAttribute('required', 'required');
+                    modalSubmitBtn.className = 'px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors';
+                    vehicleAssignmentSection.style.display = 'block';
                 } else if (action === 'rechazar') {
                     modalActionText.textContent = 'RECHAZAR';
                     modalSubmitBtn.textContent = 'Rechazar Solicitud';
-                    modalSubmitBtn.className = 'btn btn-danger';
-                    vehiculoAssignmentSection.style.display = 'none';
-                    vehiculoAsignadoSelect.removeAttribute('required');
-                    vehiculoAsignadoSelect.value = '';
+                    modalSubmitBtn.className = 'px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors';
+                    vehicleAssignmentSection.style.display = 'none';
                 }
-            });
+            }
 
-            // JavaScript para manejar el modal de Editar Solicitud Aprobada
-            var editApprovedRequestModal = document.getElementById('editApprovedRequestModal');
-            editApprovedRequestModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
+            function setupEditApprovedRequestModal(button) {
                 var solicitudId = button.getAttribute('data-solicitud-id');
-                var userName = button.getAttribute('data-usuario');
-                var fechaSalida = button.getAttribute('data-salida');
-                var fechaRegreso = button.getAttribute('data-regreso');
+                var usuario = button.getAttribute('data-usuario');
+                var salida = button.getAttribute('data-salida');
+                var regreso = button.getAttribute('data-regreso');
                 var vehiculoActualId = button.getAttribute('data-vehiculo-actual-id');
                 var observacionesAprobacion = button.getAttribute('data-observaciones-aprobacion');
 
-                editApprovedRequestModal.querySelector('#editApprovedSolicitudId').value = solicitudId;
-                editApprovedRequestModal.querySelector('#editApprovedUserName').textContent = userName;
-                editApprovedRequestModal.querySelector('#fecha_salida_new').value = fechaSalida;
-                editApprovedRequestModal.querySelector('#fecha_regreso_new').value = fechaRegreso;
-                editApprovedRequestModal.querySelector('#vehiculo_id_new').value = vehiculoActualId;
-                editApprovedRequestModal.querySelector('#observaciones_edit').value = observacionesAprobacion;
+                document.getElementById('editApprovedSolicitudId').value = solicitudId;
+                document.getElementById('editApprovedUserName').textContent = usuario;
+                document.getElementById('vehiculo_id_new').value = vehiculoActualId || '';
+                document.getElementById('fecha_salida_new').value = salida;
+                document.getElementById('fecha_regreso_new').value = regreso;
+                document.getElementById('observaciones_edit').value = observacionesAprobacion || '';
 
-                // Actualizar Flatpickr
-                flatpickr("#fecha_salida_new").setDate(fechaSalida);
-                flatpickr("#fecha_regreso_new").setDate(fechaRegreso);
-            });
+                flatpickr("#fecha_salida_new").setDate(salida);
+                flatpickr("#fecha_regreso_new").setDate(regreso);
+            }
 
+            function setupViewDetailsModal(button) {
+                var usuario = button.getAttribute('data-usuario');
+                var salida = button.getAttribute('data-salida');
+                var regreso = button.getAttribute('data-regreso');
+                var evento = button.getAttribute('data-evento');
+                var descripcion = button.getAttribute('data-descripcion');
+                var destino = button.getAttribute('data-destino');
+                var vehiculo = button.getAttribute('data-vehiculo');
+                var estatus = button.getAttribute('data-estatus');
+                var observacionesAprobacion = button.getAttribute('data-observaciones-aprobacion');
 
-            // JavaScript para manejar el modal de Ver Detalles
-            var viewDetailsModal = document.getElementById('viewDetailsModal');
-            viewDetailsModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
+                document.getElementById('detailUserName').textContent = usuario;
+                document.getElementById('detailFechaSalida').textContent = new Date(salida).toLocaleString('es-MX');
+                document.getElementById('detailFechaRegreso').textContent = new Date(regreso).toLocaleString('es-MX');
+                document.getElementById('detailEvento').textContent = evento;
+                document.getElementById('detailDescripcion').textContent = descripcion;
+                document.getElementById('detailDestino').textContent = destino;
+                document.getElementById('detailVehiculoAsignado').textContent = vehiculo;
+                document.getElementById('detailEstatus').textContent = estatus;
+                document.getElementById('detailObservacionesAprobacion').textContent = observacionesAprobacion || 'Sin observaciones';
 
-                document.getElementById('detailUserName').textContent = button.getAttribute('data-usuario');
-                document.getElementById('detailFechaSalida').textContent = new Date(button.getAttribute('data-salida')).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
-                document.getElementById('detailFechaRegreso').textContent = new Date(button.getAttribute('data-regreso')).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
-                document.getElementById('detailEvento').textContent = button.getAttribute('data-evento');
-                document.getElementById('detailDescripcion').textContent = button.getAttribute('data-descripcion');
-                document.getElementById('detailDestino').textContent = button.getAttribute('data-destino');
-                document.getElementById('detailVehiculoAsignado').textContent = button.getAttribute('data-vehiculo');
+                // Aplicar clase de color según el estatus
+                var estatusElement = document.getElementById('detailEstatus');
+                estatusElement.className = 'inline-block px-2 py-1 text-xs font-semibold rounded-full';
                 
-                var statusBadge = document.getElementById('detailEstatus');
-                statusBadge.textContent = button.getAttribute('data-estatus');
-                statusBadge.className = 'badge';
-                switch (button.getAttribute('data-estatus').toLowerCase()) {
-                    case 'pendiente': statusBadge.classList.add('bg-warning', 'text-dark'); break;
-                    case 'aprobada': statusBadge.classList.add('bg-success'); break;
-                    case 'rechazada': statusBadge.classList.add('bg-danger'); break;
-                    case 'en_curso': statusBadge.classList.add('bg-primary'); break;
-                    case 'completada': statusBadge.classList.add('bg-secondary'); break;
-                    case 'cancelada': statusBadge.classList.add('bg-info'); break;
+                switch (estatus.toLowerCase()) {
+                    case 'pendiente':
+                        estatusElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                        break;
+                    case 'aprobada':
+                        estatusElement.classList.add('bg-green-100', 'text-green-800');
+                        break;
+                    case 'rechazada':
+                        estatusElement.classList.add('bg-red-100', 'text-red-800');
+                        break;
+                    case 'en_curso':
+                        estatusElement.classList.add('bg-cambridge1', 'text-white');
+                        break;
+                    case 'completada':
+                        estatusElement.classList.add('bg-gray-100', 'text-gray-800');
+                        break;
+                    case 'cancelada':
+                        estatusElement.classList.add('bg-blue-100', 'text-blue-800');
+                        break;
                 }
-
-                document.getElementById('detailObservacionesAprobacion').textContent = button.getAttribute('data-observaciones-aprobacion');
-            });
+            }
         });
     </script>
 </body>

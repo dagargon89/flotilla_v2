@@ -262,7 +262,7 @@ if ($db) { // $db ya está definida.
             </div>
         <?php endif; ?>
 
-        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-bs-toggle="modal" data-bs-target="#addEditDocumentModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-modal-target="addEditDocumentModal" data-action="add">
             <i class="bi bi-file-earmark-plus"></i> Cargar Nuevo Documento
         </button>
 
@@ -300,7 +300,7 @@ if ($db) { // $db ya está definida.
                                     <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars($doc['subido_por_nombre'] ?? 'Desconocido'); ?></td>
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
-                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditDocumentModal" data-action="edit"
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditDocumentModal" data-action="edit"
                                                 data-id="<?php echo htmlspecialchars($doc['id']); ?>"
                                                 data-vehiculo-id="<?php echo htmlspecialchars($doc['vehiculo_id']); ?>"
                                                 data-nombre-documento="<?php echo htmlspecialchars($doc['nombre_documento']); ?>"
@@ -308,7 +308,7 @@ if ($db) { // $db ya está definida.
                                                 data-fecha-vencimiento="<?php echo htmlspecialchars($doc['fecha_vencimiento'] ?? ''); ?>">
                                                 Editar
                                             </button>
-                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteDocumentModal" data-id="<?php echo htmlspecialchars($doc['id']); ?>" data-nombre="<?php echo htmlspecialchars($doc['nombre_documento']); ?>" data-placas="<?php echo htmlspecialchars($doc['placas']); ?>">
+                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-modal-target="deleteDocumentModal" data-id="<?php echo htmlspecialchars($doc['id']); ?>" data-nombre="<?php echo htmlspecialchars($doc['nombre_documento']); ?>" data-placas="<?php echo htmlspecialchars($doc['placas']); ?>">
                                                 Eliminar
                                             </button>
                                         </div>
@@ -321,77 +321,83 @@ if ($db) { // $db ya está definida.
             </div>
         <?php endif; ?>
 
-        <div class="modal fade" id="addEditDocumentModal" tabindex="-1" aria-labelledby="addEditDocumentModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addEditDocumentModalLabel"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_documentos.php" method="POST" enctype="multipart/form-data">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" id="modalActionDocument">
-                            <input type="hidden" name="id" id="documentId">
-                            <input type="hidden" name="current_ruta_archivo" id="currentRutaArchivo">
-
-                            <div class="mb-3">
-                                <label for="vehiculo_id" class="form-label">Vehículo</label>
-                                <select class="form-select" id="vehiculo_id" name="vehiculo_id" required>
-                                    <option value="">Selecciona un vehículo...</option>
-                                    <?php foreach ($vehiculos_flotilla as $vehiculo_opt): ?>
-                                        <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>">
-                                            <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nombre_documento" class="form-label">Nombre del Documento</label>
-                                <input type="text" class="form-control" id="nombre_documento" name="nombre_documento" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento (Opcional)</label>
-                                <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento">
-                            </div>
-                            <div class="mb-3">
-                                <label for="archivo" class="form-label">Subir Archivo (PDF, JPG, PNG)</label>
-                                <input type="file" class="form-control" id="archivo" name="archivo" accept=".pdf,.jpg,.jpeg,.png">
-                                <small class="form-text text-muted" id="fileHelpText">Tamaño máximo: <?php echo ini_get('upload_max_filesize'); ?></small>
-                            </div>
-                            <div id="currentFileDisplay" class="mb-3" style="display: none;">
-                                Documento actual: <a id="currentFileLink" href="#" target="_blank"></a>
-                                <small class="form-text text-muted"> (Si subes uno nuevo, el anterior será reemplazado).</small>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="submitDocumentBtn"></button>
-                        </div>
-                    </form>
+        <!-- Modal para Agregar/Editar Documento -->
+        <div id="addEditDocumentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="addEditDocumentModalLabel"></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('addEditDocumentModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_documentos.php" method="POST" enctype="multipart/form-data">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="action" id="modalActionDocument">
+                        <input type="hidden" name="id" id="documentId">
+                        <input type="hidden" name="current_ruta_archivo" id="currentRutaArchivo">
+
+                        <div>
+                            <label for="vehiculo_id" class="block text-sm font-medium text-gray-700 mb-2">Vehículo</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vehiculo_id" name="vehiculo_id" required>
+                                <option value="">Selecciona un vehículo...</option>
+                                <?php foreach ($vehiculos_flotilla as $vehiculo_opt): ?>
+                                    <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>">
+                                        <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="nombre_documento" class="block text-sm font-medium text-gray-700 mb-2">Nombre del Documento</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="nombre_documento" name="nombre_documento" required>
+                        </div>
+                        <div>
+                            <label for="fecha_vencimiento" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Vencimiento (Opcional)</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fecha_vencimiento" name="fecha_vencimiento">
+                        </div>
+                        <div>
+                            <label for="archivo" class="block text-sm font-medium text-gray-700 mb-2">Subir Archivo (PDF, JPG, PNG)</label>
+                            <input type="file" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="archivo" name="archivo" accept=".pdf,.jpg,.jpeg,.png">
+                            <small class="text-sm text-gray-500" id="fileHelpText">Tamaño máximo: <?php echo ini_get('upload_max_filesize'); ?></small>
+                        </div>
+                        <div id="currentFileDisplay" class="hidden">
+                            <p class="text-sm text-gray-600">Documento actual: <a id="currentFileLink" href="#" target="_blank" class="text-cambridge1 hover:text-cambridge2 underline"></a></p>
+                            <small class="text-sm text-gray-500">(Si subes uno nuevo, el anterior será reemplazado).</small>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('addEditDocumentModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors" id="submitDocumentBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="deleteDocumentModal" tabindex="-1" aria-labelledby="deleteDocumentModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteDocumentModalLabel">Confirmar Eliminación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_documentos.php" method="POST">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id" id="deleteDocumentId">
-                        <div class="modal-body">
-                            ¿Estás seguro de que quieres eliminar el documento <strong id="deleteDocumentName"></strong> del vehículo con placas <strong id="deleteDocumentPlacas"></strong>?
-                            Esta acción eliminará el archivo del servidor y es irreversible.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                        </div>
-                    </form>
+        <!-- Modal para Eliminar Documento -->
+        <div id="deleteDocumentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="deleteDocumentModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('deleteDocumentModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_documentos.php" method="POST">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" id="deleteDocumentId">
+                    <div class="p-6">
+                        <p class="text-gray-700">¿Estás seguro de que quieres eliminar el documento <strong id="deleteDocumentName"></strong> del vehículo con placas <strong id="deleteDocumentPlacas"></strong>?</p>
+                        <p class="text-sm text-red-600 mt-2">Esta acción eliminará el archivo del servidor y es irreversible.</p>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('deleteDocumentModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Eliminar</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -400,6 +406,25 @@ if ($db) { // $db ya está definida.
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
     <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
         // JavaScript para manejar los modales de cargar/editar documento
         document.addEventListener('DOMContentLoaded', function() {
             flatpickr("#fecha_vencimiento", {
@@ -407,31 +432,43 @@ if ($db) { // $db ya está definida.
                 minDate: "today"
             });
 
-            var addEditDocumentModal = document.getElementById('addEditDocumentModal');
-            addEditDocumentModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-                var action = button.getAttribute('data-action');
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (modalId === 'addEditDocumentModal') {
+                        setupDocumentModal(action, this);
+                    } else if (modalId === 'deleteDocumentModal') {
+                        setupDeleteDocumentModal(this);
+                    }
+                    
+                    openModal(modalId);
+                });
+            });
 
-                var modalTitle = addEditDocumentModal.querySelector('#addEditDocumentModalLabel');
-                var modalActionInput = addEditDocumentModal.querySelector('#modalActionDocument');
-                var documentIdInput = addEditDocumentModal.querySelector('#documentId');
-                var submitBtn = addEditDocumentModal.querySelector('#submitDocumentBtn');
-                var fileInput = addEditDocumentModal.querySelector('#archivo');
-                var fileHelpText = addEditDocumentModal.querySelector('#fileHelpText');
-                var currentFileDisplay = addEditDocumentModal.querySelector('#currentFileDisplay');
-                var currentFileLink = addEditDocumentModal.querySelector('#currentFileLink');
-                var currentRutaArchivoInput = addEditDocumentModal.querySelector('#currentRutaArchivo');
-                var form = addEditDocumentModal.querySelector('form');
+            function setupDocumentModal(action, button) {
+                var modalTitle = document.getElementById('addEditDocumentModalLabel');
+                var modalActionInput = document.getElementById('modalActionDocument');
+                var documentIdInput = document.getElementById('documentId');
+                var submitBtn = document.getElementById('submitDocumentBtn');
+                var fileInput = document.getElementById('archivo');
+                var fileHelpText = document.getElementById('fileHelpText');
+                var currentFileDisplay = document.getElementById('currentFileDisplay');
+                var currentFileLink = document.getElementById('currentFileLink');
+                var currentRutaArchivoInput = document.getElementById('currentRutaArchivo');
+                var form = document.querySelector('#addEditDocumentModal form');
 
                 form.reset();
-                currentFileDisplay.style.display = 'none';
+                currentFileDisplay.classList.add('hidden');
                 fileInput.setAttribute('required', 'required');
 
                 if (action === 'add') {
                     modalTitle.textContent = 'Cargar Nuevo Documento';
                     modalActionInput.value = 'add';
                     submitBtn.textContent = 'Guardar Documento';
-                    submitBtn.className = 'btn btn-primary';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
                     documentIdInput.value = '';
                     fileHelpText.textContent = 'Tamaño máximo: <?php echo ini_get('upload_max_filesize'); ?>';
                     flatpickr("#fecha_vencimiento").clear();
@@ -439,15 +476,15 @@ if ($db) { // $db ya está definida.
                     modalTitle.textContent = 'Editar Documento';
                     modalActionInput.value = 'edit';
                     submitBtn.textContent = 'Actualizar Documento';
-                    submitBtn.className = 'btn btn-info text-white';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
                     fileInput.removeAttribute('required');
                     fileHelpText.textContent = 'Deja este campo vacío para mantener el archivo actual.';
-                    currentFileDisplay.style.display = 'block';
+                    currentFileDisplay.classList.remove('hidden');
 
                     documentIdInput.value = button.getAttribute('data-id');
-                    addEditDocumentModal.querySelector('#vehiculo_id').value = button.getAttribute('data-vehiculo-id');
-                    addEditDocumentModal.querySelector('#nombre_documento').value = button.getAttribute('data-nombre-documento');
-                    addEditDocumentModal.querySelector('#fecha_vencimiento').value = button.getAttribute('data-fecha-vencimiento');
+                    document.getElementById('vehiculo_id').value = button.getAttribute('data-vehiculo-id');
+                    document.getElementById('nombre_documento').value = button.getAttribute('data-nombre-documento');
+                    document.getElementById('fecha_vencimiento').value = button.getAttribute('data-fecha-vencimiento');
                     currentRutaArchivoInput.value = button.getAttribute('data-ruta-archivo');
                     currentFileLink.href = button.getAttribute('data-ruta-archivo');
                     currentFileLink.textContent = button.getAttribute('data-nombre-documento');
@@ -458,24 +495,16 @@ if ($db) { // $db ya está definida.
                         flatpickr("#fecha_vencimiento").clear();
                     }
                 }
-            });
+            }
 
-            var deleteDocumentModal = document.getElementById('deleteDocumentModal');
-            if (deleteDocumentModal) {
-                deleteDocumentModal.addEventListener('show.bs.modal', function(event) {
-                    var button = event.relatedTarget;
-                    var documentId = button.getAttribute('data-id');
-                    var documentName = button.getAttribute('data-nombre');
-                    var documentPlacas = button.getAttribute('data-placas');
+            function setupDeleteDocumentModal(button) {
+                var documentId = button.getAttribute('data-id');
+                var documentName = button.getAttribute('data-nombre');
+                var documentPlacas = button.getAttribute('data-placas');
 
-                    var modalDocumentId = deleteDocumentModal.querySelector('#deleteDocumentId');
-                    var modalDocumentName = deleteDocumentModal.querySelector('#deleteDocumentName');
-                    var modalDocumentPlacas = deleteDocumentModal.querySelector('#deleteDocumentPlacas');
-
-                    modalDocumentId.value = documentId;
-                    modalDocumentName.textContent = documentName;
-                    modalDocumentPlacas.textContent = documentPlacas;
-                });
+                document.getElementById('deleteDocumentId').value = documentId;
+                document.getElementById('deleteDocumentName').textContent = documentName;
+                document.getElementById('deleteDocumentPlacas').textContent = documentPlacas;
             }
         });
     </script>

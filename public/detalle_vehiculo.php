@@ -205,7 +205,7 @@ if (!$vehiculo_id) {
             <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2 mb-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold text-darkpurple">Información General</h3>
-                    <button type="button" class="bg-cambridge1 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditVehicleModal" data-action="edit"
+                    <button type="button" class="bg-cambridge1 text-white px-3 py-1 rounded text-sm font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditVehicleModal" data-action="edit"
                         data-id="<?php echo $vehiculo['id']; ?>"
                         data-marca="<?php echo htmlspecialchars($vehiculo['marca']); ?>"
                         data-modelo="<?php echo htmlspecialchars($vehiculo['modelo']); ?>"
@@ -486,511 +486,194 @@ if (!$vehiculo_id) {
         <?php endif; ?>
     </div>
 
-    <div class="modal fade" id="addEditVehicleModal" tabindex="-1" aria-labelledby="addEditVehicleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addEditVehicleModalLabel"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="gestion_vehiculos.php" method="POST">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" id="modalActionVehicle">
-                        <input type="hidden" name="id" id="vehicleId">
-
-                        <div class="mb-3">
-                            <label for="marca" class="form-label">Marca</label>
-                            <input type="text" class="form-control" id="marca" name="marca" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="modelo" class="form-label">Modelo</label>
-                            <input type="text" class="form-control" id="modelo" name="modelo" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="anio" class="form-label">Año</label>
-                            <input type="number" class="form-control" id="anio" name="anio" min="1900" max="<?php echo date('Y') + 1; ?>" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="placas" class="form-label">Placas</label>
-                            <input type="text" class="form-control" id="placas" name="placas" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="vin" class="form-label">VIN (Número de Identificación Vehicular)</label>
-                            <input type="text" class="form-control" id="vin" name="vin">
-                        </div>
-                        <div class="mb-3">
-                            <label for="tipo_combustible" class="form-label">Tipo de Combustible</label>
-                            <select class="form-select" id="tipo_combustible" name="tipo_combustible" required>
-                                <option value="">Selecciona...</option>
-                                <option value="Gasolina">Gasolina</option>
-                                <option value="Diésel">Diésel</option>
-                                <option value="Eléctrico">Eléctrico</option>
-                                <option value="Híbrido">Híbrido</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="kilometraje_actual" class="form-label">Kilometraje Actual</label>
-                            <input type="number" class="form-control" id="kilometraje_actual" name="kilometraje_actual" min="0" required>
-                        </div>
-                        <div class="mb-3" id="estatusField" style="display: none;">
-                            <label for="estatus" class="form-label">Estatus</label>
-                            <select class="form-select" id="estatus" name="estatus" required>
-                                <option value="disponible">Disponible</option>
-                                <option value="en_uso">En Uso</option>
-                                <option value="en_mantenimiento">En Mantenimiento</option>
-                                <option value="inactivo">Inactivo</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="ubicacion_actual" class="form-label">Ubicación Actual</label>
-                            <input type="text" class="form-control" id="ubicacion_actual" name="ubicacion_actual">
-                        </div>
-                        <div class="mb-3">
-                            <label for="observaciones_vehiculo" class="form-label">Observaciones</label>
-                            <textarea class="form-control" id="observaciones_vehiculo" name="observaciones" rows="3"></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary" id="submitVehicleBtn"></button>
-                    </div>
-                </form>
+    <!-- Modal para Agregar/Editar Vehículo -->
+    <div id="addEditVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h5 class="text-lg font-semibold text-gray-900" id="addEditVehicleModalLabel"></h5>
+                <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('addEditVehicleModal')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
+            <form action="gestion_vehiculos.php" method="POST">
+                <div class="p-6 space-y-4">
+                    <input type="hidden" name="action" id="modalActionVehicle">
+                    <input type="hidden" name="id" id="vehicleId">
+
+                    <div>
+                        <label for="marca" class="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="marca" name="marca" required>
+                    </div>
+                    <div>
+                        <label for="modelo" class="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="modelo" name="modelo" required>
+                    </div>
+                    <div>
+                        <label for="anio" class="block text-sm font-medium text-gray-700 mb-2">Año</label>
+                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="anio" name="anio" min="1900" max="<?php echo date('Y') + 1; ?>" required>
+                    </div>
+                    <div>
+                        <label for="placas" class="block text-sm font-medium text-gray-700 mb-2">Placas</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="placas" name="placas" required>
+                    </div>
+                    <div>
+                        <label for="vin" class="block text-sm font-medium text-gray-700 mb-2">VIN (Número de Identificación Vehicular)</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vin" name="vin">
+                    </div>
+                    <div>
+                        <label for="tipo_combustible" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Combustible</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="tipo_combustible" name="tipo_combustible" required>
+                            <option value="">Selecciona...</option>
+                            <option value="Gasolina">Gasolina</option>
+                            <option value="Diésel">Diésel</option>
+                            <option value="Eléctrico">Eléctrico</option>
+                            <option value="Híbrido">Híbrido</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="kilometraje_actual" class="block text-sm font-medium text-gray-700 mb-2">Kilometraje Actual</label>
+                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="kilometraje_actual" name="kilometraje_actual" min="0" required>
+                    </div>
+                    <div id="estatusField" class="hidden">
+                        <label for="estatus" class="block text-sm font-medium text-gray-700 mb-2">Estatus</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="estatus" name="estatus" required>
+                            <option value="disponible">Disponible</option>
+                            <option value="en_uso">En Uso</option>
+                            <option value="en_mantenimiento">En Mantenimiento</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ubicacion_actual" class="block text-sm font-medium text-gray-700 mb-2">Ubicación Actual</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="ubicacion_actual" name="ubicacion_actual">
+                    </div>
+                    <div>
+                        <label for="observaciones_vehiculo" class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                        <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones_vehiculo" name="observaciones" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('addEditVehicleModal')">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-white rounded-md transition-colors" id="submitVehicleBtn"></button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-labelledby="deleteVehicleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteVehicleModalLabel">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="gestion_vehiculos.php" method="POST">
+    <!-- Modal para Eliminar Vehículo -->
+    <div id="deleteVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h5 class="text-lg font-semibold text-gray-900" id="deleteVehicleModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('deleteVehicleModal')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form action="gestion_vehiculos.php" method="POST">
+                <div class="p-6">
                     <input type="hidden" name="action" value="delete">
                     <input type="hidden" name="id" id="deleteVehicleId">
-                    <div class="modal-body">
-                        ¿Estás seguro de que quieres eliminar el vehículo con placas <strong id="deleteVehiclePlacas"></strong>?
-                        Esta acción es irreversible.
-                    </div>
-                    <div class="modal-footer">
-                        <div class="col-md-6">
-                            <p><strong>Estatus:</strong>
-                                <?php
-                                $status_class = '';
-                                switch ($vehiculo['estatus']) {
-                                    case 'disponible':
-                                        $status_class = 'badge bg-success';
-                                        break;
-                                    case 'en_uso':
-                                        $status_class = 'badge bg-primary';
-                                        break;
-                                    case 'en_mantenimiento':
-                                        $status_class = 'badge bg-warning text-dark';
-                                        break;
-                                    case 'inactivo':
-                                        $status_class = 'badge bg-danger';
-                                        break;
-                                }
-                                ?>
-                                <span class="<?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Ubicación Actual:</strong> <?php echo htmlspecialchars($vehiculo['ubicacion_actual'] ?? 'N/A'); ?></p>
-                        </div>
-                        <div class="col-12">
-                            <p><strong>Observaciones:</strong> <?php echo htmlspecialchars($vehiculo['observaciones'] ?? 'Ninguna.'); ?></p>
-                        </div>
-                        <div class="col-12">
-                            <p><strong>Fecha de Registro:</strong> <?php echo date('d/m/Y H:i', strtotime($vehiculo['fecha_registro'])); ?></p>
-                        </div>
-                    </div>
+                    <p class="text-gray-700">¿Estás seguro de que quieres eliminar el vehículo con placas <strong id="deleteVehiclePlacas"></strong>?</p>
+                    <p class="text-red-600 text-sm mt-2">Esta acción es irreversible.</p>
                 </div>
-
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header">
-                        Historial de Solicitudes y Uso
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($solicitudes_historicas)): ?>
-                            <div class="alert alert-info text-center" role="alert">
-                                Este vehículo no tiene solicitudes o historial de uso registrado.
-                            </div>
-                        <?php else: ?>
-                            <div class="accordion" id="accordionSolicitudes">
-                                <?php foreach ($solicitudes_historicas as $index => $solicitud): ?>
-                                    <div class="accordion-item">
-                                        <h2 class="accordion-header" id="heading<?php echo $solicitud['solicitud_id']; ?>">
-                                            <button class="accordion-button <?php echo ($index !== 0) ? 'collapsed' : ''; ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $solicitud['solicitud_id']; ?>" aria-expanded="<?php echo ($index === 0) ? 'true' : 'false'; ?>" aria-controls="collapse<?php echo $solicitud['solicitud_id']; ?>">
-                                                Solicitud #<?php echo htmlspecialchars($solicitud['solicitud_id']); ?> - <?php echo htmlspecialchars($solicitud['evento']); ?> (<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>)
-                                                <span class="badge bg-<?php
-                                                                        switch ($solicitud['estatus_solicitud']) {
-                                                                            case 'pendiente':
-                                                                                echo 'warning text-dark';
-                                                                                break;
-                                                                            case 'aprobada':
-                                                                                echo 'success';
-                                                                                break;
-                                                                            case 'rechazada':
-                                                                                echo 'danger';
-                                                                                break;
-                                                                            case 'en_curso':
-                                                                                echo 'primary';
-                                                                                break;
-                                                                            case 'completada':
-                                                                                echo 'secondary';
-                                                                                break;
-                                                                            case 'cancelada':
-                                                                                echo 'info';
-                                                                                break;
-                                                                        }
-                                                                        ?> ms-3"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
-                                            </button>
-                                        </h2>
-                                        <div id="collapse<?php echo $solicitud['solicitud_id']; ?>" class="accordion-collapse collapse <?php echo ($index === 0) ? 'show' : ''; ?>" aria-labelledby="heading<?php echo $solicitud['solicitud_id']; ?>" data-bs-parent="#accordionSolicitudes">
-                                            <div class="accordion-body">
-                                                <p><strong>Solicitante:</strong> <?php echo htmlspecialchars($solicitud['usuario_nombre']); ?></p>
-                                                <p><strong>Fechas Solicitadas:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_solicitada'])); ?> a <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_solicitada'])); ?></p>
-                                                <p><strong>Evento:</strong> <?php echo htmlspecialchars($solicitud['evento']); ?></p>
-                                                <p><strong>Descripción:</strong> <?php echo htmlspecialchars($solicitud['descripcion']); ?></p>
-                                                <p><strong>Destino:</strong> <?php echo htmlspecialchars($solicitud['destino']); ?></p>
-                                                <p><strong>Observaciones del Gestor:</strong> <?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? 'Ninguna.'); ?></p>
-
-                                                <?php if (!empty($solicitud['fecha_salida_real'])): ?>
-                                                    <h6>Registro de Salida:</h6>
-                                                    <p><strong>Fecha/Hora Salida Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_salida_real'])); ?></p>
-                                                    <p><strong>KM Salida:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_salida'])); ?></p>
-                                                    <p><strong>Nivel Combustible Salida:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_salida']); ?>%</p>
-                                                    <p><strong>Obs. Salida:</strong> <?php echo htmlspecialchars($solicitud['observaciones_salida'] ?? 'Ninguna.'); ?></p>
-                                                    <?php
-                                                    $fotos_salida_urls = json_decode($solicitud['fotos_salida_medidores_url'] ?? '[]', true);
-                                                    if (!empty($fotos_salida_urls)):
-                                                    ?>
-                                                        <div class="row mb-3">
-                                                            <p><strong>Fotos de Salida (Medidores):</strong></p>
-                                                            <?php foreach ($fotos_salida_urls as $url): ?>
-                                                                <div class="col-4 col-md-3 mb-2">
-                                                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                        <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Salida">
-                                                                    </a>
-                                                                </div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    <?php
-                                                    $fotos_salida_observaciones_urls = json_decode($solicitud['fotos_salida_observaciones_url'] ?? '[]', true);
-                                                    if (!empty($fotos_salida_observaciones_urls)):
-                                                    ?>
-                                                        <div class="row mb-3">
-                                                            <p><strong>Fotos de Salida (Observaciones):</strong></p>
-                                                            <?php foreach ($fotos_salida_observaciones_urls as $url): ?>
-                                                                <div class="col-4 col-md-3 mb-2">
-                                                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                        <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Salida">
-                                                                    </a>
-                                                                </div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                <?php endif; ?>
-
-                                                <?php if (!empty($solicitud['fecha_regreso_real'])): ?>
-                                                    <h6>Registro de Regreso:</h6>
-                                                    <p><strong>Fecha/Hora Regreso Real:</strong> <?php echo date('d/m/Y H:i', strtotime($solicitud['fecha_regreso_real'])); ?></p>
-                                                    <p><strong>KM Regreso:</strong> <?php echo htmlspecialchars(number_format($solicitud['kilometraje_regreso'])); ?></p>
-                                                    <p><strong>Nivel Combustible Regreso:</strong> <?php echo htmlspecialchars($solicitud['nivel_combustible_regreso']); ?>%</p>
-                                                    <p><strong>Obs. Regreso:</strong> <?php echo htmlspecialchars($solicitud['observaciones_regreso'] ?? 'Ninguna.'); ?></p>
-                                                    <?php
-                                                    $fotos_regreso_medidores = json_decode($solicitud['fotos_regreso_medidores_url'] ?? '[]', true);
-                                                    if (!empty($fotos_regreso_medidores)):
-                                                    ?>
-                                                        <div class="row mb-3">
-                                                            <p><strong>Fotos de Regreso (Medidores):</strong></p>
-                                                            <?php foreach ($fotos_regreso_medidores as $url): ?>
-                                                                <div class="col-4 col-md-3 mb-2">
-                                                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                        <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Regreso Medidores">
-                                                                    </a>
-                                                                </div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                    <?php
-                                                    $fotos_regreso_observaciones = json_decode($solicitud['fotos_regreso_observaciones_url'] ?? '[]', true);
-                                                    if (!empty($fotos_regreso_observaciones)):
-                                                    ?>
-                                                        <div class="row mb-3">
-                                                            <p><strong>Fotos de Regreso (Observaciones):</strong></p>
-                                                            <?php foreach ($fotos_regreso_observaciones as $url): ?>
-                                                                <div class="col-4 col-md-3 mb-2">
-                                                                    <a href="<?php echo htmlspecialchars($url); ?>" target="_blank">
-                                                                        <img src="<?php echo htmlspecialchars($url); ?>" class="img-fluid rounded shadow-sm" alt="Foto Regreso Observaciones">
-                                                                    </a>
-                                                                </div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('deleteVehicleModal')">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Eliminar</button>
                 </div>
+            </form>
+        </div>
+    </div>
 
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header">
-                        Historial de Mantenimientos
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($mantenimientos_historicos)): ?>
-                            <div class="alert alert-info text-center" role="alert">
-                                Este vehículo no tiene mantenimientos registrados.
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-striped table-hover table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Tipo</th>
-                                            <th>Fecha</th>
-                                            <th>KM</th>
-                                            <th>Costo</th>
-                                            <th>Taller</th>
-                                            <th>Observaciones</th>
-                                            <th>Próx. KM</th>
-                                            <th>Próx. Fecha</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($mantenimientos_historicos as $mantenimiento): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?></td>
-                                                <td><?php echo date('d/m/Y', strtotime($mantenimiento['fecha_mantenimiento'])); ?></td>
-                                                <td><?php echo htmlspecialchars(number_format($mantenimiento['kilometraje_mantenimiento'])); ?></td>
-                                                <td><?php echo $mantenimiento['costo'] !== null ? '$' . number_format($mantenimiento['costo'], 2) : 'N/A'; ?></td>
-                                                <td><?php echo htmlspecialchars($mantenimiento['taller'] ?? 'N/A'); ?></td>
-                                                <td><?php echo htmlspecialchars($mantenimiento['observaciones'] ?? 'N/A'); ?></td>
-                                                <td><?php echo $mantenimiento['proximo_mantenimiento_km'] !== null ? htmlspecialchars(number_format($mantenimiento['proximo_mantenimiento_km'])) . ' KM' : 'N/A'; ?></td>
-                                                <td><?php echo $mantenimiento['proximo_mantenimiento_fecha'] !== null ? date('d/m/Y', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : 'N/A'; ?></td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+    <script src="js/main.js"></script>
+    <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
 
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-header">
-                        Documentos del Vehículo
-                        <a href="gestion_documentos.php?vehiculo_id=<?php echo $vehiculo['id']; ?>" class="btn btn-sm btn-outline-success float-end">
-                            Gestionar Documentos
-                        </a>
-                    </div>
-                    <div class="card-body">
-                        <?php if (empty($documentos_vehiculo)): ?>
-                            <div class="alert alert-info text-center" role="alert">
-                                Este vehículo no tiene documentos cargados.
-                            </div>
-                        <?php else: ?>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Nombre</th>
-                                            <th>Vencimiento</th>
-                                            <th>Subido</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($documentos_vehiculo as $doc): ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($doc['nombre_documento']); ?></td>
-                                                <td><?php echo $doc['fecha_vencimiento'] ? date('d/m/Y', strtotime($doc['fecha_vencimiento'])) : 'N/A'; ?></td>
-                                                <td><?php echo date('d/m/Y', strtotime($doc['fecha_subida'])); ?></td>
-                                                <td>
-                                                    <a href="<?php echo htmlspecialchars($doc['ruta_archivo']); ?>" target="_blank" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
 
-            <?php endif; ?>
-            </div>
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
 
-            <div class="modal fade" id="addEditVehicleModal" tabindex="-1" aria-labelledby="addEditVehicleModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addEditVehicleModalLabel"></h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form action="gestion_vehiculos.php" method="POST">
-                            <div class="modal-body">
-                                <input type="hidden" name="action" id="modalActionVehicle">
-                                <input type="hidden" name="id" id="vehicleId">
-
-                                <div class="mb-3">
-                                    <label for="marca" class="form-label">Marca</label>
-                                    <input type="text" class="form-control" id="marca" name="marca" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="modelo" class="form-label">Modelo</label>
-                                    <input type="text" class="form-control" id="modelo" name="modelo" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="anio" class="form-label">Año</label>
-                                    <input type="number" class="form-control" id="anio" name="anio" min="1900" max="<?php echo date('Y') + 1; ?>" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="placas" class="form-label">Placas</label>
-                                    <input type="text" class="form-control" id="placas" name="placas" required>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="vin" class="form-label">VIN (Número de Identificación Vehicular)</label>
-                                    <input type="text" class="form-control" id="vin" name="vin">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="tipo_combustible" class="form-label">Tipo de Combustible</label>
-                                    <select class="form-select" id="tipo_combustible" name="tipo_combustible" required>
-                                        <option value="">Selecciona...</option>
-                                        <option value="Gasolina">Gasolina</option>
-                                        <option value="Diésel">Diésel</option>
-                                        <option value="Eléctrico">Eléctrico</option>
-                                        <option value="Híbrido">Híbrido</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="kilometraje_actual" class="form-label">Kilometraje Actual</label>
-                                    <input type="number" class="form-control" id="kilometraje_actual" name="kilometraje_actual" min="0" required>
-                                </div>
-                                <div class="mb-3" id="estatusField" style="display: none;">
-                                    <label for="estatus" class="form-label">Estatus</label>
-                                    <select class="form-select" id="estatus" name="estatus" required>
-                                        <option value="disponible">Disponible</option>
-                                        <option value="en_uso">En Uso</option>
-                                        <option value="en_mantenimiento">En Mantenimiento</option>
-                                        <option value="inactivo">Inactivo</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="ubicacion_actual" class="form-label">Ubicación Actual</label>
-                                    <input type="text" class="form-control" id="ubicacion_actual" name="ubicacion_actual">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="observaciones_vehiculo" class="form-label">Observaciones</label>
-                                    <textarea class="form-control" id="observaciones_vehiculo" name="observaciones" rows="3"></textarea>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-primary" id="submitVehicleBtn"></button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-labelledby="deleteVehicleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deleteVehicleModalLabel">Confirmar Eliminación</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <form action="gestion_vehiculos.php" method="POST">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="id" id="deleteVehicleId">
-                            <div class="modal-body">
-                                ¿Estás seguro de que quieres eliminar el vehículo con placas <strong id="deleteVehiclePlacas"></strong>?
-                                Esta acción es irreversible.
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                <button type="submit" class="btn btn-danger">Eliminar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-            <script src="js/main.js"></script>
-            <script>
-                // JavaScript para manejar los modales de agregar/editar vehículo (copiado de gestion_vehiculos.php para que funcione el botón "Editar Vehículo")
-                // Este modal HTML también debe ser copiado de gestion_vehiculos.php y pegado en detalle_vehiculo.php antes del </body>
-                document.addEventListener('DOMContentLoaded', function() {
-                    var addEditVehicleModal = document.getElementById('addEditVehicleModal');
-                    if (addEditVehicleModal) {
-                        addEditVehicleModal.addEventListener('show.bs.modal', function(event) {
-                            var button = event.relatedTarget;
-                            var action = button.getAttribute('data-action');
-
-                            var modalTitle = addEditVehicleModal.querySelector('#addEditVehicleModalLabel');
-                            var modalActionInput = addEditVehicleModal.querySelector('#modalActionVehicle');
-                            var vehicleIdInput = addEditVehicleModal.querySelector('#vehicleId');
-                            var submitBtn = addEditVehicleModal.querySelector('#submitVehicleBtn');
-                            var estatusField = addEditVehicleModal.querySelector('#estatusField');
-                            var form = addEditVehicleModal.querySelector('form');
-
-                            form.reset();
-                            estatusField.style.display = 'none';
-
-                            if (action === 'add') {
-                                modalTitle.textContent = 'Agregar Nuevo Vehículo';
-                                modalActionInput.value = 'add';
-                                submitBtn.textContent = 'Guardar Vehículo';
-                                submitBtn.className = 'btn btn-primary';
-                                vehicleIdInput.value = '';
-                            } else if (action === 'edit') {
-                                modalTitle.textContent = 'Editar Vehículo';
-                                modalActionInput.value = 'edit';
-                                submitBtn.textContent = 'Actualizar Vehículo';
-                                submitBtn.className = 'btn btn-info text-white';
-                                estatusField.style.display = 'block';
-
-                                vehicleIdInput.value = button.getAttribute('data-id');
-                                addEditVehicleModal.querySelector('#marca').value = button.getAttribute('data-marca');
-                                addEditVehicleModal.querySelector('#modelo').value = button.getAttribute('data-modelo');
-                                addEditVehicleModal.querySelector('#anio').value = button.getAttribute('data-anio');
-                                addEditVehicleModal.querySelector('#placas').value = button.getAttribute('data-placas');
-                                addEditVehicleModal.querySelector('#vin').value = button.getAttribute('data-vin') === 'null' ? '' : button.getAttribute('data-vin');
-                                addEditVehicleModal.querySelector('#tipo_combustible').value = button.getAttribute('data-tipo-combustible');
-                                addEditVehicleModal.querySelector('#kilometraje_actual').value = button.getAttribute('data-kilometraje-actual');
-                                addEditVehicleModal.querySelector('#estatus').value = button.getAttribute('data-estatus');
-                                addEditVehicleModal.querySelector('#ubicacion_actual').value = button.getAttribute('data-ubicacion-actual') === 'null' ? '' : button.getAttribute('data-ubicacion-actual');
-                                addEditVehicleModal.querySelector('#observaciones_vehiculo').value = button.getAttribute('data-observaciones') === 'null' ? '' : button.getAttribute('data-observaciones');
-                            }
-                        });
+        // JavaScript para manejar los modales de agregar/editar vehículo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (modalId === 'addEditVehicleModal') {
+                        setupAddEditVehicleModal(action, this);
+                    } else if (modalId === 'deleteVehicleModal') {
+                        setupDeleteVehicleModal(this);
                     }
-
-                    var deleteVehicleModal = document.getElementById('deleteVehicleModal');
-                    if (deleteVehicleModal) {
-                        deleteVehicleModal.addEventListener('show.bs.modal', function(event) {
-                            var button = event.relatedTarget;
-                            var vehicleId = button.getAttribute('data-id');
-                            var vehiclePlacas = button.getAttribute('data-placas');
-
-                            var modalVehicleId = deleteVehicleModal.querySelector('#deleteVehicleId');
-                            var modalVehiclePlacas = deleteVehicleModal.querySelector('#deleteVehiclePlacas');
-
-                            modalVehicleId.value = vehicleId;
-                            modalVehiclePlacas.textContent = vehiclePlacas;
-                        });
-                    }
+                    
+                    openModal(modalId);
                 });
-            </script>
+            });
+
+            function setupAddEditVehicleModal(action, button) {
+                var modalTitle = document.getElementById('addEditVehicleModalLabel');
+                var modalActionInput = document.getElementById('modalActionVehicle');
+                var vehicleIdInput = document.getElementById('vehicleId');
+                var submitBtn = document.getElementById('submitVehicleBtn');
+                var estatusField = document.getElementById('estatusField');
+                var form = document.querySelector('#addEditVehicleModal form');
+
+                form.reset();
+                estatusField.classList.add('hidden');
+
+                if (action === 'add') {
+                    modalTitle.textContent = 'Agregar Nuevo Vehículo';
+                    modalActionInput.value = 'add';
+                    submitBtn.textContent = 'Guardar Vehículo';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
+                    vehicleIdInput.value = '';
+                } else if (action === 'edit') {
+                    modalTitle.textContent = 'Editar Vehículo';
+                    modalActionInput.value = 'edit';
+                    submitBtn.textContent = 'Actualizar Vehículo';
+                    submitBtn.className = 'px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors';
+                    estatusField.classList.remove('hidden');
+
+                    vehicleIdInput.value = button.getAttribute('data-id');
+                    document.getElementById('marca').value = button.getAttribute('data-marca');
+                    document.getElementById('modelo').value = button.getAttribute('data-modelo');
+                    document.getElementById('anio').value = button.getAttribute('data-anio');
+                    document.getElementById('placas').value = button.getAttribute('data-placas');
+                    document.getElementById('vin').value = button.getAttribute('data-vin') === 'null' ? '' : button.getAttribute('data-vin');
+                    document.getElementById('tipo_combustible').value = button.getAttribute('data-tipo-combustible');
+                    document.getElementById('kilometraje_actual').value = button.getAttribute('data-kilometraje-actual');
+                    document.getElementById('estatus').value = button.getAttribute('data-estatus');
+                    document.getElementById('ubicacion_actual').value = button.getAttribute('data-ubicacion-actual') === 'null' ? '' : button.getAttribute('data-ubicacion-actual');
+                    document.getElementById('observaciones_vehiculo').value = button.getAttribute('data-observaciones') === 'null' ? '' : button.getAttribute('data-observaciones');
+                }
+            }
+
+            function setupDeleteVehicleModal(button) {
+                var vehicleId = button.getAttribute('data-id');
+                var vehiclePlacas = button.getAttribute('data-placas');
+
+                document.getElementById('deleteVehicleId').value = vehicleId;
+                document.getElementById('deleteVehiclePlacas').textContent = vehiclePlacas;
+            }
+        });
+    </script>
 </body>
 
 </html>

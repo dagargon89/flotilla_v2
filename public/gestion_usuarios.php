@@ -287,8 +287,8 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-4" data-bs-toggle="modal" data-bs-target="#addEditUserModal" data-action="add">
-            <i class="bi bi-plus-circle"></i> Agregar Nuevo Usuario (Admin)
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-4" data-modal-target="addEditUserModal" data-action="add">
+            <i class="bi bi-person-plus"></i> Agregar Nuevo Usuario
         </button>
         <p class="text-sm text-mountbatten mb-6">Para solicitudes de cuenta, ve a la tabla de abajo y busca el estatus "Pendiente de Aprobación".</p>
 
@@ -376,24 +376,32 @@ if ($db) {
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
                                             <?php if ($usuario['estatus_cuenta'] === 'pendiente_aprobacion'): ?>
-                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#approveRejectUserModal"
-                                                    data-user-id="<?php echo $usuario['id']; ?>" data-action="approve_account" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                <button type="button" class="bg-green-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="approveRejectUserModal"
+                                                    data-user-id="<?php echo $usuario['id']; ?>"
+                                                    data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>"
+                                                    data-action-type="approve"
+                                                    data-action-text="aprobar">
                                                     Aprobar
                                                 </button>
-                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-bs-toggle="modal" data-bs-target="#approveRejectUserModal"
-                                                    data-user-id="<?php echo $usuario['id']; ?>" data-action="reject_account" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="approveRejectUserModal"
+                                                    data-user-id="<?php echo $usuario['id']; ?>"
+                                                    data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>"
+                                                    data-action-type="reject"
+                                                    data-action-text="rechazar">
                                                     Rechazar
                                                 </button>
                                             <?php endif; ?>
-                                            <button type="button" class="bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-yellow-600 transition" data-bs-toggle="modal" data-bs-target="#addAmonestacionModal"
-                                                data-user-id="<?php echo $usuario['id']; ?>" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                            <button type="button" class="bg-yellow-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-yellow-600 transition" data-modal-target="addAmonestacionModal"
+                                                data-user-id="<?php echo $usuario['id']; ?>"
+                                                data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
                                                 Amonestar
                                             </button>
-                                            <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-bs-toggle="modal" data-bs-target="#viewUserHistoryModal"
-                                                data-user-id="<?php echo $usuario['id']; ?>" data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
-                                                Historial Amon.
+                                            <button type="button" class="bg-gray-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewUserHistoryModal"
+                                                data-user-id="<?php echo $usuario['id']; ?>"
+                                                data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                Historial
                                             </button>
-                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditUserModal" data-action="edit"
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditUserModal" data-action="edit"
                                                 data-id="<?php echo $usuario['id']; ?>"
                                                 data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>"
                                                 data-correo="<?php echo htmlspecialchars($usuario['correo_electronico']); ?>"
@@ -403,7 +411,7 @@ if ($db) {
                                                 Editar
                                             </button>
                                             <?php if ($usuario['id'] !== $user_id_sesion): ?>
-                                                <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-id="<?php echo $usuario['id']; ?>" data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>">
+                                                <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-modal-target="deleteUserModal" data-id="<?php echo $usuario['id']; ?>" data-nombre="<?php echo htmlspecialchars($usuario['nombre']); ?>">
                                                     Eliminar
                                                 </button>
                                             <?php endif; ?>
@@ -417,162 +425,177 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <div class="modal fade" id="addEditUserModal" tabindex="-1" aria-labelledby="addEditUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addEditUserModalLabel"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_usuarios.php" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" id="modalActionUser">
-                            <input type="hidden" name="id" id="userId">
-
-                            <div class="mb-3">
-                                <label for="nombre" class="form-label">Nombre Completo</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="correo_electronico" class="form-label">Correo Electrónico</label>
-                                <input type="email" class="form-control" id="correo_electronico" name="correo_electronico" required>
-                            </div>
-                            <div class="mb-3" id="passwordField">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                                <small class="form-text text-muted" id="passwordHelp"></small>
-                            </div>
-                            <div class="mb-3">
-                                <label for="rol" class="form-label">Rol</label>
-                                <select class="form-select" id="rol" name="rol" required>
-                                    <option value="empleado">Empleado</option>
-                                    <option value="flotilla_manager">Manager de Flotilla</option>
-                                    <?php if ($rol_usuario_sesion === 'admin'): ?>
-                                        <option value="admin">Administrador</option>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3" id="estatusCuentaField">
-                                <label for="estatus_cuenta" class="form-label">Estatus de Cuenta</label>
-                                <select class="form-select" id="estatus_cuenta" name="estatus_cuenta" required>
-                                    <option value="pendiente_aprobacion">Pendiente de Aprobación</option>
-                                    <option value="activa">Activa</option>
-                                    <option value="rechazada">Rechazada</option>
-                                    <option value="inactiva">Inactiva</option>
-                                </select>
-                            </div>
-                            <div class="mb-3" id="estatusUsuarioField">
-                                <label for="estatus_usuario" class="form-label">Estatus de Uso (Vehículos)</label>
-                                <select class="form-select" id="estatus_usuario" name="estatus_usuario" required>
-                                    <option value="activo">Activo</option>
-                                    <option value="amonestado">Amonestado</option>
-                                    <option value="suspendido">Suspendido</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="submitUserBtn"></button>
-                        </div>
-                    </form>
+        <!-- Modal para Agregar/Editar Usuario -->
+        <div id="addEditUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="addEditUserModalLabel"></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('addEditUserModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_usuarios.php" method="POST">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="action" id="modalActionUser">
+                        <input type="hidden" name="id" id="userId">
+
+                        <div>
+                            <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">Nombre Completo</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="nombre" name="nombre" required>
+                        </div>
+                        <div>
+                            <label for="correo_electronico" class="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico</label>
+                            <input type="email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="correo_electronico" name="correo_electronico" required>
+                        </div>
+                        <div id="passwordField">
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                            <input type="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="password" name="password" required>
+                            <small class="text-sm text-gray-500" id="passwordHelp"></small>
+                        </div>
+                        <div>
+                            <label for="rol" class="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="rol" name="rol" required>
+                                <option value="empleado">Empleado</option>
+                                <option value="flotilla_manager">Manager de Flotilla</option>
+                                <?php if ($rol_usuario_sesion === 'admin'): ?>
+                                    <option value="admin">Administrador</option>
+                                <?php endif; ?>
+                            </select>
+                        </div>
+                        <div id="estatusCuentaField">
+                            <label for="estatus_cuenta" class="block text-sm font-medium text-gray-700 mb-2">Estatus de Cuenta</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="estatus_cuenta" name="estatus_cuenta" required>
+                                <option value="pendiente_aprobacion">Pendiente de Aprobación</option>
+                                <option value="activa">Activa</option>
+                                <option value="rechazada">Rechazada</option>
+                                <option value="inactiva">Inactiva</option>
+                            </select>
+                        </div>
+                        <div id="estatusUsuarioField">
+                            <label for="estatus_usuario" class="block text-sm font-medium text-gray-700 mb-2">Estatus de Uso (Vehículos)</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="estatus_usuario" name="estatus_usuario" required>
+                                <option value="activo">Activo</option>
+                                <option value="amonestado">Amonestado</option>
+                                <option value="suspendido">Suspendido</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('addEditUserModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors" id="submitUserBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteUserModalLabel">Confirmar Eliminación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_usuarios.php" method="POST">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id" id="deleteUserId">
-                        <div class="modal-body">
-                            ¿Estás seguro de que quieres eliminar al usuario <strong id="deleteUserName"></strong>?
-                            Esta acción es irreversible y eliminará también sus solicitudes asociadas.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                        </div>
-                    </form>
+        <!-- Modal para Eliminar Usuario -->
+        <div id="deleteUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="deleteUserModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('deleteUserModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_usuarios.php" method="POST">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" id="deleteUserId">
+                    <div class="p-6">
+                        <p class="text-gray-700">¿Estás seguro de que quieres eliminar al usuario <strong id="deleteUserName"></strong>?</p>
+                        <p class="text-sm text-red-600 mt-2">Esta acción es irreversible y eliminará también sus solicitudes asociadas.</p>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('deleteUserModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Eliminar</button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="approveRejectUserModal" tabindex="-1" aria-labelledby="approveRejectUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="approveRejectUserModalLabel">Gestionar Solicitud de Cuenta</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_usuarios.php" method="POST">
-                        <input type="hidden" name="user_id_action" id="modalUserActionId">
-                        <input type="hidden" name="action" id="modalUserActionType">
-                        <div class="modal-body">
-                            Estás a punto de <strong id="modalUserActionText"></strong> la solicitud de cuenta para <strong id="modalUserActionName"></strong>.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn" id="modalUserSubmitBtn"></button>
-                        </div>
-                    </form>
+        <!-- Modal para Aprobar/Rechazar Usuario -->
+        <div id="approveRejectUserModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="approveRejectUserModalLabel">Gestionar Solicitud de Cuenta</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('approveRejectUserModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_usuarios.php" method="POST">
+                    <input type="hidden" name="user_id_action" id="modalUserActionId">
+                    <input type="hidden" name="action" id="modalUserActionType">
+                    <div class="p-6">
+                        <p class="text-gray-700">Estás a punto de <strong id="modalUserActionText"></strong> la solicitud de cuenta para <strong id="modalUserActionName"></strong>.</p>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('approveRejectUserModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white rounded-md transition-colors" id="modalUserSubmitBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="addAmonestacionModal" tabindex="-1" aria-labelledby="addAmonestacionModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addAmonestacionModalLabel">Registrar Amonestación para <span id="amonestacionUserName"></span></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_usuarios.php" method="POST">
-                        <input type="hidden" name="action" value="add_amonestacion">
-                        <input type="hidden" name="amonestacion_user_id" id="amonestacionUserId">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label for="tipo_amonestacion" class="form-label">Tipo de Amonestación</label>
-                                <select class="form-select" id="tipo_amonestacion" name="tipo_amonestacion" required>
-                                    <option value="">Selecciona...</option>
-                                    <option value="leve">Leve</option>
-                                    <option value="grave">Grave</option>
-                                    <option value="suspension">Suspensión (Automáticamente suspende al usuario)</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="descripcion_amonestacion" class="form-label">Descripción del Incidente</label>
-                                <textarea class="form-control" id="descripcion_amonestacion" name="descripcion_amonestacion" rows="3" required></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Registrar Amonestación</button>
-                        </div>
-                    </form>
+        <!-- Modal para Agregar Amonestación -->
+        <div id="addAmonestacionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="addAmonestacionModalLabel">Registrar Amonestación para <span id="amonestacionUserName"></span></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('addAmonestacionModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_usuarios.php" method="POST">
+                    <input type="hidden" name="action" value="add_amonestacion">
+                    <input type="hidden" name="amonestacion_user_id" id="amonestacionUserId">
+                    <div class="p-6 space-y-4">
+                        <div>
+                            <label for="tipo_amonestacion" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Amonestación</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="tipo_amonestacion" name="tipo_amonestacion" required>
+                                <option value="">Selecciona...</option>
+                                <option value="leve">Leve</option>
+                                <option value="grave">Grave</option>
+                                <option value="suspension">Suspensión (Automáticamente suspende al usuario)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="descripcion_amonestacion" class="block text-sm font-medium text-gray-700 mb-2">Descripción del Incidente</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="descripcion_amonestacion" name="descripcion_amonestacion" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('addAmonestacionModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors">Registrar Amonestación</button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="viewUserHistoryModal" tabindex="-1" aria-labelledby="viewUserHistoryModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewUserHistoryModalLabel">Historial de Amonestaciones de <span id="historyUserName"></span></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Modal para Ver Historial de Usuario -->
+        <div id="viewUserHistoryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="viewUserHistoryModalLabel">Historial de Amonestaciones de <span id="historyUserName"></span></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('viewUserHistoryModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <div id="amonestacionesHistoryTable" class="overflow-x-auto">
+                        <p class="text-center text-gray-500">Cargando historial...</p>
                     </div>
-                    <div class="modal-body">
-                        <div id="amonestacionesHistoryTable" class="table-responsive">
-                            <p class="text-center text-muted">Cargando historial...</p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
+                </div>
+                <div class="flex justify-end p-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('viewUserHistoryModal')">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -582,25 +605,64 @@ if ($db) {
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="js/main.js"></script>
     <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
         // JavaScript para manejar los modales de agregar/editar usuario
         document.addEventListener('DOMContentLoaded', function() {
-            var addEditUserModal = document.getElementById('addEditUserModal');
-            addEditUserModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-                var action = button.getAttribute('data-action');
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const action = this.getAttribute('data-action');
+                    const actionType = this.getAttribute('data-action-type');
+                    const actionText = this.getAttribute('data-action-text');
+                    
+                    if (modalId === 'addEditUserModal') {
+                        setupUserModal(action, this);
+                    } else if (modalId === 'deleteUserModal') {
+                        setupDeleteUserModal(this);
+                    } else if (modalId === 'approveRejectUserModal') {
+                        setupApproveRejectUserModal(this, actionType, actionText);
+                    } else if (modalId === 'addAmonestacionModal') {
+                        setupAmonestacionModal(this);
+                    } else if (modalId === 'viewUserHistoryModal') {
+                        setupViewUserHistoryModal(this);
+                    }
+                    
+                    openModal(modalId);
+                });
+            });
 
-                var modalTitle = addEditUserModal.querySelector('#addEditUserModalLabel');
-                var modalActionInput = addEditUserModal.querySelector('#modalActionUser');
-                var userIdInput = addEditUserModal.querySelector('#userId');
-                var submitBtn = addEditUserModal.querySelector('#submitUserBtn');
-                var passwordField = addEditUserModal.querySelector('#passwordField');
-                var passwordInput = addEditUserModal.querySelector('#password');
-                var passwordHelp = addEditUserModal.querySelector('#passwordHelp');
-                var estatusCuentaField = addEditUserModal.querySelector('#estatusCuentaField');
-                var estatusCuentaSelect = addEditUserModal.querySelector('#estatus_cuenta');
-                var estatusUsuarioField = addEditUserModal.querySelector('#estatusUsuarioField');
-                var estatusUsuarioSelect = addEditUserModal.querySelector('#estatus_usuario');
-                var form = addEditUserModal.querySelector('form');
+            function setupUserModal(action, button) {
+                var modalTitle = document.getElementById('addEditUserModalLabel');
+                var modalActionInput = document.getElementById('modalActionUser');
+                var userIdInput = document.getElementById('userId');
+                var submitBtn = document.getElementById('submitUserBtn');
+                var passwordField = document.getElementById('passwordField');
+                var passwordInput = document.getElementById('password');
+                var passwordHelp = document.getElementById('passwordHelp');
+                var estatusCuentaField = document.getElementById('estatusCuentaField');
+                var estatusCuentaSelect = document.getElementById('estatus_cuenta');
+                var estatusUsuarioField = document.getElementById('estatusUsuarioField');
+                var estatusUsuarioSelect = document.getElementById('estatus_usuario');
+                var form = document.querySelector('#addEditUserModal form');
 
                 form.reset();
                 passwordField.style.display = 'block';
@@ -613,14 +675,14 @@ if ($db) {
                     modalTitle.textContent = 'Agregar Nuevo Usuario';
                     modalActionInput.value = 'add';
                     submitBtn.textContent = 'Guardar Usuario';
-                    submitBtn.className = 'btn btn-primary';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
                     userIdInput.value = '';
                     passwordHelp.textContent = '';
                 } else if (action === 'edit') {
                     modalTitle.textContent = 'Editar Usuario';
                     modalActionInput.value = 'edit';
                     submitBtn.textContent = 'Actualizar Usuario';
-                    submitBtn.className = 'btn btn-info text-white';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
 
                     passwordInput.removeAttribute('required');
                     passwordInput.name = 'new_password';
@@ -629,127 +691,108 @@ if ($db) {
                     estatusUsuarioField.style.display = 'block';
 
                     userIdInput.value = button.getAttribute('data-id');
-                    addEditUserModal.querySelector('#nombre').value = button.getAttribute('data-nombre');
-                    addEditUserModal.querySelector('#correo_electronico').value = button.getAttribute('data-correo');
-                    addEditUserModal.querySelector('#rol').value = button.getAttribute('data-rol');
+                    document.getElementById('nombre').value = button.getAttribute('data-nombre');
+                    document.getElementById('correo_electronico').value = button.getAttribute('data-correo');
+                    document.getElementById('rol').value = button.getAttribute('data-rol');
                     estatusCuentaSelect.value = button.getAttribute('data-estatus-cuenta');
                     estatusUsuarioSelect.value = button.getAttribute('data-estatus-usuario');
                 }
-            });
+            }
 
-            // JavaScript para manejar el modal de eliminar usuario
-            var deleteUserModal = document.getElementById('deleteUserModal');
-            deleteUserModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
+            function setupDeleteUserModal(button) {
                 var userId = button.getAttribute('data-id');
                 var userName = button.getAttribute('data-nombre');
 
-                var modalUserId = deleteUserModal.querySelector('#deleteUserId');
-                var modalUserName = deleteUserModal.querySelector('#deleteUserName');
+                document.getElementById('deleteUserId').value = userId;
+                document.getElementById('deleteUserName').textContent = userName;
+            }
 
-                modalUserId.value = userId;
-                modalUserName.textContent = userName;
-            });
-
-            // JavaScript para manejar el modal de Aprobar/Rechazar Usuario (Solicitud de Cuenta)
-            var approveRejectUserModal = document.getElementById('approveRejectUserModal');
-            approveRejectUserModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
+            function setupApproveRejectUserModal(button, actionType, actionText) {
                 var userId = button.getAttribute('data-user-id');
-                var action = button.getAttribute('data-action');
                 var userName = button.getAttribute('data-user-name');
 
-                var modalUserActionId = approveRejectUserModal.querySelector('#modalUserActionId');
-                var modalUserActionType = approveRejectUserModal.querySelector('#modalUserActionType');
-                var modalUserActionText = approveRejectUserModal.querySelector('#modalUserActionText');
-                var modalUserActionName = approveRejectUserModal.querySelector('#modalUserActionName');
-                var modalUserSubmitBtn = approveRejectUserModal.querySelector('#modalUserSubmitBtn');
+                document.getElementById('modalUserActionId').value = userId;
+                document.getElementById('modalUserActionType').value = actionType === 'approve' ? 'approve_account' : 'reject_account';
+                document.getElementById('modalUserActionName').textContent = userName;
 
-                modalUserActionId.value = userId;
-                modalUserActionType.value = action;
-                modalUserActionName.textContent = userName;
+                var modalUserActionText = document.getElementById('modalUserActionText');
+                var modalUserSubmitBtn = document.getElementById('modalUserSubmitBtn');
 
-                if (action === 'approve_account') {
+                if (actionType === 'approve') {
                     modalUserActionText.textContent = 'APROBAR';
                     modalUserSubmitBtn.textContent = 'Aprobar Cuenta';
-                    modalUserSubmitBtn.className = 'btn btn-success';
-                } else if (action === 'reject_account') {
+                    modalUserSubmitBtn.className = 'px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors';
+                } else if (actionType === 'reject') {
                     modalUserActionText.textContent = 'RECHAZAR';
                     modalUserSubmitBtn.textContent = 'Rechazar Cuenta';
-                    modalUserSubmitBtn.className = 'btn btn-danger';
+                    modalUserSubmitBtn.className = 'px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors';
                 }
-            });
+            }
 
-            // JavaScript para manejar el modal de Añadir Amonestación
-            var addAmonestacionModal = document.getElementById('addAmonestacionModal');
-            addAmonestacionModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
+            function setupAmonestacionModal(button) {
                 var userId = button.getAttribute('data-user-id');
                 var userName = button.getAttribute('data-user-name');
 
-                addAmonestacionModal.querySelector('#amonestacionUserName').textContent = userName;
-                addAmonestacionModal.querySelector('#amonestacionUserId').value = userId;
-                addAmonestacionModal.querySelector('form').reset();
-            });
+                document.getElementById('amonestacionUserName').textContent = userName;
+                document.getElementById('amonestacionUserId').value = userId;
+                document.querySelector('#addAmonestacionModal form').reset();
+            }
 
-            // JavaScript para manejar el modal de Ver Historial de Amonestaciones
-            var viewUserHistoryModal = document.getElementById('viewUserHistoryModal');
-            viewUserHistoryModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
+            function setupViewUserHistoryModal(button) {
                 var userId = button.getAttribute('data-user-id');
                 var userName = button.getAttribute('data-user-name');
 
-                viewUserHistoryModal.querySelector('#historyUserName').textContent = userName;
-                var historyTableContainer = viewUserHistoryModal.querySelector('#amonestacionesHistoryTable');
-                historyTableContainer.innerHTML = '<p class="text-center text-muted">Cargando historial...</p>';
+                document.getElementById('historyUserName').textContent = userName;
+                var historyTableContainer = document.getElementById('amonestacionesHistoryTable');
+                historyTableContainer.innerHTML = '<p class="text-center text-gray-500">Cargando historial...</p>';
 
                 fetch('api/get_amonestaciones_history.php?user_id=' + userId)
                     .then(response => response.json())
                     .then(data => {
                         if (data.error) {
-                            historyTableContainer.innerHTML = '<div class="alert alert-danger text-center">Error al cargar historial: ' + data.error + '</div>';
+                            historyTableContainer.innerHTML = '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center">Error al cargar historial: ' + data.error + '</div>';
                             return;
                         }
 
                         if (data.history.length === 0) {
-                            historyTableContainer.innerHTML = '<div class="alert alert-info text-center">No hay amonestaciones registradas para este usuario.</div>';
+                            historyTableContainer.innerHTML = '<div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded text-center">No hay amonestaciones registradas para este usuario.</div>';
                         } else {
                             let tableHtml = `
-                                <table class="table table-striped table-hover table-sm">
-                                    <thead>
+                                <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
+                                    <thead class="bg-gray-50">
                                         <tr>
-                                            <th>Fecha</th>
-                                            <th>Tipo</th>
-                                            <th>Descripción</th>
-                                            <th>Amonestado Por</th>
-                                            <th>Evidencia</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amonestado Por</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evidencia</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="bg-white divide-y divide-gray-200">
                             `;
                             data.history.forEach(item => {
                                 const amonestadoPor = item.amonestado_por_nombre || 'N/A';
-                                const evidenciaLink = item.evidencia_url ? `<a href="${item.evidencia_url}" target="_blank">Ver Evidencia</a>` : 'N/A';
+                                const evidenciaLink = item.evidencia_url ? `<a href="${item.evidencia_url}" target="_blank" class="text-cambridge1 hover:text-cambridge2 underline">Ver Evidencia</a>` : 'N/A';
                                 let tipoClass = '';
                                 switch (item.tipo_amonestacion) {
                                     case 'leve':
-                                        tipoClass = 'badge bg-primary';
+                                        tipoClass = 'bg-blue-100 text-blue-800';
                                         break;
                                     case 'grave':
-                                        tipoClass = 'badge bg-warning text-dark';
+                                        tipoClass = 'bg-yellow-100 text-yellow-800';
                                         break;
                                     case 'suspension':
-                                        tipoClass = 'badge bg-danger';
+                                        tipoClass = 'bg-red-100 text-red-800';
                                         break;
                                 }
 
                                 tableHtml += `
-                                    <tr>
-                                        <td>${new Date(item.fecha_amonestacion).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</td>
-                                        <td><span class="${tipoClass}">${item.tipo_amonestacion.charAt(0).toUpperCase() + item.tipo_amonestacion.slice(1)}</span></td>
-                                        <td>${item.descripcion}</td>
-                                        <td>${amonestadoPor}</td>
-                                        <td>${evidenciaLink}</td>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(item.fecha_amonestacion).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${tipoClass}">${item.tipo_amonestacion.charAt(0).toUpperCase() + item.tipo_amonestacion.slice(1)}</span></td>
+                                        <td class="px-6 py-4 text-sm text-gray-900">${item.descripcion}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${amonestadoPor}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${evidenciaLink}</td>
                                     </tr>
                                 `;
                             });
@@ -762,9 +805,9 @@ if ($db) {
                     })
                     .catch(error => {
                         console.error('Error fetching amonestaciones history:', error);
-                        historyTableContainer.innerHTML = '<div class="alert alert-danger text-center">No se pudo cargar el historial de amonestaciones.</div>';
+                        historyTableContainer.innerHTML = '<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-center">No se pudo cargar el historial de amonestaciones.</div>';
                     });
-            });
+            }
         });
     </script>
 </body>

@@ -429,19 +429,22 @@ if (isset($_GET['error'])) {
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
                                             <?php if ($solicitud['estatus_solicitud'] === 'aprobada' && !$solicitud['historial_id']): ?>
-                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-bs-toggle="modal" data-bs-target="#salidaVehiculoModal" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-placas="<?php echo htmlspecialchars($solicitud['placas']); ?>">
-                                                    <i class="bi bi-play-circle"></i> Salida
+                                                <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="useVehicleModal" data-action="marcar_salida" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-actual="<?php echo $solicitud['kilometraje_actual']; ?>">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-6.518-3.748A1 1 0 007 8.118v7.764a1 1 0 001.234.97l6.518-1.872A1 1 0 0016 13.882V10.118a1 1 0 00-1.248-.95z" /></svg>
+                                                    Salida
                                                 </button>
                                             <?php elseif ($solicitud['estatus_solicitud'] === 'en_curso' && $solicitud['fecha_salida_real'] && !$solicitud['fecha_regreso_real']): ?>
-                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-bs-toggle="modal" data-bs-target="#regresoVehiculoModal" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-placas="<?php echo htmlspecialchars($solicitud['placas']); ?>" data-km-salida="<?php echo $solicitud['kilometraje_salida']; ?>">
-                                                    <i class="bi bi-stop-circle"></i> Regreso
+                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="useVehicleModal" data-action="marcar_regreso" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-vehiculo-id="<?php echo $solicitud['vehiculo_id']; ?>" data-vehiculo-info="<?php echo htmlspecialchars($solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')'); ?>" data-kilometraje-salida="<?php echo $solicitud['kilometraje_salida']; ?>">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+                                                    Regreso
                                                 </button>
                                             <?php endif; ?>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#detallesSolicitudModal" data-solicitud="<?php echo htmlspecialchars(json_encode($solicitud)); ?>">
-                                            <i class="bi bi-eye"></i> Ver
+                                        <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="viewDetailsModal" data-solicitud="<?php echo htmlspecialchars(json_encode($solicitud)); ?>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                            Ver
                                         </button>
                                     </td>
                                 </tr>
@@ -452,110 +455,123 @@ if (isset($_GET['error'])) {
             </div>
         <?php endif; ?>
 
-        <div class="modal fade" id="useVehicleModal" tabindex="-1" aria-labelledby="useVehicleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="useVehicleModalLabel"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="mis_solicitudes.php" method="POST" enctype="multipart/form-data">
-                        <div class="modal-body">
-                            <input type="hidden" name="action_uso" id="useAction">
-                            <input type="hidden" name="solicitud_id" id="useSolicitudId">
-                            <input type="hidden" name="vehiculo_id" id="useVehiculoId">
-
-                            <p>Vehículo: <strong id="useVehicleInfo"></strong></p>
-                            <div class="mb-3">
-                                <label for="kilometraje" class="form-label">Kilometraje Actual</label>
-                                <input type="number" class="form-control" id="kilometraje" name="kilometraje" min="0" required>
-                                <small class="form-text text-muted" id="currentKmHint"></small>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nivel_combustible" class="form-label">Nivel de Combustible (%)</label>
-                                <input type="number" class="form-control" id="nivel_combustible" name="nivel_combustible" min="0" max="100" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="fotos_medidores" class="form-label">Fotos de Evidencia del Kilometraje y Nivel de Combustible</label>
-                                <input type="file" class="form-control" id="fotos_medidores" name="fotos_medidores[]" accept="image/*" multiple>
-                                <small class="form-text text-muted">Sube fotos claras del tablero mostrando el kilometraje y del medidor de combustible (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tiene_observaciones" class="form-label">¿Hay observaciones o detalles que reportar?</label>
-                                <select class="form-control" id="tiene_observaciones" name="tiene_observaciones">
-                                    <option value="no">No</option>
-                                    <option value="si">Sí</option>
-                                </select>
-                            </div>
-                            <div id="seccion_observaciones" style="display: none;">
-                                <div class="mb-3">
-                                    <label for="observaciones" class="form-label">Observaciones (detalles, golpes, limpieza)</label>
-                                    <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="fotos_observaciones" class="form-label">Fotos de Evidencia de las Observaciones</label>
-                                    <input type="file" class="form-control" id="fotos_observaciones" name="fotos_observaciones[]" accept="image/*" multiple>
-                                    <small class="form-text text-muted">Sube fotos que evidencien los detalles mencionados en las observaciones (golpes, limpieza, etc.) (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn" id="useSubmitBtn"></button>
-                        </div>
-                    </form>
+        <!-- Modal para Marcar Salida/Regreso -->
+        <div id="useVehicleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="useVehicleModalLabel"></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('useVehicleModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="mis_solicitudes.php" method="POST" enctype="multipart/form-data">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="action_uso" id="useAction">
+                        <input type="hidden" name="solicitud_id" id="useSolicitudId">
+                        <input type="hidden" name="vehiculo_id" id="useVehiculoId">
+
+                        <p class="text-gray-700">Vehículo: <strong id="useVehicleInfo"></strong></p>
+                        <div>
+                            <label for="kilometraje" class="block text-sm font-medium text-gray-700 mb-2">Kilometraje Actual</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="kilometraje" name="kilometraje" min="0" required>
+                            <small class="text-sm text-gray-500" id="currentKmHint"></small>
+                        </div>
+                        <div>
+                            <label for="nivel_combustible" class="block text-sm font-medium text-gray-700 mb-2">Nivel de Combustible (%)</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="nivel_combustible" name="nivel_combustible" min="0" max="100" required>
+                        </div>
+                        <div>
+                            <label for="fotos_medidores" class="block text-sm font-medium text-gray-700 mb-2">Fotos de Evidencia del Kilometraje y Nivel de Combustible</label>
+                            <input type="file" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fotos_medidores" name="fotos_medidores[]" accept="image/*" multiple>
+                            <small class="text-sm text-gray-500">Sube fotos claras del tablero mostrando el kilometraje y del medidor de combustible (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
+                        </div>
+                        <div>
+                            <label for="tiene_observaciones" class="block text-sm font-medium text-gray-700 mb-2">¿Hay observaciones o detalles que reportar?</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="tiene_observaciones" name="tiene_observaciones">
+                                <option value="no">No</option>
+                                <option value="si">Sí</option>
+                            </select>
+                        </div>
+                        <div id="seccion_observaciones" class="hidden space-y-4">
+                            <div>
+                                <label for="observaciones" class="block text-sm font-medium text-gray-700 mb-2">Observaciones (detalles, golpes, limpieza)</label>
+                                <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones" name="observaciones" rows="3"></textarea>
+                            </div>
+                            <div>
+                                <label for="fotos_observaciones" class="block text-sm font-medium text-gray-700 mb-2">Fotos de Evidencia de las Observaciones</label>
+                                <input type="file" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fotos_observaciones" name="fotos_observaciones[]" accept="image/*" multiple>
+                                <small class="text-sm text-gray-500">Sube fotos que evidencien los detalles mencionados en las observaciones (golpes, limpieza, etc.) (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('useVehicleModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white rounded-md transition-colors" id="useSubmitBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewDetailsModalLabel">Detalles de Solicitud</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <!-- Modal para Ver Detalles -->
+        <div id="viewDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="viewDetailsModalLabel">Detalles de Solicitud</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('viewDetailsModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div>
+                        <h6 class="text-lg font-semibold text-gray-900 mb-3">Detalles de la Solicitud:</h6>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <p class="text-gray-700"><strong>Salida Deseada:</strong> <span id="detailFechaSalida"></span></p>
+                            <p class="text-gray-700"><strong>Regreso Deseado:</strong> <span id="detailFechaRegreso"></span></p>
+                            <p class="text-gray-700"><strong>Evento:</strong> <span id="detailEvento"></span></p>
+                            <p class="text-gray-700"><strong>Descripción:</strong> <span id="detailDescripcion"></span></p>
+                            <p class="text-gray-700"><strong>Destino:</strong> <span id="detailDestino"></span></p>
+                            <p class="text-gray-700"><strong>Vehículo Asignado:</strong> <span id="detailVehiculoAsignado"></span></p>
+                            <p class="text-gray-700"><strong>Estatus:</strong> <span id="detailEstatus" class="inline-block px-2 py-1 text-xs font-semibold rounded-full"></span></p>
+                            <p class="text-gray-700"><strong>Observaciones del Gestor:</strong> <span id="detailObservacionesAprobacion"></span></p>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <h6>Detalles de la Solicitud:</h6>
-                        <p><strong>Salida Deseada:</strong> <span id="detailFechaSalida"></span></p>
-                        <p><strong>Regreso Deseado:</strong> <span id="detailFechaRegreso"></span></p>
-                        <p><strong>Evento:</strong> <span id="detailEvento"></span></p>
-                        <p><strong>Descripción:</strong> <span id="detailDescripcion"></span></p>
-                        <p><strong>Destino:</strong> <span id="detailDestino"></span></p>
-                        <p><strong>Vehículo Asignado:</strong> <span id="detailVehiculoAsignado"></span></p>
-                        <p><strong>Estatus:</strong> <span id="detailEstatus" class="badge"></span></p>
-                        <p><strong>Observaciones del Gestor:</strong> <span id="detailObservacionesAprobacion"></span></p>
 
-                        <h6 class="mt-4">Registro de Salida del Vehículo:</h6>
-                        <div id="salidaDetails">
-                            <p><strong>Kilometraje de Salida:</strong> <span id="detailKmSalida"></span> KM</p>
-                            <p><strong>Combustible de Salida:</strong> <span id="detailGasSalida"></span>%</p>
-                            <p><strong>Fecha y Hora de Salida Real:</strong> <span id="detailFechaSalidaReal"></span></p>
-                            <p><strong>Observaciones al Salir:</strong> <span id="detailObsSalida"></span></p>
-                            <div class="row" id="detailFotosSalida">
+                    <div>
+                        <h6 class="text-lg font-semibold text-gray-900 mb-3">Registro de Salida del Vehículo:</h6>
+                        <div id="salidaDetails" class="space-y-2">
+                            <p class="text-gray-700"><strong>Kilometraje de Salida:</strong> <span id="detailKmSalida"></span> KM</p>
+                            <p class="text-gray-700"><strong>Combustible de Salida:</strong> <span id="detailGasSalida"></span>%</p>
+                            <p class="text-gray-700"><strong>Fecha y Hora de Salida Real:</strong> <span id="detailFechaSalidaReal"></span></p>
+                            <p class="text-gray-700"><strong>Observaciones al Salir:</strong> <span id="detailObsSalida"></span></p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="detailFotosSalida">
                             </div>
                         </div>
-                        <div id="noSalidaDetails" class="alert alert-info text-center" style="display: none;">
+                        <div id="noSalidaDetails" class="hidden bg-blue-50 border border-blue-200 rounded-md p-4 text-center text-blue-700">
                             Aún no se ha registrado la salida de este vehículo.
                         </div>
+                    </div>
 
-                        <h6 class="mt-4">Registro de Regreso del Vehículo:</h6>
-                        <div id="regresoDetails">
-                            <p><strong>Kilometraje de Regreso:</strong> <span id="detailKmRegreso"></span> KM</p>
-                            <p><strong>Combustible de Regreso:</strong> <span id="detailGasRegreso"></span>%</p>
-                            <p><strong>Fecha y Hora de Regreso Real:</strong> <span id="detailFechaRegresoReal"></span></p>
-                            <p><strong>Observaciones al Regresar:</strong> <span id="detailObsRegreso"></span></p>
-                            <div class="row" id="detailFotosRegreso">
+                    <div>
+                        <h6 class="text-lg font-semibold text-gray-900 mb-3">Registro de Regreso del Vehículo:</h6>
+                        <div id="regresoDetails" class="space-y-2">
+                            <p class="text-gray-700"><strong>Kilometraje de Regreso:</strong> <span id="detailKmRegreso"></span> KM</p>
+                            <p class="text-gray-700"><strong>Combustible de Regreso:</strong> <span id="detailGasRegreso"></span>%</p>
+                            <p class="text-gray-700"><strong>Fecha y Hora de Regreso Real:</strong> <span id="detailFechaRegresoReal"></span></p>
+                            <p class="text-gray-700"><strong>Observaciones al Regresar:</strong> <span id="detailObsRegreso"></span></p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="detailFotosRegreso">
                             </div>
                         </div>
-                        <div id="noRegresoDetails" class="alert alert-info text-center" style="display: none;">
+                        <div id="noRegresoDetails" class="hidden bg-blue-50 border border-blue-200 rounded-md p-4 text-center text-blue-700">
                             Aún no se ha registrado el regreso de este vehículo.
                         </div>
-
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
+                </div>
+                <div class="flex justify-end p-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('viewDetailsModal')">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -564,318 +580,184 @@ if (isset($_GET['error'])) {
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="js/main.js"></script>
     <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
         // JavaScript para manejar el modal de Marcar Salida/Regreso
         document.addEventListener('DOMContentLoaded', function() {
-            var useVehicleModal = document.getElementById('useVehicleModal');
-            useVehicleModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    
+                    if (modalId === 'useVehicleModal') {
+                        setupUseVehicleModal(this);
+                    } else if (modalId === 'viewDetailsModal') {
+                        setupViewDetailsModal(this);
+                    }
+                    
+                    openModal(modalId);
+                });
+            });
+
+            function setupUseVehicleModal(button) {
                 var action = button.getAttribute('data-action');
                 var solicitudId = button.getAttribute('data-solicitud-id');
                 var vehiculoId = button.getAttribute('data-vehiculo-id');
                 var vehiculoInfo = button.getAttribute('data-vehiculo-info');
                 var kilometrajeActual = button.getAttribute('data-kilometraje-actual');
+                var kilometrajeSalida = button.getAttribute('data-kilometraje-salida');
 
-                var modalTitle = useVehicleModal.querySelector('#useVehicleModalLabel');
-                var useAction = useVehicleModal.querySelector('#useAction');
-                var useSolicitudId = useVehicleModal.querySelector('#useSolicitudId');
-                var useVehiculoId = useVehicleModal.querySelector('#useVehiculoId');
-                var useVehicleInfo = useVehicleModal.querySelector('#useVehicleInfo');
-                var kilometrajeInput = useVehicleModal.querySelector('#kilometraje');
-                var currentKmHint = useVehicleModal.querySelector('#currentKmHint');
-                var useSubmitBtn = useVehicleModal.querySelector('#useSubmitBtn');
-                var form = useVehicleModal.querySelector('form');
+                var modalTitle = document.getElementById('useVehicleModalLabel');
+                var useAction = document.getElementById('useAction');
+                var useSolicitudId = document.getElementById('useSolicitudId');
+                var useVehiculoId = document.getElementById('useVehiculoId');
+                var useVehicleInfo = document.getElementById('useVehicleInfo');
+                var kilometrajeInput = document.getElementById('kilometraje');
+                var currentKmHint = document.getElementById('currentKmHint');
+                var useSubmitBtn = document.getElementById('useSubmitBtn');
+                var form = document.querySelector('#useVehicleModal form');
 
                 form.reset();
 
                 useSolicitudId.value = solicitudId;
                 useVehiculoId.value = vehiculoId;
                 useVehicleInfo.textContent = vehiculoInfo;
-                kilometrajeInput.value = kilometrajeActual;
 
                 if (action === 'marcar_salida') {
                     modalTitle.textContent = 'Marcar Salida del Vehículo';
                     useAction.value = 'marcar_salida';
                     useSubmitBtn.textContent = 'Registrar Salida';
-                    useSubmitBtn.className = 'btn btn-primary';
+                    useSubmitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
                     currentKmHint.textContent = 'Kilometraje actual del vehículo: ' + kilometrajeActual + ' KM (debe ser mayor o igual)';
                     kilometrajeInput.min = kilometrajeActual;
+                    kilometrajeInput.value = kilometrajeActual;
                 } else if (action === 'marcar_regreso') {
                     modalTitle.textContent = 'Marcar Regreso del Vehículo';
                     useAction.value = 'marcar_regreso';
                     useSubmitBtn.textContent = 'Registrar Regreso';
-                    useSubmitBtn.className = 'btn btn-secondary';
-                    currentKmHint.textContent = 'Kilometraje de salida registrado: X KM (el de regreso debe ser mayor)';
+                    useSubmitBtn.className = 'px-4 py-2 text-white bg-gray-600 rounded-md hover:bg-gray-700 transition-colors';
+                    currentKmHint.textContent = 'Kilometraje de salida registrado: ' + kilometrajeSalida + ' KM (el de regreso debe ser mayor)';
+                    kilometrajeInput.min = parseInt(kilometrajeSalida) + 1;
                 }
-            });
+            }
+
+            function setupViewDetailsModal(button) {
+                var solicitudData = JSON.parse(button.getAttribute('data-solicitud'));
+                
+                document.getElementById('detailFechaSalida').textContent = new Date(solicitudData.fecha_salida_solicitada).toLocaleString('es-MX');
+                document.getElementById('detailFechaRegreso').textContent = new Date(solicitudData.fecha_regreso_solicitada).toLocaleString('es-MX');
+                document.getElementById('detailEvento').textContent = solicitudData.evento;
+                document.getElementById('detailDescripcion').textContent = solicitudData.descripcion;
+                document.getElementById('detailDestino').textContent = solicitudData.destino;
+                document.getElementById('detailVehiculoAsignado').textContent = solicitudData.marca ? solicitudData.marca + ' ' + solicitudData.modelo + ' (' + solicitudData.placas + ')' : 'Sin asignar';
+                document.getElementById('detailObservacionesAprobacion').textContent = solicitudData.observaciones_aprobacion || 'Sin observaciones';
+
+                // Aplicar clase de color según el estatus
+                var estatusElement = document.getElementById('detailEstatus');
+                estatusElement.textContent = solicitudData.estatus_solicitud.charAt(0).toUpperCase() + solicitudData.estatus_solicitud.slice(1);
+                estatusElement.className = 'inline-block px-2 py-1 text-xs font-semibold rounded-full';
+                
+                switch (solicitudData.estatus_solicitud.toLowerCase()) {
+                    case 'pendiente':
+                        estatusElement.classList.add('bg-yellow-100', 'text-yellow-800');
+                        break;
+                    case 'aprobada':
+                        estatusElement.classList.add('bg-green-100', 'text-green-800');
+                        break;
+                    case 'rechazada':
+                        estatusElement.classList.add('bg-red-100', 'text-red-800');
+                        break;
+                    case 'en_curso':
+                        estatusElement.classList.add('bg-cambridge1', 'text-white');
+                        break;
+                    case 'completada':
+                        estatusElement.classList.add('bg-gray-100', 'text-gray-800');
+                        break;
+                    case 'cancelada':
+                        estatusElement.classList.add('bg-blue-100', 'text-blue-800');
+                        break;
+                }
+
+                // Mostrar detalles de salida si existen
+                if (solicitudData.fecha_salida_real) {
+                    document.getElementById('salidaDetails').classList.remove('hidden');
+                    document.getElementById('noSalidaDetails').classList.add('hidden');
+                    document.getElementById('detailKmSalida').textContent = solicitudData.kilometraje_salida;
+                    document.getElementById('detailGasSalida').textContent = solicitudData.combustible_salida;
+                    document.getElementById('detailFechaSalidaReal').textContent = new Date(solicitudData.fecha_salida_real).toLocaleString('es-MX');
+                    document.getElementById('detailObsSalida').textContent = solicitudData.observaciones_salida || 'Sin observaciones';
+                    
+                    // Mostrar fotos de salida si existen
+                    var fotosSalidaContainer = document.getElementById('detailFotosSalida');
+                    fotosSalidaContainer.innerHTML = '';
+                    if (solicitudData.fotos_salida) {
+                        var fotosSalida = JSON.parse(solicitudData.fotos_salida);
+                        fotosSalida.forEach(function(foto) {
+                            var img = document.createElement('img');
+                            img.src = 'uploads/' + foto;
+                            img.className = 'w-full h-24 object-cover rounded-md';
+                            img.alt = 'Foto de salida';
+                            fotosSalidaContainer.appendChild(img);
+                        });
+                    }
+                } else {
+                    document.getElementById('salidaDetails').classList.add('hidden');
+                    document.getElementById('noSalidaDetails').classList.remove('hidden');
+                }
+
+                // Mostrar detalles de regreso si existen
+                if (solicitudData.fecha_regreso_real) {
+                    document.getElementById('regresoDetails').classList.remove('hidden');
+                    document.getElementById('noRegresoDetails').classList.add('hidden');
+                    document.getElementById('detailKmRegreso').textContent = solicitudData.kilometraje_regreso;
+                    document.getElementById('detailGasRegreso').textContent = solicitudData.combustible_regreso;
+                    document.getElementById('detailFechaRegresoReal').textContent = new Date(solicitudData.fecha_regreso_real).toLocaleString('es-MX');
+                    document.getElementById('detailObsRegreso').textContent = solicitudData.observaciones_regreso || 'Sin observaciones';
+                    
+                    // Mostrar fotos de regreso si existen
+                    var fotosRegresoContainer = document.getElementById('detailFotosRegreso');
+                    fotosRegresoContainer.innerHTML = '';
+                    if (solicitudData.fotos_regreso) {
+                        var fotosRegreso = JSON.parse(solicitudData.fotos_regreso);
+                        fotosRegreso.forEach(function(foto) {
+                            var img = document.createElement('img');
+                            img.src = 'uploads/' + foto;
+                            img.className = 'w-full h-24 object-cover rounded-md';
+                            img.alt = 'Foto de regreso';
+                            fotosRegresoContainer.appendChild(img);
+                        });
+                    }
+                } else {
+                    document.getElementById('regresoDetails').classList.add('hidden');
+                    document.getElementById('noRegresoDetails').classList.remove('hidden');
+                }
+            }
 
             // Mostrar/ocultar sección de observaciones según selección
             document.getElementById('tiene_observaciones').addEventListener('change', function() {
                 var seccionObservaciones = document.getElementById('seccion_observaciones');
                 if (this.value === 'si') {
-                    seccionObservaciones.style.display = 'block';
+                    seccionObservaciones.classList.remove('hidden');
                 } else {
-                    seccionObservaciones.style.display = 'none';
+                    seccionObservaciones.classList.add('hidden');
                 }
-            });
-
-            // Función para formatear fechas para la lista y modales (Solución para "Invalid Date" más robusta)
-            function formatDateTime(dateTimeString) {
-                // Manejar valores null, cadenas vacías o la fecha "cero" de MySQL
-                if (!dateTimeString || dateTimeString === '0000-00-00 00:00:00') {
-                    return 'N/A';
-                }
-                // Reemplazar el espacio con 'T' para asegurar el formato ISO 8601
-                const isoDateTimeString = dateTimeString.replace(' ', 'T');
-                let date = new Date(isoDateTimeString);
-
-                // Si new Date() aún no funciona (ej. en Safari con algunos formatos), intentar parseo manual
-                if (isNaN(date.getTime())) {
-                    const parts = dateTimeString.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/);
-                    if (parts) {
-                        // Crear fecha en UTC para evitar problemas de zona horaria si no se especifica
-                        date = new Date(Date.UTC(parts[1], parts[2] - 1, parts[3], parts[4], parts[5], parts[6]));
-                    } else {
-                        console.error("Fecha inválida no parseable:", dateTimeString);
-                        return 'Fecha Inválida';
-                    }
-                }
-
-                const options = {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
-                };
-                return date.toLocaleString('es-MX', options);
-            }
-
-            // JavaScript para manejar el modal de Ver Detalles
-            var viewDetailsModal = document.getElementById('viewDetailsModal');
-            viewDetailsModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-
-                document.getElementById('detailFechaSalida').textContent = formatDateTime(button.getAttribute('data-fecha-salida'));
-                document.getElementById('detailFechaRegreso').textContent = formatDateTime(button.getAttribute('data-regreso'));
-                document.getElementById('detailEvento').textContent = button.getAttribute('data-evento');
-                document.getElementById('detailDescripcion').textContent = button.getAttribute('data-descripcion');
-                document.getElementById('detailDestino').textContent = button.getAttribute('data-destino');
-                document.getElementById('detailVehiculoAsignado').textContent = button.getAttribute('data-vehiculo-info');
-
-                var statusBadge = document.getElementById('detailEstatus');
-                statusBadge.textContent = button.getAttribute('data-estatus');
-                statusBadge.className = 'badge';
-                switch (button.getAttribute('data-estatus').toLowerCase()) {
-                    case 'pendiente':
-                        statusBadge.classList.add('bg-warning', 'text-dark');
-                        break;
-                    case 'aprobada':
-                        statusBadge.classList.add('bg-success');
-                        break;
-                    case 'rechazada':
-                        statusBadge.classList.add('bg-danger');
-                        break;
-                    case 'en_curso':
-                        statusBadge.classList.add('bg-primary');
-                        break;
-                    case 'completada':
-                        statusBadge.classList.add('bg-secondary');
-                        break;
-                    case 'cancelada':
-                        statusBadge.classList.add('bg-info');
-                        break;
-                }
-                document.getElementById('detailObservacionesAprobacion').textContent = button.getAttribute('data-observaciones-aprobacion') || 'Ninguna observación.';
-
-                // Detalles de Salida
-                var historialId = button.getAttribute('data-historial-id');
-                var salidaDetails = document.getElementById('salidaDetails');
-                var noSalidaDetails = document.getElementById('noSalidaDetails');
-                var regresoDetails = document.getElementById('regresoDetails');
-                var noRegresoDetails = document.getElementById('noRegresoDetails');
-
-                if (historialId) {
-                    salidaDetails.style.display = 'block';
-                    noSalidaDetails.style.display = 'none';
-                    document.getElementById('detailKmSalida').textContent = button.getAttribute('data-km-salida');
-                    document.getElementById('detailGasSalida').textContent = button.getAttribute('data-gas-salida');
-                    document.getElementById('detailFechaSalidaReal').textContent = formatDateTime(button.getAttribute('data-fecha-salida-real'));
-                    document.getElementById('detailObsSalida').textContent = button.getAttribute('data-obs-salida') || 'Ninguna.';
-
-                    // Cargar fotos de salida
-                    var fotosSalidaContainer = document.getElementById('detailFotosSalida');
-                    fotosSalidaContainer.innerHTML = '';
-                    var fotosSalidaMedidores = JSON.parse(button.getAttribute('data-fotos-salida-medidores') || '[]');
-                    var fotosSalidaObservaciones = JSON.parse(button.getAttribute('data-fotos-salida-observaciones') || '[]');
-                    
-                    if (fotosSalidaMedidores.length > 0 || fotosSalidaObservaciones.length > 0) {
-                        // Mostrar fotos de medidores
-                        if (fotosSalidaMedidores.length > 0) {
-                            fotosSalidaContainer.innerHTML += '<div class="col-12"><h6>Fotos de Kilometraje y Combustible:</h6></div>';
-                            fotosSalidaMedidores.forEach(url => {
-                                var col = document.createElement('div');
-                                col.className = 'col-6 col-md-4 mb-3';
-                                var img = document.createElement('img');
-                                img.src = url;
-                                img.alt = 'Evidencia de medidores en salida';
-                                img.className = 'img-fluid rounded shadow-sm';
-                                img.style.cursor = 'pointer';
-                                img.onclick = () => window.open(url, '_blank');
-                                col.appendChild(img);
-                                fotosSalidaContainer.appendChild(col);
-                            });
-                        }
-                        
-                        // Mostrar fotos de observaciones
-                        if (fotosSalidaObservaciones.length > 0) {
-                            fotosSalidaContainer.innerHTML += '<div class="col-12"><h6 class="mt-3">Fotos de Observaciones:</h6></div>';
-                            fotosSalidaObservaciones.forEach(url => {
-                                var col = document.createElement('div');
-                                col.className = 'col-6 col-md-4 mb-3';
-                                var img = document.createElement('img');
-                                img.src = url;
-                                img.alt = 'Evidencia de observaciones en salida';
-                                img.className = 'img-fluid rounded shadow-sm';
-                                img.style.cursor = 'pointer';
-                                img.onclick = () => window.open(url, '_blank');
-                                col.appendChild(img);
-                                fotosSalidaContainer.appendChild(col);
-                            });
-                        }
-                    } else {
-                        fotosSalidaContainer.innerHTML = '<div class="col-12"><p class="text-muted">No hay fotos de evidencia.</p></div>';
-                    }
-
-                    // Detalles de Regreso
-                    if (button.getAttribute('data-km-regreso') && button.getAttribute('data-fecha-regreso-real')) {
-                        regresoDetails.style.display = 'block';
-                        noRegresoDetails.style.display = 'none';
-                        document.getElementById('detailKmRegreso').textContent = button.getAttribute('data-km-regreso');
-                        document.getElementById('detailGasRegreso').textContent = button.getAttribute('data-gas-regreso');
-                        document.getElementById('detailFechaRegresoReal').textContent = formatDateTime(button.getAttribute('data-fecha-regreso-real'));
-                        document.getElementById('detailObsRegreso').textContent = button.getAttribute('data-obs-regreso') || 'Ninguna.';
-
-                        // Cargar fotos de regreso
-                        var fotosRegresoContainer = document.getElementById('detailFotosRegreso');
-                        fotosRegresoContainer.innerHTML = '';
-                        var fotosRegresoMedidores = JSON.parse(button.getAttribute('data-fotos-regreso-medidores') || '[]');
-                        var fotosRegresoObservaciones = JSON.parse(button.getAttribute('data-fotos-regreso-observaciones') || '[]');
-                        
-                        if (fotosRegresoMedidores.length > 0 || fotosRegresoObservaciones.length > 0) {
-                            // Mostrar fotos de medidores
-                            if (fotosRegresoMedidores.length > 0) {
-                                fotosRegresoContainer.innerHTML += '<div class="col-12"><h6>Fotos de Kilometraje y Combustible:</h6></div>';
-                                fotosRegresoMedidores.forEach(url => {
-                                    var col = document.createElement('div');
-                                    col.className = 'col-6 col-md-4 mb-3';
-                                    var img = document.createElement('img');
-                                    img.src = url;
-                                    img.alt = 'Evidencia de medidores en regreso';
-                                    img.className = 'img-fluid rounded shadow-sm';
-                                    img.style.cursor = 'pointer';
-                                    img.onclick = () => window.open(url, '_blank');
-                                    col.appendChild(img);
-                                    fotosRegresoContainer.appendChild(col);
-                                });
-                            }
-                            
-                            // Mostrar fotos de observaciones
-                            if (fotosRegresoObservaciones.length > 0) {
-                                fotosRegresoContainer.innerHTML += '<div class="col-12"><h6 class="mt-3">Fotos de Observaciones:</h6></div>';
-                                fotosRegresoObservaciones.forEach(url => {
-                                    var col = document.createElement('div');
-                                    col.className = 'col-6 col-md-4 mb-3';
-                                    var img = document.createElement('img');
-                                    img.src = url;
-                                    img.alt = 'Evidencia de observaciones en regreso';
-                                    img.className = 'img-fluid rounded shadow-sm';
-                                    img.style.cursor = 'pointer';
-                                    img.onclick = () => window.open(url, '_blank');
-                                    col.appendChild(img);
-                                    fotosRegresoContainer.appendChild(col);
-                                });
-                            }
-                        } else {
-                            fotosRegresoContainer.innerHTML = '<div class="col-12"><p class="text-muted">No hay fotos de evidencia.</p></div>';
-                        }
-
-                    } else {
-                        regresoDetails.style.display = 'none';
-                        noRegresoDetails.style.display = 'block';
-                    }
-
-                } else {
-                    salidaDetails.style.display = 'none';
-                    noSalidaDetails.style.display = 'block';
-                    regresoDetails.style.display = 'none';
-                    noRegresoDetails.style.display = 'block';
-                }
-            });
-        });
-
-    // Función para verificar el estado del vehículo
-    function checkVehicleStatus(vehiculoId) {
-        fetch(`api/get_vehiculo_status.php?vehiculo_id=${vehiculoId}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status) {
-                    const statusElement = document.getElementById(`vehicle-status-${vehiculoId}`);
-                    const buttons = document.querySelectorAll(`button[data-vehiculo-id="${vehiculoId}"]`);
-                    
-                    if (statusElement) {
-                        // Formatear el estado para mostrar
-                        const estadoFormateado = data.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                        statusElement.textContent = estadoFormateado;
-                        
-                        // Actualizar clases visuales según el estado
-                        statusElement.className = ''; // Limpiar clases existentes
-                        if (['en_mantenimiento', 'inactivo', 'en_uso'].includes(data.status)) {
-                            statusElement.classList.add('text-danger');
-                        } else if (data.status === 'activo') {
-                            statusElement.classList.add('text-success');
-                        }
-
-                        // Actualizar todos los botones asociados al vehículo
-                        buttons.forEach(button => {
-                            if (['en_mantenimiento', 'inactivo', 'en_uso'].includes(data.status)) {
-                                button.disabled = true;
-                                button.title = `Vehículo no disponible: ${estadoFormateado}`;
-                                // Agregar clase visual para botones deshabilitados
-                                button.classList.add('btn-disabled');
-                            } else {
-                                button.disabled = false;
-                                button.title = '';
-                                button.classList.remove('btn-disabled');
-                            }
-                        });
-
-                        console.log(`Estado actualizado para vehículo ${vehiculoId}: ${data.status} at ${data.timestamp}`);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error al verificar el estado del vehículo:', error);
-                const statusElement = document.getElementById(`vehicle-status-${vehiculoId}`);
-                if (statusElement) {
-                    statusElement.textContent = 'Error al verificar estado';
-                    statusElement.classList.add('text-warning');
-                }
-            });
-        }
-
-        // Verificar el estado cada 30 segundos
-        document.addEventListener('DOMContentLoaded', function() {
-            const buttons = document.querySelectorAll('[data-vehiculo-id]');
-            buttons.forEach(button => {
-                const vehiculoId = button.dataset.vehiculoId;
-                checkVehicleStatus(vehiculoId, button);
-                setInterval(() => checkVehicleStatus(vehiculoId, button), 30000);
             });
         });
     </script>

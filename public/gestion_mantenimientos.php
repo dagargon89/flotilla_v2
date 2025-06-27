@@ -246,7 +246,7 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-bs-toggle="modal" data-bs-target="#addEditMaintenanceModal" data-action="add">
+        <button type="button" class="bg-cambridge2 text-darkpurple px-4 py-2 rounded-lg font-semibold hover:bg-cambridge1 transition mb-6" data-modal-target="addEditMaintenanceModal" data-action="add">
             <i class="bi bi-tools"></i> Registrar Nuevo Mantenimiento
         </button>
 
@@ -286,7 +286,7 @@ if ($db) {
                                     <td class="px-4 py-3 text-sm"><?php echo $mantenimiento['proximo_mantenimiento_fecha'] !== null ? date('d/m/Y', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : 'N/A'; ?></td>
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
-                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-bs-toggle="modal" data-bs-target="#addEditMaintenanceModal" data-action="edit"
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditMaintenanceModal" data-action="edit"
                                                 data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>"
                                                 data-vehiculo-id="<?php echo htmlspecialchars($mantenimiento['vehiculo_id']); ?>"
                                                 data-tipo-mantenimiento="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>"
@@ -299,7 +299,7 @@ if ($db) {
                                                 data-proximo-mantenimiento-fecha="<?php echo htmlspecialchars($mantenimiento['proximo_mantenimiento_fecha'] ? date('Y-m-d', strtotime($mantenimiento['proximo_mantenimiento_fecha'])) : ''); ?>">
                                                 Editar
                                             </button>
-                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-bs-toggle="modal" data-bs-target="#deleteMaintenanceModal" data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>" data-tipo="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>" data-placas="<?php echo htmlspecialchars($mantenimiento['placas']); ?>">
+                                            <button type="button" class="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-700 transition" data-modal-target="deleteMaintenanceModal" data-id="<?php echo htmlspecialchars($mantenimiento['id']); ?>" data-tipo="<?php echo htmlspecialchars($mantenimiento['tipo_mantenimiento']); ?>" data-placas="<?php echo htmlspecialchars($mantenimiento['placas']); ?>">
                                                 Eliminar
                                             </button>
                                         </div>
@@ -312,93 +312,99 @@ if ($db) {
             </div>
         <?php endif; ?>
 
-        <div class="modal fade" id="addEditMaintenanceModal" tabindex="-1" aria-labelledby="addEditMaintenanceModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addEditMaintenanceModalLabel"></h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_mantenimientos.php" method="POST">
-                        <div class="modal-body">
-                            <input type="hidden" name="action" id="modalActionMaintenance">
-                            <input type="hidden" name="id" id="maintenanceId">
-
-                            <div class="mb-3">
-                                <label for="vehiculo_id" class="form-label">Vehículo</label>
-                                <select class="form-select" id="vehiculo_id" name="vehiculo_id" required>
-                                    <option value="">Selecciona un vehículo...</option>
-                                    <?php foreach ($vehiculos_flotilla as $vehiculo_opt): ?>
-                                        <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>">
-                                            <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tipo_mantenimiento" class="form-label">Tipo de Mantenimiento</label>
-                                <input type="text" class="form-control" id="tipo_mantenimiento" name="tipo_mantenimiento" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="fecha_mantenimiento" class="form-label">Fecha y Hora del Mantenimiento</label>
-                                <input type="datetime-local" class="form-control" id="fecha_mantenimiento" name="fecha_mantenimiento" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="kilometraje_mantenimiento" class="form-label">Kilometraje del Vehículo</label>
-                                <input type="number" class="form-control" id="kilometraje_mantenimiento" name="kilometraje_mantenimiento" min="0" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="costo" class="form-label">Costo ($)</label>
-                                <input type="number" class="form-control" id="costo" name="costo" step="0.01" min="0">
-                            </div>
-                            <div class="mb-3">
-                                <label for="taller" class="form-label">Taller / Proveedor</label>
-                                <input type="text" class="form-control" id="taller" name="taller">
-                            </div>
-                            <div class="mb-3">
-                                <label for="observaciones_mantenimiento" class="form-label">Observaciones</label>
-                                <textarea class="form-control" id="observaciones_mantenimiento" name="observaciones" rows="3"></textarea>
-                            </div>
-                            <hr>
-                            <h6>Próximo Mantenimiento (Opcional)</h6>
-                            <div class="mb-3">
-                                <label for="proximo_mantenimiento_km" class="form-label">Próximo KM</label>
-                                <input type="number" class="form-control" id="proximo_mantenimiento_km" name="proximo_mantenimiento_km" min="0">
-                            </div>
-                            <div class="mb-3">
-                                <label for="proximo_mantenimiento_fecha" class="form-label">Próxima Fecha</label>
-                                <input type="date" class="form-control" id="proximo_mantenimiento_fecha" name="proximo_mantenimiento_fecha">
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary" id="submitMaintenanceBtn"></button>
-                        </div>
-                    </form>
+        <!-- Modal para Agregar/Editar Mantenimiento -->
+        <div id="addEditMaintenanceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="addEditMaintenanceModalLabel"></h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('addEditMaintenanceModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_mantenimientos.php" method="POST">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="action" id="modalActionMaintenance">
+                        <input type="hidden" name="id" id="maintenanceId">
+
+                        <div>
+                            <label for="vehiculo_id" class="block text-sm font-medium text-gray-700 mb-2">Vehículo</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vehiculo_id" name="vehiculo_id" required>
+                                <option value="">Selecciona un vehículo...</option>
+                                <?php foreach ($vehiculos_flotilla as $vehiculo_opt): ?>
+                                    <option value="<?php echo htmlspecialchars($vehiculo_opt['id']); ?>">
+                                        <?php echo htmlspecialchars($vehiculo_opt['marca'] . ' ' . $vehiculo_opt['modelo'] . ' (' . $vehiculo_opt['placas'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="tipo_mantenimiento" class="block text-sm font-medium text-gray-700 mb-2">Tipo de Mantenimiento</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="tipo_mantenimiento" name="tipo_mantenimiento" required>
+                        </div>
+                        <div>
+                            <label for="fecha_mantenimiento" class="block text-sm font-medium text-gray-700 mb-2">Fecha y Hora del Mantenimiento</label>
+                            <input type="datetime-local" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="fecha_mantenimiento" name="fecha_mantenimiento" required>
+                        </div>
+                        <div>
+                            <label for="kilometraje_mantenimiento" class="block text-sm font-medium text-gray-700 mb-2">Kilometraje del Vehículo</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="kilometraje_mantenimiento" name="kilometraje_mantenimiento" min="0" required>
+                        </div>
+                        <div>
+                            <label for="costo" class="block text-sm font-medium text-gray-700 mb-2">Costo ($)</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="costo" name="costo" step="0.01" min="0">
+                        </div>
+                        <div>
+                            <label for="taller" class="block text-sm font-medium text-gray-700 mb-2">Taller / Proveedor</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="taller" name="taller">
+                        </div>
+                        <div>
+                            <label for="observaciones_mantenimiento" class="block text-sm font-medium text-gray-700 mb-2">Observaciones</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones_mantenimiento" name="observaciones" rows="3"></textarea>
+                        </div>
+                        <hr class="border-gray-300">
+                        <h6 class="text-lg font-semibold text-gray-900">Próximo Mantenimiento (Opcional)</h6>
+                        <div>
+                            <label for="proximo_mantenimiento_km" class="block text-sm font-medium text-gray-700 mb-2">Próximo KM</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="proximo_mantenimiento_km" name="proximo_mantenimiento_km" min="0">
+                        </div>
+                        <div>
+                            <label for="proximo_mantenimiento_fecha" class="block text-sm font-medium text-gray-700 mb-2">Próxima Fecha</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="proximo_mantenimiento_fecha" name="proximo_mantenimiento_fecha">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('addEditMaintenanceModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors" id="submitMaintenanceBtn"></button>
+                    </div>
+                </form>
             </div>
         </div>
 
-        <div class="modal fade" id="deleteMaintenanceModal" tabindex="-1" aria-labelledby="deleteMaintenanceModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteMaintenanceModalLabel">Confirmar Eliminación</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <form action="gestion_mantenimientos.php" method="POST">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="id" id="deleteMaintenanceId">
-                        <div class="modal-body">
-                            ¿Estás seguro de que quieres eliminar el mantenimiento <strong id="deleteMaintenanceType"></strong> para el vehículo con placas <strong id="deleteMaintenancePlacas"></strong>?
-                            Esta acción es irreversible.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-danger">Eliminar</button>
-                        </div>
-                    </form>
+        <!-- Modal para Eliminar Mantenimiento -->
+        <div id="deleteMaintenanceModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900" id="deleteMaintenanceModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('deleteMaintenanceModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+                <form action="gestion_mantenimientos.php" method="POST">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="id" id="deleteMaintenanceId">
+                    <div class="p-6">
+                        <p class="text-gray-700">¿Estás seguro de que quieres eliminar el mantenimiento <strong id="deleteMaintenanceType"></strong> para el vehículo con placas <strong id="deleteMaintenancePlacas"></strong>?</p>
+                        <p class="text-sm text-red-600 mt-2">Esta acción es irreversible.</p>
+                    </div>
+                    <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('deleteMaintenanceModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">Eliminar</button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -408,6 +414,25 @@ if ($db) {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
     <script>
+        // Funciones para manejar modales
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed') && event.target.classList.contains('bg-black')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
         // JavaScript para manejar los modales de agregar/editar mantenimiento
         document.addEventListener('DOMContentLoaded', function() {
             flatpickr("#fecha_mantenimiento", {
@@ -420,16 +445,28 @@ if ($db) {
                 minDate: "today"
             });
 
-            var addEditMaintenanceModal = document.getElementById('addEditMaintenanceModal');
-            addEditMaintenanceModal.addEventListener('show.bs.modal', function(event) {
-                var button = event.relatedTarget;
-                var action = button.getAttribute('data-action');
+            // Configurar botones para abrir modales
+            document.querySelectorAll('[data-modal-target]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const modalId = this.getAttribute('data-modal-target');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (modalId === 'addEditMaintenanceModal') {
+                        setupMaintenanceModal(action, this);
+                    } else if (modalId === 'deleteMaintenanceModal') {
+                        setupDeleteMaintenanceModal(this);
+                    }
+                    
+                    openModal(modalId);
+                });
+            });
 
-                var modalTitle = addEditMaintenanceModal.querySelector('#addEditMaintenanceModalLabel');
-                var modalActionInput = addEditMaintenanceModal.querySelector('#modalActionMaintenance');
-                var maintenanceIdInput = addEditMaintenanceModal.querySelector('#maintenanceId');
-                var submitBtn = addEditMaintenanceModal.querySelector('#submitMaintenanceBtn');
-                var form = addEditMaintenanceModal.querySelector('form');
+            function setupMaintenanceModal(action, button) {
+                var modalTitle = document.getElementById('addEditMaintenanceModalLabel');
+                var modalActionInput = document.getElementById('modalActionMaintenance');
+                var maintenanceIdInput = document.getElementById('maintenanceId');
+                var submitBtn = document.getElementById('submitMaintenanceBtn');
+                var form = document.querySelector('#addEditMaintenanceModal form');
 
                 form.reset();
 
@@ -437,7 +474,7 @@ if ($db) {
                     modalTitle.textContent = 'Registrar Nuevo Mantenimiento';
                     modalActionInput.value = 'add';
                     submitBtn.textContent = 'Guardar Mantenimiento';
-                    submitBtn.className = 'btn btn-primary';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
                     maintenanceIdInput.value = '';
                     flatpickr("#fecha_mantenimiento").setDate(new Date());
                     flatpickr("#proximo_mantenimiento_fecha").clear();
@@ -445,18 +482,18 @@ if ($db) {
                     modalTitle.textContent = 'Editar Mantenimiento';
                     modalActionInput.value = 'edit';
                     submitBtn.textContent = 'Actualizar Mantenimiento';
-                    submitBtn.className = 'btn btn-info text-white';
+                    submitBtn.className = 'px-4 py-2 text-white bg-cambridge1 rounded-md hover:bg-cambridge2 transition-colors';
 
                     maintenanceIdInput.value = button.getAttribute('data-id');
-                    addEditMaintenanceModal.querySelector('#vehiculo_id').value = button.getAttribute('data-vehiculo-id');
-                    addEditMaintenanceModal.querySelector('#tipo_mantenimiento').value = button.getAttribute('data-tipo-mantenimiento');
-                    addEditMaintenanceModal.querySelector('#fecha_mantenimiento').value = button.getAttribute('data-fecha-mantenimiento');
-                    addEditMaintenanceModal.querySelector('#kilometraje_mantenimiento').value = button.getAttribute('data-kilometraje-mantenimiento');
-                    addEditMaintenanceModal.querySelector('#costo').value = button.getAttribute('data-costo');
-                    addEditMaintenanceModal.querySelector('#taller').value = button.getAttribute('data-taller');
-                    addEditMaintenanceModal.querySelector('#observaciones_mantenimiento').value = button.getAttribute('data-observaciones');
-                    addEditMaintenanceModal.querySelector('#proximo_mantenimiento_km').value = button.getAttribute('data-proximo-mantenimiento-km');
-                    addEditMaintenanceModal.querySelector('#proximo_mantenimiento_fecha').value = button.getAttribute('data-proximo-mantenimiento-fecha');
+                    document.getElementById('vehiculo_id').value = button.getAttribute('data-vehiculo-id');
+                    document.getElementById('tipo_mantenimiento').value = button.getAttribute('data-tipo-mantenimiento');
+                    document.getElementById('fecha_mantenimiento').value = button.getAttribute('data-fecha-mantenimiento');
+                    document.getElementById('kilometraje_mantenimiento').value = button.getAttribute('data-kilometraje-mantenimiento');
+                    document.getElementById('costo').value = button.getAttribute('data-costo');
+                    document.getElementById('taller').value = button.getAttribute('data-taller');
+                    document.getElementById('observaciones_mantenimiento').value = button.getAttribute('data-observaciones');
+                    document.getElementById('proximo_mantenimiento_km').value = button.getAttribute('data-proximo-mantenimiento-km');
+                    document.getElementById('proximo_mantenimiento_fecha').value = button.getAttribute('data-proximo-mantenimiento-fecha');
 
                     flatpickr("#fecha_mantenimiento").setDate(button.getAttribute('data-fecha-mantenimiento'));
                     if (button.getAttribute('data-proximo-mantenimiento-fecha')) {
@@ -465,24 +502,16 @@ if ($db) {
                         flatpickr("#proximo_mantenimiento_fecha").clear();
                     }
                 }
-            });
+            }
 
-            var deleteMaintenanceModal = document.getElementById('deleteMaintenanceModal');
-            if (deleteMaintenanceModal) {
-                deleteMaintenanceModal.addEventListener('show.bs.modal', function(event) {
-                    var button = event.relatedTarget;
-                    var maintenanceId = button.getAttribute('data-id');
-                    var maintenanceType = button.getAttribute('data-tipo');
-                    var maintenancePlacas = button.getAttribute('data-placas');
+            function setupDeleteMaintenanceModal(button) {
+                var maintenanceId = button.getAttribute('data-id');
+                var maintenanceType = button.getAttribute('data-tipo');
+                var maintenancePlacas = button.getAttribute('data-placas');
 
-                    var modalMaintenanceId = deleteMaintenanceModal.querySelector('#deleteMaintenanceId');
-                    var modalMaintenanceType = deleteMaintenanceModal.querySelector('#deleteMaintenanceType');
-                    var modalMaintenancePlacas = deleteMaintenanceModal.querySelector('#deleteMaintenancePlacas');
-
-                    modalMaintenanceId.value = maintenanceId;
-                    modalMaintenanceType.textContent = maintenanceType;
-                    modalMaintenancePlacas.textContent = maintenancePlacas;
-                });
+                document.getElementById('deleteMaintenanceId').value = maintenanceId;
+                document.getElementById('deleteMaintenanceType').textContent = maintenanceType;
+                document.getElementById('deleteMaintenancePlacas').textContent = maintenancePlacas;
             }
         });
     </script>
