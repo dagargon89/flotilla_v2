@@ -157,19 +157,19 @@ if (!$vehiculo_id) {
     <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -213,19 +213,27 @@ if (!$vehiculo_id) {
                             Editar
                         </button>
                     </div>
-                    
+
                     <!-- Información principal destacada -->
                     <div class="mb-6 p-4 bg-parchment rounded-lg">
                         <h4 class="text-lg font-bold text-darkpurple mb-2"><?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo']); ?></h4>
                         <p class="text-2xl font-bold text-cambridge1 mb-2"><?php echo htmlspecialchars($vehiculo['placas']); ?></p>
                         <span class="inline-block px-3 py-1 text-sm font-semibold rounded-full <?php
-                            switch ($vehiculo['estatus']) {
-                                case 'disponible': echo 'bg-green-500 text-white'; break;
-                                case 'en_uso': echo 'bg-cambridge1 text-white'; break;
-                                case 'en_mantenimiento': echo 'bg-yellow-500 text-white'; break;
-                                case 'inactivo': echo 'bg-red-500 text-white'; break;
-                            }
-                        ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
+                                                                                                switch ($vehiculo['estatus']) {
+                                                                                                    case 'disponible':
+                                                                                                        echo 'bg-green-500 text-white';
+                                                                                                        break;
+                                                                                                    case 'en_uso':
+                                                                                                        echo 'bg-cambridge1 text-white';
+                                                                                                        break;
+                                                                                                    case 'en_mantenimiento':
+                                                                                                        echo 'bg-yellow-500 text-white';
+                                                                                                        break;
+                                                                                                    case 'inactivo':
+                                                                                                        echo 'bg-red-500 text-white';
+                                                                                                        break;
+                                                                                                }
+                                                                                                ?>"><?php echo htmlspecialchars(ucfirst($vehiculo['estatus'])); ?></span>
                     </div>
 
                     <!-- Detalles técnicos -->
@@ -290,17 +298,29 @@ if (!$vehiculo_id) {
                                                 </div>
                                             </div>
                                             <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
-                                                switch ($solicitud['estatus_solicitud']) {
-                                                    case 'pendiente': echo 'bg-yellow-500 text-white'; break;
-                                                    case 'aprobada': echo 'bg-green-500 text-white'; break;
-                                                    case 'rechazada': echo 'bg-red-500 text-white'; break;
-                                                    case 'en_curso': echo 'bg-cambridge2 text-darkpurple'; break;
-                                                    case 'completada': echo 'bg-gray-500 text-white'; break;
-                                                    case 'cancelada': echo 'bg-blue-500 text-white'; break;
-                                                }
-                                            ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
+                                                                                                                    switch ($solicitud['estatus_solicitud']) {
+                                                                                                                        case 'pendiente':
+                                                                                                                            echo 'bg-yellow-500 text-white';
+                                                                                                                            break;
+                                                                                                                        case 'aprobada':
+                                                                                                                            echo 'bg-green-500 text-white';
+                                                                                                                            break;
+                                                                                                                        case 'rechazada':
+                                                                                                                            echo 'bg-red-500 text-white';
+                                                                                                                            break;
+                                                                                                                        case 'en_curso':
+                                                                                                                            echo 'bg-cambridge2 text-darkpurple';
+                                                                                                                            break;
+                                                                                                                        case 'completada':
+                                                                                                                            echo 'bg-gray-500 text-white';
+                                                                                                                            break;
+                                                                                                                        case 'cancelada':
+                                                                                                                            echo 'bg-blue-500 text-white';
+                                                                                                                            break;
+                                                                                                                    }
+                                                                                                                    ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
                                         </div>
-                                        
+
                                         <!-- Contenido colapsable -->
                                         <div id="content-<?php echo $index; ?>" class="hidden px-4 pb-4 bg-white">
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pt-2">
@@ -600,13 +620,13 @@ if (!$vehiculo_id) {
                 button.addEventListener('click', function() {
                     const modalId = this.getAttribute('data-modal-target');
                     const action = this.getAttribute('data-action');
-                    
+
                     if (modalId === 'addEditVehicleModal') {
                         setupAddEditVehicleModal(action, this);
                     } else if (modalId === 'deleteVehicleModal') {
                         setupDeleteVehicleModal(this);
                     }
-                    
+
                     openModal(modalId);
                 });
             });
@@ -664,7 +684,7 @@ if (!$vehiculo_id) {
         function toggleSolicitud(index) {
             const content = document.getElementById(`content-${index}`);
             const icon = document.getElementById(`icon-${index}`);
-            
+
             if (content.classList.contains('hidden')) {
                 // Expandir
                 content.classList.remove('hidden');

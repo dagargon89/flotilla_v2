@@ -129,19 +129,19 @@ if ($db) {
     <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
 
@@ -200,13 +200,21 @@ if ($db) {
                             <?php foreach ($lista as $vehiculo): ?>
                                 <li class="flex items-center gap-2">
                                     <span class="inline-block w-2 h-2 rounded-full <?php
-                                        switch($estatus) {
-                                            case 'disponible': echo 'bg-green-500'; break;
-                                            case 'en_uso': echo 'bg-cambridge2'; break;
-                                            case 'en_mantenimiento': echo 'bg-yellow-500'; break;
-                                            case 'inactivo': echo 'bg-red-500'; break;
-                                        }
-                                    ?>"></span>
+                                                                                    switch ($estatus) {
+                                                                                        case 'disponible':
+                                                                                            echo 'bg-green-500';
+                                                                                            break;
+                                                                                        case 'en_uso':
+                                                                                            echo 'bg-cambridge2';
+                                                                                            break;
+                                                                                        case 'en_mantenimiento':
+                                                                                            echo 'bg-yellow-500';
+                                                                                            break;
+                                                                                        case 'inactivo':
+                                                                                            echo 'bg-red-500';
+                                                                                            break;
+                                                                                    }
+                                                                                    ?>"></span>
                                     <?php echo htmlspecialchars($vehiculo['marca'] . ' ' . $vehiculo['modelo'] . ' (' . $vehiculo['placas'] . ')'); ?>
                                 </li>
                             <?php endforeach; ?>

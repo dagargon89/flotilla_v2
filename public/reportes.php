@@ -247,19 +247,19 @@ $report_data_json = json_encode($report_data);
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
 
@@ -389,27 +389,27 @@ $report_data_json = json_encode($report_data);
                                     <td class="px-4 py-3"><?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?></td>
                                     <td class="px-4 py-3">
                                         <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
-                                            switch ($solicitud['estatus_solicitud']) {
-                                                case 'pendiente':
-                                                    echo 'bg-yellow-500 text-white';
-                                                    break;
-                                                case 'aprobada':
-                                                    echo 'bg-green-500 text-white';
-                                                    break;
-                                                case 'rechazada':
-                                                    echo 'bg-red-500 text-white';
-                                                    break;
-                                                case 'en_curso':
-                                                    echo 'bg-cambridge1 text-white';
-                                                    break;
-                                                case 'completada':
-                                                    echo 'bg-gray-500 text-white';
-                                                    break;
-                                                case 'cancelada':
-                                                    echo 'bg-blue-500 text-white';
-                                                    break;
-                                            }
-                                        ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
+                                                                                                                switch ($solicitud['estatus_solicitud']) {
+                                                                                                                    case 'pendiente':
+                                                                                                                        echo 'bg-yellow-500 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'aprobada':
+                                                                                                                        echo 'bg-green-500 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'rechazada':
+                                                                                                                        echo 'bg-red-500 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'en_curso':
+                                                                                                                        echo 'bg-cambridge1 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'completada':
+                                                                                                                        echo 'bg-gray-500 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'cancelada':
+                                                                                                                        echo 'bg-blue-500 text-white';
+                                                                                                                        break;
+                                                                                                                }
+                                                                                                                ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
                                     </td>
                                     <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars($solicitud['kilometraje_salida'] ?? 'N/A'); ?></td>
                                     <td class="px-4 py-3 text-sm"><?php echo htmlspecialchars($solicitud['kilometraje_regreso'] ?? 'N/A'); ?></td>

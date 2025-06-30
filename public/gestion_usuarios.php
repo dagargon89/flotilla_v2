@@ -246,19 +246,19 @@ if ($db) {
     <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -633,7 +633,7 @@ if ($db) {
                     const action = this.getAttribute('data-action');
                     const actionType = this.getAttribute('data-action-type');
                     const actionText = this.getAttribute('data-action-text');
-                    
+
                     if (modalId === 'addEditUserModal') {
                         setupUserModal(action, this);
                     } else if (modalId === 'deleteUserModal') {
@@ -645,7 +645,7 @@ if ($db) {
                     } else if (modalId === 'viewUserHistoryModal') {
                         setupViewUserHistoryModal(this);
                     }
-                    
+
                     openModal(modalId);
                 });
             });

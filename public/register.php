@@ -77,19 +77,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
 

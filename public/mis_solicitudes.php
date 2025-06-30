@@ -295,19 +295,19 @@ if (isset($_GET['error'])) {
     <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -316,9 +316,11 @@ if (isset($_GET['error'])) {
             border-radius: 4px;
             font-weight: bold;
         }
+
         .text-danger {
             color: #dc3545 !important;
         }
+
         button[disabled] {
             cursor: not-allowed;
             opacity: 0.6;
@@ -418,7 +420,7 @@ if (isset($_GET['error'])) {
                                         // Determinar el estado del vehículo basado en el historial
                                         $vehicle_status = 'Sin uso';
                                         $vehicle_status_class = 'bg-gray-500 text-white';
-                                        
+
                                         if ($solicitud['historial_id']) {
                                             if ($solicitud['fecha_salida_real'] && !$solicitud['fecha_regreso_real']) {
                                                 $vehicle_status = 'En uso';
@@ -613,13 +615,13 @@ if (isset($_GET['error'])) {
             document.querySelectorAll('[data-modal-target]').forEach(button => {
                 button.addEventListener('click', function() {
                     const modalId = this.getAttribute('data-modal-target');
-                    
+
                     if (modalId === 'useVehicleModal') {
                         setupUseVehicleModal(this);
                     } else if (modalId === 'viewDetailsModal') {
                         setupViewDetailsModal(this);
                     }
-                    
+
                     openModal(modalId);
                 });
             });
@@ -668,7 +670,7 @@ if (isset($_GET['error'])) {
 
             function setupViewDetailsModal(button) {
                 var solicitudData = JSON.parse(button.getAttribute('data-solicitud'));
-                
+
                 document.getElementById('detailFechaSalida').textContent = new Date(solicitudData.fecha_salida_solicitada).toLocaleString('es-MX');
                 document.getElementById('detailFechaRegreso').textContent = new Date(solicitudData.fecha_regreso_solicitada).toLocaleString('es-MX');
                 document.getElementById('detailEvento').textContent = solicitudData.evento;
@@ -681,7 +683,7 @@ if (isset($_GET['error'])) {
                 var estatusElement = document.getElementById('detailEstatus');
                 estatusElement.textContent = solicitudData.estatus_solicitud.charAt(0).toUpperCase() + solicitudData.estatus_solicitud.slice(1);
                 estatusElement.className = 'inline-block px-2 py-1 text-xs font-semibold rounded-full';
-                
+
                 switch (solicitudData.estatus_solicitud.toLowerCase()) {
                     case 'pendiente':
                         estatusElement.classList.add('bg-yellow-100', 'text-yellow-800');
@@ -711,7 +713,7 @@ if (isset($_GET['error'])) {
                     document.getElementById('detailGasSalida').textContent = solicitudData.combustible_salida;
                     document.getElementById('detailFechaSalidaReal').textContent = new Date(solicitudData.fecha_salida_real).toLocaleString('es-MX');
                     document.getElementById('detailObsSalida').textContent = solicitudData.observaciones_salida || 'Sin observaciones';
-                    
+
                     // Mostrar fotos de salida si existen
                     var fotosSalidaContainer = document.getElementById('detailFotosSalida');
                     fotosSalidaContainer.innerHTML = '';
@@ -738,7 +740,7 @@ if (isset($_GET['error'])) {
                     document.getElementById('detailGasRegreso').textContent = solicitudData.combustible_regreso;
                     document.getElementById('detailFechaRegresoReal').textContent = new Date(solicitudData.fecha_regreso_real).toLocaleString('es-MX');
                     document.getElementById('detailObsRegreso').textContent = solicitudData.observaciones_regreso || 'Sin observaciones';
-                    
+
                     // Mostrar fotos de regreso si existen
                     var fotosRegresoContainer = document.getElementById('detailFotosRegreso');
                     fotosRegresoContainer.innerHTML = '';

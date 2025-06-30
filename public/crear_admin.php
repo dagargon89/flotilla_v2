@@ -33,7 +33,6 @@ if ($db) {
         $stmt->execute();
 
         $success_message = "¡Usuario Administrador creado exitosamente!";
-
     } catch (PDOException $e) {
         // Si el usuario ya existe (por el correo_electronico UNIQUE) o hay otro error
         if ($e->getCode() == 23000) { // Código para violación de clave única
@@ -50,25 +49,26 @@ if ($db) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Administrador - Flotilla Interna</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
 
@@ -76,7 +76,7 @@ if ($db) {
     <div class="max-w-2xl mx-auto px-4 py-8">
         <div class="bg-white rounded-xl shadow-lg p-8 border border-cambridge2">
             <h1 class="text-3xl font-bold text-darkpurple text-center mb-6">Crear Usuario Administrador</h1>
-            
+
             <?php if (!empty($success_message)): ?>
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6" role="alert">
                     <h2 class="text-xl font-semibold mb-2"><?php echo $success_message; ?></h2>
@@ -108,4 +108,5 @@ if ($db) {
         </div>
     </div>
 </body>
+
 </html>

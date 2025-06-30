@@ -69,7 +69,7 @@ $vehiculos_flotilla_para_modales = []; // Para el dropdown de edición
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $solicitud_id = $_POST['solicitud_id'] ?? null;
     $action = $_POST['action'] ?? '';
-    
+
     try {
         if ($action === 'aprobar' || $action === 'rechazar') {
             $observaciones = trim($_POST['observaciones_aprobacion'] ?? '');
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             if (!$current_solicitud_info) {
                 throw new Exception("Solicitud no encontrada para procesar.");
             }
-            
+
             if ($action === 'aprobar') {
                 if (!$vehiculo_asignado_id) {
                     throw new Exception("Debes seleccionar un vehículo para aprobar la solicitud.");
@@ -124,7 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 }
 
                 $vehiculo_to_update = $vehiculo_asignado_id;
-                
             } else {
                 $vehiculo_to_update = null;
             }
@@ -146,7 +145,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             }
 
             $db->commit();
-
         } elseif ($action === 'edit_approved_request') { // NUEVA ACCIÓN: Editar una solicitud aprobada
             $vehiculo_id_new = filter_var($_POST['vehiculo_id_new'] ?? null, FILTER_VALIDATE_INT);
             $fecha_salida_new = trim($_POST['fecha_salida_new'] ?? '');
@@ -200,11 +198,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             $db->commit();
             $success_message = 'Solicitud aprobada actualizada con éxito.';
-
         } else {
             throw new Exception("Acción no reconocida.");
         }
-
     } catch (Exception $e) {
         if ($db->inTransaction()) {
             $db->rollBack();
@@ -242,7 +238,6 @@ if ($db) {
         // --- Obtener todos los vehículos para el dropdown en los modales (incluyendo los que no están 'disponibles') ---
         $stmt_vehiculos_flotilla = $db->query("SELECT id, marca, modelo, placas FROM vehiculos ORDER BY marca, modelo");
         $vehiculos_flotilla_para_modales = $stmt_vehiculos_flotilla->fetchAll(PDO::FETCH_ASSOC);
-
     } catch (PDOException $e) {
         error_log("Error al cargar datos para gestión de solicitudes: " . $e->getMessage());
         $error_message .= ' No se pudieron cargar las solicitudes o vehículos para la tabla. Detalle: ' . $e->getMessage();
@@ -252,6 +247,7 @@ if ($db) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -262,22 +258,23 @@ if ($db) {
     <!-- Agregar Tailwind CSS CDN y configuración de colores personalizados -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
+
 <body class="bg-parchment min-h-screen">
     <?php
     $nombre_usuario_sesion = $_SESSION['user_name'] ?? 'Usuario';
@@ -342,15 +339,27 @@ if ($db) {
                                     </td>
                                     <td class="px-4 py-3">
                                         <?php
-                                            $status_class = '';
-                                            switch ($solicitud['estatus_solicitud']) {
-                                                case 'pendiente': $status_class = 'bg-yellow-500 text-white'; break;
-                                                case 'aprobada': $status_class = 'bg-green-500 text-white'; break;
-                                                case 'rechazada': $status_class = 'bg-red-500 text-white'; break;
-                                                case 'en_curso': $status_class = 'bg-cambridge1 text-white'; break;
-                                                case 'completada': $status_class = 'bg-gray-500 text-white'; break;
-                                                case 'cancelada': $status_class = 'bg-blue-500 text-white'; break;
-                                            }
+                                        $status_class = '';
+                                        switch ($solicitud['estatus_solicitud']) {
+                                            case 'pendiente':
+                                                $status_class = 'bg-yellow-500 text-white';
+                                                break;
+                                            case 'aprobada':
+                                                $status_class = 'bg-green-500 text-white';
+                                                break;
+                                            case 'rechazada':
+                                                $status_class = 'bg-red-500 text-white';
+                                                break;
+                                            case 'en_curso':
+                                                $status_class = 'bg-cambridge1 text-white';
+                                                break;
+                                            case 'completada':
+                                                $status_class = 'bg-gray-500 text-white';
+                                                break;
+                                            case 'cancelada':
+                                                $status_class = 'bg-blue-500 text-white';
+                                                break;
+                                        }
                                         ?>
                                         <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php echo $status_class; ?>"><?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?></span>
                                     </td>
@@ -358,19 +367,19 @@ if ($db) {
                                         <?php if ($solicitud['estatus_solicitud'] === 'pendiente'): ?>
                                             <div class="flex flex-wrap gap-1">
                                                 <button type="button" class="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-green-600 transition" data-modal-target="approveRejectModal"
-                                                        data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="aprobar"
-                                                        data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
-                                                        data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
-                                                        data-regreso="<?php echo htmlspecialchars($solicitud['fecha_regreso_solicitada']); ?>"
-                                                        data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>"
-                                                        data-vehiculo-actual-id="<?php echo htmlspecialchars($solicitud['vehiculo_actual_id']); ?>"
-                                                        data-vehiculo-info-display="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>">
+                                                    data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="aprobar"
+                                                    data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
+                                                    data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
+                                                    data-regreso="<?php echo htmlspecialchars($solicitud['fecha_regreso_solicitada']); ?>"
+                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>"
+                                                    data-vehiculo-actual-id="<?php echo htmlspecialchars($solicitud['vehiculo_actual_id']); ?>"
+                                                    data-vehiculo-info-display="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>">
                                                     <i class="bi bi-check-lg"></i> Aprobar
                                                 </button>
                                                 <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="approveRejectModal"
-                                                        data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="rechazar"
-                                                        data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
-                                                        data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>">
+                                                    data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="rechazar"
+                                                    data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
+                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>">
                                                     <i class="bi bi-x-lg"></i> Rechazar
                                                 </button>
                                             </div>
@@ -590,7 +599,7 @@ if ($db) {
                 button.addEventListener('click', function() {
                     const modalId = this.getAttribute('data-modal-target');
                     const action = this.getAttribute('data-action');
-                    
+
                     if (modalId === 'approveRejectModal') {
                         setupApproveRejectModal(action, this);
                     } else if (modalId === 'editApprovedRequestModal') {
@@ -598,7 +607,7 @@ if ($db) {
                     } else if (modalId === 'viewDetailsModal') {
                         setupViewDetailsModal(this);
                     }
-                    
+
                     openModal(modalId);
                 });
             });
@@ -673,7 +682,7 @@ if ($db) {
                 // Aplicar clase de color según el estatus
                 var estatusElement = document.getElementById('detailEstatus');
                 estatusElement.className = 'inline-block px-2 py-1 text-xs font-semibold rounded-full';
-                
+
                 switch (estatus.toLowerCase()) {
                     case 'pendiente':
                         estatusElement.classList.add('bg-yellow-100', 'text-yellow-800');
@@ -698,4 +707,5 @@ if ($db) {
         });
     </script>
 </body>
+
 </html>

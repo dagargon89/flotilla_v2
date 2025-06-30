@@ -65,19 +65,19 @@ $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
 
@@ -122,18 +122,18 @@ $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
                                     <td class="border border-cambridge1 px-4 py-2"><?php echo date('d/m/Y H:i', strtotime($amonestacion['fecha_amonestacion'])); ?></td>
                                     <td class="border border-cambridge1 px-4 py-2">
                                         <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full <?php
-                                            switch ($amonestacion['tipo_amonestacion']) {
-                                                case 'leve':
-                                                    echo 'bg-cambridge1 text-white';
-                                                    break;
-                                                case 'grave':
-                                                    echo 'bg-yellow-500 text-white';
-                                                    break;
-                                                case 'suspension':
-                                                    echo 'bg-red-500 text-white';
-                                                    break;
-                                            }
-                                        ?>"><?php echo htmlspecialchars(ucfirst($amonestacion['tipo_amonestacion'])); ?></span>
+                                                                                                                switch ($amonestacion['tipo_amonestacion']) {
+                                                                                                                    case 'leve':
+                                                                                                                        echo 'bg-cambridge1 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'grave':
+                                                                                                                        echo 'bg-yellow-500 text-white';
+                                                                                                                        break;
+                                                                                                                    case 'suspension':
+                                                                                                                        echo 'bg-red-500 text-white';
+                                                                                                                        break;
+                                                                                                                }
+                                                                                                                ?>"><?php echo htmlspecialchars(ucfirst($amonestacion['tipo_amonestacion'])); ?></span>
                                     </td>
                                     <td class="border border-cambridge1 px-4 py-2"><?php echo htmlspecialchars($amonestacion['descripcion']); ?></td>
                                     <td class="border border-cambridge1 px-4 py-2"><?php echo htmlspecialchars($amonestacion['amonestado_por_nombre'] ?? 'N/A'); ?></td>
@@ -156,7 +156,7 @@ $rol_usuario_sesion = $_SESSION['user_role'] ?? 'empleado';
                 <p class="text-mountbatten mb-2">Si consideras que esta suspensión es un error o tienes alguna pregunta, por favor contacta al administrador de la flotilla:</p>
                 <p class="text-darkpurple"><strong>Correo Electrónico:</strong> <a href="mailto:admin@tuorganizacion.com" class="text-cambridge1 hover:underline">admin@tuorganizacion.com</a></p>
             </div>
-            
+
             <div class="text-center mt-6">
                 <a href="logout.php" class="inline-block bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition">Cerrar Sesión</a>
             </div>

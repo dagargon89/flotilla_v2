@@ -222,19 +222,19 @@ if ($db) { // $db ya está definida.
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              darkpurple: '#310A31',
-              mountbatten: '#847996',
-              cambridge1: '#88B7B5',
-              cambridge2: '#A7CAB1',
-              parchment: '#F4ECD6',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkpurple: '#310A31',
+                        mountbatten: '#847996',
+                        cambridge1: '#88B7B5',
+                        cambridge2: '#A7CAB1',
+                        parchment: '#FFFBFA',
+                    }
+                }
             }
-          }
         }
-      }
     </script>
 </head>
 
@@ -437,13 +437,13 @@ if ($db) { // $db ya está definida.
                 button.addEventListener('click', function() {
                     const modalId = this.getAttribute('data-modal-target');
                     const action = this.getAttribute('data-action');
-                    
+
                     if (modalId === 'addEditDocumentModal') {
                         setupDocumentModal(action, this);
                     } else if (modalId === 'deleteDocumentModal') {
                         setupDeleteDocumentModal(this);
                     }
-                    
+
                     openModal(modalId);
                 });
             });
