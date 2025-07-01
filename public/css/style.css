@@ -28,3 +28,16 @@ body {
     vertical-align: middle;
     margin-right: 0.25rem;
 }
+
+/* Paleta de colores centralizada */
+.bg-darkpurple { background-color: var(--color-darkpurple) !important; }
+.bg-mountbatten { background-color: var(--color-mountbatten) !important; }
+.bg-cambridge1 { background-color: var(--color-cambridge1) !important; }
+.bg-cambridge2 { background-color: var(--color-cambridge2) !important; }
+.bg-parchment { background-color: var(--color-parchment) !important; }
+
+.text-darkpurple { color: var(--color-darkpurple) !important; }
+.text-mountbatten { color: var(--color-mountbatten) !important; }
+.text-cambridge1 { color: var(--color-cambridge1) !important; }
+.text-cambridge2 { color: var(--color-cambridge2) !important; }
+.text-parchment { color: var(--color-parchment) !important; }

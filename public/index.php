@@ -108,6 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     </script>
+    <link rel="stylesheet" href="css/colors.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-parchment">

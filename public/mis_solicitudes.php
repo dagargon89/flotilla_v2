@@ -309,6 +309,7 @@ if (isset($_GET['error'])) {
             }
         }
     </script>
+    <link rel="stylesheet" href="css/colors.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
         #vehicle-status {

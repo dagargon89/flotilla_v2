@@ -171,6 +171,7 @@ if (!$vehiculo_id) {
             }
         }
     </script>
+    <link rel="stylesheet" href="css/colors.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
