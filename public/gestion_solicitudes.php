@@ -371,7 +371,7 @@ if ($db) {
                                                     data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                     data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
                                                     data-regreso="<?php echo htmlspecialchars($solicitud['fecha_regreso_solicitada']); ?>"
-                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>"
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>"
                                                     data-vehiculo-actual-id="<?php echo htmlspecialchars($solicitud['vehiculo_actual_id']); ?>"
                                                     data-vehiculo-info-display="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>">
                                                     <i class="bi bi-check-lg"></i> Aprobar
@@ -379,7 +379,7 @@ if ($db) {
                                                 <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="approveRejectModal"
                                                     data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="rechazar"
                                                     data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
-                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>">
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
                                                     <i class="bi bi-x-lg"></i> Rechazar
                                                 </button>
                                             </div>
@@ -391,7 +391,7 @@ if ($db) {
                                                     data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
                                                     data-regreso="<?php echo htmlspecialchars($solicitud['fecha_regreso_solicitada']); ?>"
                                                     data-vehiculo-actual-id="<?php echo htmlspecialchars($solicitud['vehiculo_actual_id'] ?? ''); ?>"
-                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion'] ?? ''); ?>">
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
                                                     <i class="bi bi-pencil-fill"></i> Editar Asignación
                                                 </button>
                                                 <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewDetailsModal"
@@ -404,7 +404,7 @@ if ($db) {
                                                     data-destino="<?php echo htmlspecialchars($solicitud['destino']); ?>"
                                                     data-vehiculo="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>"
                                                     data-estatus="<?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?>"
-                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>">
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
                                                     <i class="bi bi-eye-fill"></i> Ver Detalles
                                                 </button>
                                             </div>
@@ -420,7 +420,7 @@ if ($db) {
                                                     data-destino="<?php echo htmlspecialchars($solicitud['destino']); ?>"
                                                     data-vehiculo="<?php echo htmlspecialchars($solicitud['marca'] ? $solicitud['marca'] . ' ' . $solicitud['modelo'] . ' (' . $solicitud['placas'] . ')' : 'Sin asignar'); ?>"
                                                     data-estatus="<?php echo htmlspecialchars(ucfirst($solicitud['estatus_solicitud'])); ?>"
-                                                    data-observaciones-aprobacion="<?php echo htmlspecialchars($solicitud['observaciones_aprobacion']); ?>">
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
                                                     <i class="bi bi-eye-fill"></i> Ver Detalles
                                                 </button>
                                             </div>
@@ -620,7 +620,7 @@ if ($db) {
                 document.getElementById('modalSolicitudId').value = solicitudId;
                 document.getElementById('modalAction').value = action;
                 document.getElementById('modalUserName').textContent = usuario;
-                document.getElementById('observaciones_aprobacion_modal').value = observacionesAprobacion || '';
+                document.getElementById('observaciones_aprobacion_modal').value = (observacionesAprobacion === null || observacionesAprobacion === 'null' || typeof observacionesAprobacion === 'undefined') ? '' : observacionesAprobacion;
 
                 var modalActionText = document.getElementById('modalActionText');
                 var modalSubmitBtn = document.getElementById('modalSubmitBtn');

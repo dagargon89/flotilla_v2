@@ -85,6 +85,12 @@ if ($db) { // $db ya está definida.
     }
 }
 
+// --- FUNCIÓN PARA CONVERTIR FECHAS AL FORMATO DE MYSQL ---
+function convertirFecha($fecha)
+{
+    $dt = DateTime::createFromFormat('d/m/Y H:i', $fecha);
+    return $dt ? $dt->format('Y-m-d H:i:s') : null;
+}
 
 // Lógica para procesar la solicitud cuando se envía el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -101,9 +107,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descripcion = trim($_POST['descripcion'] ?? '');
     $destino = trim($_POST['destino'] ?? '');
 
+    // Convertir fechas al formato de MySQL
+    $fecha_salida_solicitada_db = convertirFecha($fecha_salida_solicitada);
+    $fecha_regreso_solicitada_db = convertirFecha($fecha_regreso_solicitada);
+
     if (empty($selected_vehiculo_id) || empty($fecha_salida_solicitada) || empty($fecha_regreso_solicitada) || empty($evento) || empty($descripcion) || empty($destino)) {
         $error_message = 'Por favor, completa todos los campos requeridos, incluyendo la selección del vehículo.';
-    } elseif (strtotime($fecha_salida_solicitada) >= strtotime($fecha_regreso_solicitada)) {
+    } elseif (strtotime($fecha_salida_solicitada_db) >= strtotime($fecha_regreso_solicitada_db)) {
         $error_message = 'La fecha y hora de regreso deben ser posteriores a la fecha y hora de salida.';
     } else {
         if ($db) {
@@ -117,8 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     )
                 ");
                 $stmt_overlap->bindParam(':vehiculo_id', $selected_vehiculo_id);
-                $stmt_overlap->bindParam(':fecha_salida', $fecha_salida_solicitada);
-                $stmt_overlap->bindParam(':fecha_regreso', $fecha_regreso_solicitada);
+                $stmt_overlap->bindParam(':fecha_salida', $fecha_salida_solicitada_db);
+                $stmt_overlap->bindParam(':fecha_regreso', $fecha_regreso_solicitada_db);
                 $stmt_overlap->execute();
 
                 if ($stmt_overlap->fetchColumn() > 0) {
@@ -127,8 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $db->prepare("INSERT INTO solicitudes_vehiculos (usuario_id, vehiculo_id, fecha_salida_solicitada, fecha_regreso_solicitada, evento, descripcion, destino) VALUES (:usuario_id, :vehiculo_id, :fecha_salida, :fecha_regreso, :evento, :descripcion, :destino)");
                     $stmt->bindParam(':usuario_id', $user_id);
                     $stmt->bindParam(':vehiculo_id', $selected_vehiculo_id);
-                    $stmt->bindParam(':fecha_salida', $fecha_salida_solicitada);
-                    $stmt->bindParam(':fecha_regreso', $fecha_regreso_solicitada);
+                    $stmt->bindParam(':fecha_salida', $fecha_salida_solicitada_db);
+                    $stmt->bindParam(':fecha_regreso', $fecha_regreso_solicitada_db);
                     $stmt->bindParam(':evento', $evento);
                     $stmt->bindParam(':descripcion', $descripcion);
                     $stmt->bindParam(':destino', $destino);
@@ -145,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } catch (PDOException $e) {
                 error_log("Error al enviar solicitud de vehículo: " . $e->getMessage());
-                $error_message = 'Ocurrió un error al procesar tu solicitud. Intenta de nuevo.';
+                $error_message = 'Ocurrió un error al procesar tu solicitud. Intenta de nuevo. <br><strong>Debug:</strong> ' . htmlspecialchars($e->getMessage());
             }
         } else {
             $error_message = 'No se pudo conectar a la base de datos.';
