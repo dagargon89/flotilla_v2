@@ -456,8 +456,11 @@ if ($db) {
                                 <label for="vehiculo_asignado_id" class="block text-sm font-medium text-gray-700 mb-2">Asignar Vehículo Disponible</label>
                                 <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="vehiculo_asignado_id" name="vehiculo_asignado_id">
                                     <option value="">Selecciona un vehículo (Obligatorio para Aprobar)</option>
-                                    <?php foreach ($vehiculos_flotilla_para_modales as $vehiculo_opcion): ?>
-                                        <option value="<?php echo htmlspecialchars($vehiculo_opcion['id']); ?>">
+                                    <?php foreach (
+                                        $vehiculos_flotilla_para_modales as $vehiculo_opcion
+                                    ): ?>
+                                        <option value="<?php echo htmlspecialchars($vehiculo_opcion['id']); ?>"
+                                            <?php echo (isset($solicitud['vehiculo_actual_id']) && $solicitud['vehiculo_actual_id'] == $vehiculo_opcion['id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($vehiculo_opcion['marca'] . ' ' . $vehiculo_opcion['modelo'] . ' (' . $vehiculo_opcion['placas'] . ')'); ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -616,11 +619,17 @@ if ($db) {
                 var solicitudId = button.getAttribute('data-solicitud-id');
                 var usuario = button.getAttribute('data-usuario');
                 var observacionesAprobacion = button.getAttribute('data-observaciones-aprobacion');
+                var vehiculoActualId = button.getAttribute('data-vehiculo-actual-id');
 
                 document.getElementById('modalSolicitudId').value = solicitudId;
                 document.getElementById('modalAction').value = action;
                 document.getElementById('modalUserName').textContent = usuario;
                 document.getElementById('observaciones_aprobacion_modal').value = (observacionesAprobacion === null || observacionesAprobacion === 'null' || typeof observacionesAprobacion === 'undefined') ? '' : observacionesAprobacion;
+                if (vehiculoActualId) {
+                    document.getElementById('vehiculo_asignado_id').value = vehiculoActualId;
+                } else {
+                    document.getElementById('vehiculo_asignado_id').value = '';
+                }
 
                 var modalActionText = document.getElementById('modalActionText');
                 var modalSubmitBtn = document.getElementById('modalSubmitBtn');
