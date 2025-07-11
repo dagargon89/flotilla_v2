@@ -1,7 +1,40 @@
-:root {
+/*:root {
   --color-darkpurple: #310A31;
   --color-mountbatten: #847996;
   --color-cambridge1: #88B7B5;
   --color-cambridge2: #A7CAB1;
   --color-parchment: #FFFBFA;
-} 
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-success: #38a169;
+  --color-success-hover: #2f855a;
+  --color-danger: #dc3545;
+  --color-danger-hover: #a71d2a;
+  --color-warning: #ffc107;
+  --color-warning-hover: #e0a800;
+  --color-info: #17a2b8;
+  --color-info-hover: #117a8b;
+} */
+:root {
+  --color-darkpurple: #310A31; /* Fondo de secciones importantes, texto principal */
+  --color-mountbatten: #847996; /* Texto secundario, bordes sutiles */
+  --color-cambridge1: #88B7B5; /* Color secundario para gráficos o íconos */
+  --color-cambridge2: #A7CAB1; /* Otro color secundario para gráficos o íconos */
+  --color-parchment: #FFFBFA; /* Fondo principal del dashboard */
+
+  /* NUEVO COLOR DE ACENTO */
+  --color-accent: #FF7F50; /* Naranja Coral: para botones principales, elementos clave */
+  --color-accent-hover: #E65A2C; /* Versión más oscura para hover */
+
+  /* Colores de estado (puedes mantener los tuyos o ajustarlos ligeramente) */
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-success: #38a169;
+  --color-success-hover: #2f855a;
+  --color-danger: #dc3545;
+  --color-danger-hover: #a71d2a;
+  --color-warning: #ffc107;
+  --color-warning-hover: #e0a800;
+  --color-info: #17a2b8;
+  --color-info-hover: #117a8b;
+}

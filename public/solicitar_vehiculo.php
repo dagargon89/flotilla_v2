@@ -101,15 +101,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $selected_vehiculo_id = filter_var($_POST['vehiculo_id'] ?? null, FILTER_VALIDATE_INT);
-    $fecha_salida_solicitada = trim($_POST['fecha_salida_solicitada'] ?? '');
-    $fecha_regreso_solicitada = trim($_POST['fecha_regreso_solicitada'] ?? '');
+    // Manejar tanto inputs móviles como desktop
+    $fecha_salida_solicitada = trim($_POST['fecha_salida_solicitada'] ?? $_POST['fecha_salida_solicitada_desktop'] ?? '');
+    $fecha_regreso_solicitada = trim($_POST['fecha_regreso_solicitada'] ?? $_POST['fecha_regreso_solicitada_desktop'] ?? '');
     $evento = trim($_POST['evento'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $destino = trim($_POST['destino'] ?? '');
 
     // Convertir fechas al formato de MySQL
-    $fecha_salida_solicitada_db = convertirFecha($fecha_salida_solicitada);
-    $fecha_regreso_solicitada_db = convertirFecha($fecha_regreso_solicitada);
+    // Si viene de input móvil (datetime-local), ya está en formato correcto
+    // Si viene de Flatpickr (desktop), usar la función de conversión
+    if (strpos($fecha_salida_solicitada, '/') !== false) {
+        // Viene de Flatpickr (formato d/m/Y H:i)
+        $fecha_salida_solicitada_db = convertirFecha($fecha_salida_solicitada);
+    } else {
+        // Viene de input móvil (formato Y-m-dTH:i)
+        $fecha_salida_solicitada_db = $fecha_salida_solicitada ? date('Y-m-d H:i:s', strtotime($fecha_salida_solicitada)) : null;
+    }
+
+    if (strpos($fecha_regreso_solicitada, '/') !== false) {
+        // Viene de Flatpickr (formato d/m/Y H:i)
+        $fecha_regreso_solicitada_db = convertirFecha($fecha_regreso_solicitada);
+    } else {
+        // Viene de input móvil (formato Y-m-dTH:i)
+        $fecha_regreso_solicitada_db = $fecha_regreso_solicitada ? date('Y-m-d H:i:s', strtotime($fecha_regreso_solicitada)) : null;
+    }
 
     if (empty($selected_vehiculo_id) || empty($fecha_salida_solicitada) || empty($fecha_regreso_solicitada) || empty($evento) || empty($descripcion) || empty($destino)) {
         $error_message = 'Por favor, completa todos los campos requeridos, incluyendo la selección del vehículo.';
@@ -249,11 +265,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div>
                         <label for="fecha_salida_solicitada" class="block text-sm font-medium text-darkpurple mb-1">Fecha y Hora de Salida Deseada</label>
-                        <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_salida_solicitada" name="fecha_salida_solicitada" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" placeholder="Selecciona fecha y hora" autocomplete="off" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                        <!-- Input nativo para móviles -->
+                        <input type="datetime-local" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition md:hidden" id="fecha_salida_solicitada_mobile" name="fecha_salida_solicitada" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                        <!-- Input con Flatpickr para desktop -->
+                        <input type="text" class="hidden md:block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_salida_solicitada" name="fecha_salida_solicitada_desktop" value="<?php echo htmlspecialchars($fecha_salida_solicitada); ?>" placeholder="Selecciona fecha y hora" autocomplete="off" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
                     </div>
                     <div>
                         <label for="fecha_regreso_solicitada" class="block text-sm font-medium text-darkpurple mb-1">Fecha y Hora de Regreso Deseada</label>
-                        <input type="text" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_regreso_solicitada" name="fecha_regreso_solicitada" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" placeholder="Selecciona fecha y hora" autocomplete="off" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                        <!-- Input nativo para móviles -->
+                        <input type="datetime-local" class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition md:hidden" id="fecha_regreso_solicitada_mobile" name="fecha_regreso_solicitada" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                        <!-- Input con Flatpickr para desktop -->
+                        <input type="text" class="hidden md:block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="fecha_regreso_solicitada" name="fecha_regreso_solicitada_desktop" value="<?php echo htmlspecialchars($fecha_regreso_solicitada); ?>" placeholder="Selecciona fecha y hora" autocomplete="off" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
                     </div>
                     <div>
                         <label for="evento" class="block text-sm font-medium text-darkpurple mb-1">Evento</label>
@@ -297,6 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="js/main.js"></script>
     <script>
         // Inicializa Flatpickr para los inputs de fecha con formato amigable y español
+        // Solo en desktop (md:block)
         const flatpickrSalida = flatpickr("#fecha_salida_solicitada", {
             enableTime: true,
             dateFormat: "d/m/Y H:i",
@@ -307,6 +330,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             onChange: function(selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0) {
                     flatpickrRegreso.set('minDate', selectedDates[0]);
+                    // Sincronizar con input móvil
+                    const mobileInput = document.getElementById('fecha_salida_solicitada_mobile');
+                    if (mobileInput) {
+                        mobileInput.value = selectedDates[0].toISOString().slice(0, 16);
+                    }
                 }
             }
         });
@@ -316,7 +344,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             minDate: "today",
             time_24hr: true,
             locale: "es",
-            defaultDate: new Date().fp_incr(1)
+            defaultDate: new Date().fp_incr(1),
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    // Sincronizar con input móvil
+                    const mobileInput = document.getElementById('fecha_regreso_solicitada_mobile');
+                    if (mobileInput) {
+                        mobileInput.value = selectedDates[0].toISOString().slice(0, 16);
+                    }
+                }
+            }
+        });
+
+        // Sincronizar inputs móviles con desktop
+        document.addEventListener('DOMContentLoaded', function() {
+            const salidaMobile = document.getElementById('fecha_salida_solicitada_mobile');
+            const regresoMobile = document.getElementById('fecha_regreso_solicitada_mobile');
+            const salidaDesktop = document.getElementById('fecha_salida_solicitada');
+            const regresoDesktop = document.getElementById('fecha_regreso_solicitada');
+
+            // Cuando cambia el input móvil, actualizar el desktop
+            if (salidaMobile) {
+                salidaMobile.addEventListener('change', function() {
+                    if (this.value) {
+                        const date = new Date(this.value);
+                        flatpickrSalida.setDate(date);
+                    }
+                });
+            }
+
+            if (regresoMobile) {
+                regresoMobile.addEventListener('change', function() {
+                    if (this.value) {
+                        const date = new Date(this.value);
+                        flatpickrRegreso.setDate(date);
+                    }
+                });
+            }
         });
 
         // --- Lógica para la vista de lista de disponibilidad ---

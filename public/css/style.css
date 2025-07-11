@@ -6,12 +6,13 @@ body {
     border-radius: 15px;
 }
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #fff !important;
 }
 .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+    background-color: var(--color-primary-hover) !important;
+    border-color: var(--color-primary-hover) !important;
 }
 
 /* Estilos para organizar botones de acción en tablas */
@@ -41,3 +42,35 @@ body {
 .text-cambridge1 { color: var(--color-cambridge1) !important; }
 .text-cambridge2 { color: var(--color-cambridge2) !important; }
 .text-parchment { color: var(--color-parchment) !important; }
+
+.alert-success {
+    background-color: var(--color-success) !important;
+    color: #fff !important;
+}
+.alert-success:hover {
+    background-color: var(--color-success-hover) !important;
+}
+
+.alert-danger {
+    background-color: var(--color-danger) !important;
+    color: #fff !important;
+}
+.alert-danger:hover {
+    background-color: var(--color-danger-hover) !important;
+}
+
+.alert-warning {
+    background-color: var(--color-warning) !important;
+    color: #212529 !important;
+}
+.alert-warning:hover {
+    background-color: var(--color-warning-hover) !important;
+}
+
+.alert-info {
+    background-color: var(--color-info) !important;
+    color: #fff !important;
+}
+.alert-info:hover {
+    background-color: var(--color-info-hover) !important;
+}
