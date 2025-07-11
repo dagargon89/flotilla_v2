@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'] ?? '';
 
     try {
-        if ($action === 'aprobar' || $action === 'rechazar') {
+        if ($action === 'aprobar' || $action === 'rechazar' || $action === 'cancelar') {
             $observaciones = trim($_POST['observaciones_aprobacion'] ?? '');
             $vehiculo_asignado_id = filter_var($_POST['vehiculo_asignado_id'] ?? null, FILTER_VALIDATE_INT);
 
@@ -81,13 +81,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             $db->beginTransaction();
 
-            $new_status = ($action === 'aprobar') ? 'aprobada' : 'rechazada';
+            $new_status = '';
             $vehiculo_to_update = null;
+
+            if ($action === 'aprobar') {
+                $new_status = 'aprobada';
+                if (!$vehiculo_asignado_id) {
+                    throw new Exception("Debes seleccionar un vehículo para aprobar la solicitud.");
+                }
+                $vehiculo_to_update = $vehiculo_asignado_id;
+            } elseif ($action === 'rechazar') {
+                $new_status = 'rechazada';
+                $vehiculo_to_update = null;
+            } elseif ($action === 'cancelar') {
+                $new_status = 'cancelada';
+                $vehiculo_to_update = null;
+            }
 
             $stmt_get_solicitud_info = $db->prepare("
                 SELECT s.vehiculo_id, s.fecha_salida_solicitada, s.fecha_regreso_solicitada,
                        u.nombre AS solicitante_nombre, u.correo_electronico AS solicitante_correo,
-                       s.evento, s.descripcion, s.destino
+                       s.evento, s.descripcion, s.destino, s.estatus_solicitud
                 FROM solicitudes_vehiculos s
                 JOIN usuarios u ON s.usuario_id = u.id
                 WHERE s.id = :solicitud_id FOR UPDATE");
@@ -99,11 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 throw new Exception("Solicitud no encontrada para procesar.");
             }
 
-            if ($action === 'aprobar') {
-                if (!$vehiculo_asignado_id) {
-                    throw new Exception("Debes seleccionar un vehículo para aprobar la solicitud.");
-                }
+            // Validación adicional para cancelar: solo permitir cancelar solicitudes aprobadas o en_curso
+            if ($action === 'cancelar' && !in_array($current_solicitud_info['estatus_solicitud'], ['aprobada', 'en_curso'])) {
+                throw new Exception("Solo se pueden cancelar solicitudes aprobadas o en curso.");
+            }
 
+            if ($action === 'aprobar') {
                 $stmt_overlap = $db->prepare("
                     SELECT COUNT(*) FROM solicitudes_vehiculos
                     WHERE vehiculo_id = :vehiculo_id
@@ -122,10 +137,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 if ($stmt_overlap->fetchColumn() > 0) {
                     throw new Exception("El vehículo seleccionado no está disponible en las fechas solicitadas. Por favor, elige otro.");
                 }
-
-                $vehiculo_to_update = $vehiculo_asignado_id;
-            } else {
-                $vehiculo_to_update = null;
             }
 
             $stmt_update_sol = $db->prepare("UPDATE solicitudes_vehiculos SET estatus_solicitud = :new_status, fecha_aprobacion = NOW(), aprobado_por = :aprobado_por, observaciones_aprobacion = :observaciones, vehiculo_id = :vehiculo_id WHERE id = :solicitud_id");
@@ -137,7 +148,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $stmt_update_sol->execute();
 
             if ($stmt_update_sol->rowCount() > 0) {
-                $success_message = 'Solicitud ' . ($action === 'aprobar' ? 'aprobada' : 'rechazada') . ' con éxito.';
+                $action_text = '';
+                switch ($action) {
+                    case 'aprobar':
+                        $action_text = 'aprobada';
+                        break;
+                    case 'rechazar':
+                        $action_text = 'rechazada';
+                        break;
+                    case 'cancelar':
+                        $action_text = 'cancelada';
+                        break;
+                }
+                $success_message = 'Solicitud ' . $action_text . ' con éxito.';
                 // Correo electrónico (pendiente de configurar en mail.php)
             } else {
                 $error_message = 'La solicitud no pudo ser actualizada. Asegúrate de que no esté ya procesada o de que el ID sea correcto.';
@@ -408,6 +431,12 @@ if ($db) {
                                                     data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
                                                     <i class="bi bi-eye-fill"></i> Ver Detalles
                                                 </button>
+                                                <button type="button" class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-red-600 transition" data-modal-target="approveRejectModal"
+                                                    data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-action="cancelar"
+                                                    data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
+                                                    <i class="bi bi-x-circle-fill"></i> Cancelar
+                                                </button>
                                             </div>
                                         <?php else: ?>
                                             <div class="flex flex-wrap gap-1">
@@ -452,6 +481,7 @@ if ($db) {
                         <input type="hidden" name="action" id="modalAction">
                         <input type="hidden" name="vehiculo_info_display_modal" id="vehiculoInfoDisplayModal">
                         <p class="text-gray-700">Estás a punto de <strong id="modalActionText"></strong> la solicitud de <strong id="modalUserName"></strong>.</p>
+                        <p class="text-sm text-red-600" id="cancelWarning" style="display: none;">⚠️ <strong>Importante:</strong> Al cancelar una solicitud, se liberará el vehículo asignado y la solicitud quedará marcada como cancelada.</p>
                         <div id="vehicleAssignmentSection">
                             <div>
                                 <label for="vehiculo_asignado_id" class="block text-sm font-medium text-gray-700 mb-2">Asignar Vehículo Disponible</label>
@@ -641,11 +671,19 @@ if ($db) {
                     modalSubmitBtn.textContent = 'Aprobar Solicitud';
                     modalSubmitBtn.className = 'px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors';
                     vehicleAssignmentSection.style.display = 'block';
+                    document.getElementById('cancelWarning').style.display = 'none';
                 } else if (action === 'rechazar') {
                     modalActionText.textContent = 'RECHAZAR';
                     modalSubmitBtn.textContent = 'Rechazar Solicitud';
                     modalSubmitBtn.className = 'px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors';
                     vehicleAssignmentSection.style.display = 'none';
+                    document.getElementById('cancelWarning').style.display = 'none';
+                } else if (action === 'cancelar') {
+                    modalActionText.textContent = 'CANCELAR';
+                    modalSubmitBtn.textContent = 'Cancelar Solicitud';
+                    modalSubmitBtn.className = 'px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors';
+                    vehicleAssignmentSection.style.display = 'none';
+                    document.getElementById('cancelWarning').style.display = 'block';
                 }
             }
 
