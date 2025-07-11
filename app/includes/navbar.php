@@ -102,8 +102,8 @@
                                 <a href="mis_solicitudes.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'mis_solicitudes.php') ? 'bg-cambridge1 text-white' : 'text-gray-700 hover:bg-cambridge2 hover:text-white'; ?> block px-4 py-2 text-sm transition-colors duration-200">
                                     Mis Solicitudes
                                 </a>
-                                <a href="#" class="text-gray-700 hover:bg-cambridge2 hover:text-white block px-4 py-2 text-sm transition-colors duration-200">
-                                    Mi Perfil (próximamente)
+                                <a href="mi_perfil.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'mi_perfil.php') ? 'bg-cambridge1 text-white' : 'text-gray-700 hover:bg-cambridge2 hover:text-white'; ?> block px-4 py-2 text-sm transition-colors duration-200">
+                                    Mi Perfil
                                 </a>
                                 <div class="border-t border-gray-200 my-1"></div>
                             <?php endif; ?>
@@ -143,7 +143,7 @@
                 <?php if (isset($rol_usuario_sesion) && ($rol_usuario_sesion === 'flotilla_manager' || $rol_usuario_sesion === 'admin')): ?>
                     <div class="border-t border-gray-600 my-2"></div>
                     <div class="text-gray-400 px-3 py-2 text-sm font-medium">Administración</div>
-                    
+
                     <?php if ($rol_usuario_sesion === 'flotilla_manager' || $rol_usuario_sesion === 'admin'): ?>
                         <a href="gestion_solicitudes.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'gestion_solicitudes.php') ? 'bg-cambridge1 text-white' : 'text-gray-300 hover:text-white hover:bg-cambridge2'; ?> block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                             Gestión de Solicitudes
@@ -175,7 +175,7 @@
                 Hola, <?php echo htmlspecialchars($nombre_usuario_sesion ?? 'Usuario'); ?>
                 (<?php echo htmlspecialchars($rol_usuario_sesion ?? 'empleado'); ?>)
             </div>
-            
+
             <?php if (isset($current_user_estatus_usuario) && $current_user_estatus_usuario === 'suspendido'): ?>
                 <a href="suspended.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'suspended.php') ? 'bg-cambridge1 text-white' : 'text-gray-300 hover:text-white hover:bg-cambridge2'; ?> block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                     Mi Suspensión
@@ -184,11 +184,11 @@
                 <a href="mis_solicitudes.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'mis_solicitudes.php') ? 'bg-cambridge1 text-white' : 'text-gray-300 hover:text-white hover:bg-cambridge2'; ?> block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                     Mis Solicitudes
                 </a>
-                <a href="#" class="text-gray-300 hover:text-white hover:bg-cambridge2 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
-                    Mi Perfil (próximamente)
+                <a href="mi_perfil.php" class="<?php echo (basename($_SERVER['PHP_SELF']) == 'mi_perfil.php') ? 'bg-cambridge1 text-white' : 'text-gray-300 hover:text-white hover:bg-cambridge2'; ?> block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
+                    Mi Perfil
                 </a>
             <?php endif; ?>
-            
+
             <a href="logout.php" class="text-gray-300 hover:text-white hover:bg-red-600 block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200">
                 Cerrar Sesión
             </a>
@@ -197,15 +197,15 @@
 </nav>
 
 <script>
-// JavaScript para el menú móvil
-document.addEventListener('DOMContentLoaded', function() {
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-    
-    if (mobileMenuButton && mobileMenu) {
-        mobileMenuButton.addEventListener('click', function() {
-            mobileMenu.classList.toggle('hidden');
-        });
-    }
-});
+    // JavaScript para el menú móvil
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    });
 </script>
