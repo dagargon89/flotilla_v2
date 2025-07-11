@@ -28,7 +28,7 @@ desktop.ini
 /public/build/
 
 # Ignore sensitive files or backups
-*.sql
+#*.sql
 *.bak
 *.old
 
