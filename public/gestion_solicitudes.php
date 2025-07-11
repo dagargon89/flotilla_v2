@@ -221,6 +221,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
             $db->commit();
             $success_message = 'Solicitud aprobada actualizada con éxito.';
+        } elseif ($action === 'cambiar_usuario') { // NUEVA ACCIÓN: Cambiar usuario de una solicitud
+            $nuevo_usuario_id = filter_var($_POST['nuevo_usuario_id'] ?? null, FILTER_VALIDATE_INT);
+            $observaciones_cambio = trim($_POST['observaciones_cambio_usuario'] ?? '');
+
+            if ($solicitud_id === false || !$nuevo_usuario_id) {
+                throw new Exception("Datos incompletos para cambiar el usuario de la solicitud.");
+            }
+
+            $db->beginTransaction();
+
+            // Verificar que la solicitud existe y está aprobada o en curso
+            $stmt_verificar_solicitud = $db->prepare("
+                SELECT estatus_solicitud, usuario_id 
+                FROM solicitudes_vehiculos 
+                WHERE id = :solicitud_id
+            ");
+            $stmt_verificar_solicitud->bindParam(':solicitud_id', $solicitud_id);
+            $stmt_verificar_solicitud->execute();
+            $solicitud_actual = $stmt_verificar_solicitud->fetch(PDO::FETCH_ASSOC);
+
+            if (!$solicitud_actual) {
+                throw new Exception("Solicitud no encontrada.");
+            }
+
+            if (!in_array($solicitud_actual['estatus_solicitud'], ['aprobada', 'en_curso'])) {
+                throw new Exception("Solo se puede cambiar el usuario de solicitudes aprobadas o en curso.");
+            }
+
+            if ($solicitud_actual['usuario_id'] == $nuevo_usuario_id) {
+                throw new Exception("El nuevo usuario es el mismo que el actual.");
+            }
+
+            // Verificar que el nuevo usuario existe y está activo
+            $stmt_verificar_usuario = $db->prepare("
+                SELECT id, nombre, correo_electronico, estatus_usuario 
+                FROM usuarios 
+                WHERE id = :usuario_id
+            ");
+            $stmt_verificar_usuario->bindParam(':usuario_id', $nuevo_usuario_id);
+            $stmt_verificar_usuario->execute();
+            $nuevo_usuario = $stmt_verificar_usuario->fetch(PDO::FETCH_ASSOC);
+
+            if (!$nuevo_usuario) {
+                throw new Exception("El usuario seleccionado no existe.");
+            }
+
+            if ($nuevo_usuario['estatus_usuario'] !== 'activo') {
+                throw new Exception("El usuario seleccionado no está activo.");
+            }
+
+            // Actualizar la solicitud con el nuevo usuario
+            $stmt_cambiar_usuario = $db->prepare("
+                UPDATE solicitudes_vehiculos 
+                SET usuario_id = :nuevo_usuario_id,
+                    observaciones_aprobacion = CONCAT(COALESCE(observaciones_aprobacion, ''), ' | Cambio de usuario: ', :observaciones_cambio)
+                WHERE id = :solicitud_id
+            ");
+            $stmt_cambiar_usuario->bindParam(':nuevo_usuario_id', $nuevo_usuario_id);
+            $stmt_cambiar_usuario->bindParam(':observaciones_cambio', $observaciones_cambio);
+            $stmt_cambiar_usuario->bindParam(':solicitud_id', $solicitud_id);
+            $stmt_cambiar_usuario->execute();
+
+            $db->commit();
+            $success_message = 'Usuario de la solicitud cambiado con éxito a: ' . htmlspecialchars($nuevo_usuario['nombre']);
         } else {
             throw new Exception("Acción no reconocida.");
         }
@@ -355,6 +419,10 @@ if ($db) {
         // --- Obtener todos los vehículos para el dropdown en los modales (incluyendo los que no están 'disponibles') ---
         $stmt_vehiculos_flotilla = $db->query("SELECT id, marca, modelo, placas FROM vehiculos ORDER BY marca, modelo");
         $vehiculos_flotilla_para_modales = $stmt_vehiculos_flotilla->fetchAll(PDO::FETCH_ASSOC);
+
+        // --- Obtener lista de usuarios para el selector de cambio de usuario ---
+        $stmt_usuarios_flotilla = $db->query("SELECT id, nombre, correo_electronico FROM usuarios WHERE estatus_usuario = 'activo' ORDER BY nombre");
+        $usuarios_flotilla_para_modales = $stmt_usuarios_flotilla->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         error_log("Error al cargar datos para gestión de solicitudes: " . $e->getMessage());
         $error_message .= ' No se pudieron cargar las solicitudes o vehículos para la tabla. Detalle: ' . $e->getMessage();
@@ -593,6 +661,12 @@ if ($db) {
                                                     data-vehiculo-actual-id="<?php echo htmlspecialchars($solicitud['vehiculo_actual_id'] ?? ''); ?>"
                                                     data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
                                                     <i class="bi bi-pencil-fill"></i> Editar Asignación
+                                                </button>
+                                                <button type="button" class="bg-blue-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-blue-600 transition" data-modal-target="cambiarUsuarioModal"
+                                                    data-solicitud-id="<?php echo htmlspecialchars($solicitud['solicitud_id']); ?>"
+                                                    data-usuario-actual="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
+                                                    data-observaciones-aprobacion="<?php echo (empty($solicitud['observaciones_aprobacion']) || strpos($solicitud['observaciones_aprobacion'], 'Deprecated') !== false ? '' : htmlspecialchars($solicitud['observaciones_aprobacion'])); ?>">
+                                                    <i class="bi bi-person-fill"></i> Cambiar Usuario
                                                 </button>
                                                 <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewDetailsModal"
                                                     data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>"
@@ -835,6 +909,58 @@ if ($db) {
             </div>
         </div>
 
+        <!-- Modal para Cambiar Usuario -->
+        <div id="cambiarUsuarioModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold text-gray-900">Cambiar Usuario de Solicitud</h5>
+                    <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('cambiarUsuarioModal')">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <form action="gestion_solicitudes.php" method="POST">
+                    <div class="p-6 space-y-4">
+                        <input type="hidden" name="solicitud_id" id="cambiarUsuarioSolicitudId">
+                        <input type="hidden" name="action" value="cambiar_usuario">
+
+                        <div>
+                            <p class="text-gray-700 mb-3">Estás a punto de cambiar el usuario de la solicitud.</p>
+                            <p class="text-sm text-gray-600 mb-4"><strong>Usuario actual:</strong> <span id="cambiarUsuarioActual"></span></p>
+                        </div>
+
+                        <div>
+                            <label for="nuevo_usuario_id" class="block text-sm font-medium text-gray-700 mb-2">Nuevo Usuario</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="nuevo_usuario_id" name="nuevo_usuario_id" required>
+                                <option value="">-- Selecciona un usuario --</option>
+                                <?php foreach ($usuarios_flotilla_para_modales as $usuario): ?>
+                                    <option value="<?php echo htmlspecialchars($usuario['id']); ?>">
+                                        <?php echo htmlspecialchars($usuario['nombre'] . ' (' . $usuario['correo_electronico'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="observaciones_cambio_usuario" class="block text-sm font-medium text-gray-700 mb-2">Observaciones del Cambio (Opcional)</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1" id="observaciones_cambio_usuario" name="observaciones_cambio_usuario" rows="3" placeholder="Motivo del cambio de usuario..."></textarea>
+                        </div>
+
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3">
+                            <p class="text-sm text-yellow-800">
+                                <strong>⚠️ Importante:</strong> Al cambiar el usuario de una solicitud, esta aparecerá en la cuenta del nuevo usuario seleccionado.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
+                        <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('cambiarUsuarioModal')">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">Cambiar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <!-- Eliminar Bootstrap y Bootstrap Icons -->
@@ -887,6 +1013,8 @@ if ($db) {
                         setupEditApprovedRequestModal(this);
                     } else if (modalId === 'viewDetailsModal') {
                         setupViewDetailsModal(this);
+                    } else if (modalId === 'cambiarUsuarioModal') {
+                        setupCambiarUsuarioModal(this);
                     }
 
                     openModal(modalId);
@@ -998,6 +1126,14 @@ if ($db) {
                         estatusElement.classList.add('bg-blue-100', 'text-blue-800');
                         break;
                 }
+            }
+
+            function setupCambiarUsuarioModal(button) {
+                var solicitudId = button.getAttribute('data-solicitud-id');
+                var usuarioActual = button.getAttribute('data-usuario-actual');
+
+                document.getElementById('cambiarUsuarioSolicitudId').value = solicitudId;
+                document.getElementById('cambiarUsuarioActual').textContent = usuarioActual;
             }
         });
     </script>

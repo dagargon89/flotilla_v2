@@ -85,6 +85,18 @@ if ($db) { // $db ya está definida.
     }
 }
 
+// Obtener lista de usuarios para el selector (solo para admins y líderes)
+$usuarios_lista = [];
+if ($db && ($rol_usuario_sesion === 'admin' || $rol_usuario_sesion === 'lider_flotilla')) {
+    try {
+        $stmt_usuarios = $db->query("SELECT id, nombre, correo_electronico FROM usuarios WHERE estatus_usuario = 'activo' ORDER BY nombre");
+        $usuarios_lista = $stmt_usuarios->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Error al cargar usuarios para selector: " . $e->getMessage());
+        $error_message = 'No se pudieron cargar los usuarios disponibles.';
+    }
+}
+
 // --- FUNCIÓN PARA CONVERTIR FECHAS AL FORMATO DE MYSQL ---
 function convertirFecha($fecha)
 {
@@ -107,6 +119,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $evento = trim($_POST['evento'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $destino = trim($_POST['destino'] ?? '');
+
+    // Determinar el usuario para quien se crea la solicitud
+    $usuario_solicitud_id = $user_id; // Por defecto, el usuario logueado
+    if ($rol_usuario_sesion === 'admin' || $rol_usuario_sesion === 'lider_flotilla') {
+        $usuario_solicitud_id = filter_var($_POST['usuario_solicitud_id'] ?? $user_id, FILTER_VALIDATE_INT);
+        if (!$usuario_solicitud_id) {
+            $usuario_solicitud_id = $user_id; // Fallback al usuario logueado
+        }
+    }
 
     // Convertir fechas al formato de MySQL
     // Si viene de input móvil (datetime-local), ya está en formato correcto
@@ -151,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error_message = 'El vehículo seleccionado NO está disponible en las fechas que has elegido. Por favor, revisa la disponibilidad y selecciona otras fechas o vehículo.';
                 } else {
                     $stmt = $db->prepare("INSERT INTO solicitudes_vehiculos (usuario_id, vehiculo_id, fecha_salida_solicitada, fecha_regreso_solicitada, evento, descripcion, destino) VALUES (:usuario_id, :vehiculo_id, :fecha_salida, :fecha_regreso, :evento, :descripcion, :destino)");
-                    $stmt->bindParam(':usuario_id', $user_id);
+                    $stmt->bindParam(':usuario_id', $usuario_solicitud_id);
                     $stmt->bindParam(':vehiculo_id', $selected_vehiculo_id);
                     $stmt->bindParam(':fecha_salida', $fecha_salida_solicitada_db);
                     $stmt->bindParam(':fecha_regreso', $fecha_regreso_solicitada_db);
@@ -246,6 +267,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="bg-white rounded-xl shadow-lg p-6 border border-cambridge2">
                 <form action="solicitar_vehiculo.php" method="POST" class="space-y-4">
+                    <?php if ($rol_usuario_sesion === 'admin' || $rol_usuario_sesion === 'lider_flotilla'): ?>
+                        <div>
+                            <label for="usuario_solicitud_id" class="block text-sm font-medium text-darkpurple mb-1">Solicitar para Usuario</label>
+                            <select class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="usuario_solicitud_id" name="usuario_solicitud_id" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
+                                <option value="">-- Selecciona un usuario --</option>
+                                <?php foreach ($usuarios_lista as $usuario): ?>
+                                    <option value="<?php echo htmlspecialchars($usuario['id']); ?>" <?php echo ($usuario['id'] == $user_id) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($usuario['nombre'] . ' (' . $usuario['correo_electronico'] . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endif; ?>
                     <div>
                         <label for="vehiculo_id" class="block text-sm font-medium text-darkpurple mb-1">Selecciona el Vehículo</label>
                         <select class="block w-full rounded-lg border border-cambridge1 focus:border-darkpurple focus:ring-2 focus:ring-cambridge1 px-3 py-2 text-darkpurple bg-parchment outline-none transition" id="vehiculo_id" name="vehiculo_id" <?php echo ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') ? 'disabled' : ''; ?> required>
