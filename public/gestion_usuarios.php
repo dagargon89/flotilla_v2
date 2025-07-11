@@ -204,13 +204,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// --- Obtener todos los usuarios para mostrar en la tabla ---
+// --- Configuración de filtros y paginación ---
+$filtros = [
+    'rol' => $_GET['filtro_rol'] ?? '',
+    'estatus_cuenta' => $_GET['filtro_estatus_cuenta'] ?? '',
+    'estatus_usuario' => $_GET['filtro_estatus_usuario'] ?? '',
+    'nombre' => $_GET['filtro_nombre'] ?? '',
+    'correo' => $_GET['filtro_correo'] ?? ''
+];
+
+$registros_por_pagina = $_GET['registros_por_pagina'] ?? 10;
+$pagina_actual = $_GET['pagina'] ?? 1;
+
+// Validar registros por página
+$opciones_registros = [10, 30, 50, 'todos'];
+if (!in_array($registros_por_pagina, $opciones_registros)) {
+    $registros_por_pagina = 10;
+}
+
+// --- Obtener todos los usuarios con filtros y paginación ---
 $requested_user_id_for_history = filter_var($_GET['view_history_id'] ?? null, FILTER_VALIDATE_INT);
 $historial_amonestaciones_modal = [];
 
 if ($db) {
     try {
-        $stmt = $db->query("SELECT id, nombre, correo_electronico, rol, estatus_cuenta, estatus_usuario, fecha_creacion, ultima_sesion FROM usuarios ORDER BY nombre ASC");
+        // Construir la consulta base
+        $sql_base = "SELECT id, nombre, correo_electronico, rol, estatus_cuenta, estatus_usuario, fecha_creacion, ultima_sesion FROM usuarios";
+
+        // Construir las condiciones WHERE
+        $where_conditions = [];
+        $params = [];
+
+        if (!empty($filtros['rol'])) {
+            $where_conditions[] = "rol = :rol";
+            $params[':rol'] = $filtros['rol'];
+        }
+
+        if (!empty($filtros['estatus_cuenta'])) {
+            $where_conditions[] = "estatus_cuenta = :estatus_cuenta";
+            $params[':estatus_cuenta'] = $filtros['estatus_cuenta'];
+        }
+
+        if (!empty($filtros['estatus_usuario'])) {
+            $where_conditions[] = "estatus_usuario = :estatus_usuario";
+            $params[':estatus_usuario'] = $filtros['estatus_usuario'];
+        }
+
+        if (!empty($filtros['nombre'])) {
+            $where_conditions[] = "nombre LIKE :nombre";
+            $params[':nombre'] = '%' . $filtros['nombre'] . '%';
+        }
+
+        if (!empty($filtros['correo'])) {
+            $where_conditions[] = "correo_electronico LIKE :correo";
+            $params[':correo'] = '%' . $filtros['correo'] . '%';
+        }
+
+        // Agregar condiciones WHERE si existen
+        if (!empty($where_conditions)) {
+            $sql_base .= " WHERE " . implode(' AND ', $where_conditions);
+        }
+
+        $sql_base .= " ORDER BY nombre ASC";
+
+        // Obtener el total de registros para paginación
+        $sql_count = "SELECT COUNT(*) FROM usuarios";
+        if (!empty($where_conditions)) {
+            $sql_count .= " WHERE " . implode(' AND ', $where_conditions);
+        }
+
+        $stmt_count = $db->prepare($sql_count);
+        foreach ($params as $key => $value) {
+            $stmt_count->bindValue($key, $value);
+        }
+        $stmt_count->execute();
+        $total_registros = $stmt_count->fetchColumn();
+
+        // Calcular paginación
+        $total_paginas = 1;
+        $offset = 0;
+
+        if ($registros_por_pagina !== 'todos') {
+            $total_paginas = ceil($total_registros / $registros_por_pagina);
+            $offset = ($pagina_actual - 1) * $registros_por_pagina;
+
+            // Agregar LIMIT a la consulta
+            $sql_base .= " LIMIT :limit OFFSET :offset";
+            $params[':limit'] = (int)$registros_por_pagina;
+            $params[':offset'] = $offset;
+        }
+
+        // Ejecutar la consulta principal
+        $stmt = $db->prepare($sql_base);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
         $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if ($requested_user_id_for_history) {
@@ -292,6 +381,90 @@ if ($db) {
             <i class="bi bi-person-plus"></i> Agregar Nuevo Usuario
         </button>
         <p class="text-sm text-mountbatten mb-6">Para solicitudes de cuenta, ve a la tabla de abajo y busca el estatus "Pendiente de Aprobación".</p>
+
+        <!-- Filtros y Controles -->
+        <div class="bg-white rounded-xl shadow-lg border border-cambridge2 mb-6">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-darkpurple mb-4">Filtros y Controles</h3>
+
+                <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    <!-- Filtro por Rol -->
+                    <div>
+                        <label for="filtro_rol" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                        <select name="filtro_rol" id="filtro_rol" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                            <option value="">Todos los roles</option>
+                            <option value="admin" <?php echo $filtros['rol'] === 'admin' ? 'selected' : ''; ?>>Administrador</option>
+                            <option value="flotilla_manager" <?php echo $filtros['rol'] === 'flotilla_manager' ? 'selected' : ''; ?>>Gestor de Flotilla</option>
+                            <option value="empleado" <?php echo $filtros['rol'] === 'empleado' ? 'selected' : ''; ?>>Empleado</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Estatus de Cuenta -->
+                    <div>
+                        <label for="filtro_estatus_cuenta" class="block text-sm font-medium text-gray-700 mb-1">Estatus Cuenta</label>
+                        <select name="filtro_estatus_cuenta" id="filtro_estatus_cuenta" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                            <option value="">Todos los estatus</option>
+                            <option value="pendiente_aprobacion" <?php echo $filtros['estatus_cuenta'] === 'pendiente_aprobacion' ? 'selected' : ''; ?>>Pendiente de Aprobación</option>
+                            <option value="activa" <?php echo $filtros['estatus_cuenta'] === 'activa' ? 'selected' : ''; ?>>Activa</option>
+                            <option value="rechazada" <?php echo $filtros['estatus_cuenta'] === 'rechazada' ? 'selected' : ''; ?>>Rechazada</option>
+                            <option value="inactiva" <?php echo $filtros['estatus_cuenta'] === 'inactiva' ? 'selected' : ''; ?>>Inactiva</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Estatus de Usuario -->
+                    <div>
+                        <label for="filtro_estatus_usuario" class="block text-sm font-medium text-gray-700 mb-1">Estatus Usuario</label>
+                        <select name="filtro_estatus_usuario" id="filtro_estatus_usuario" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                            <option value="">Todos los estatus</option>
+                            <option value="activo" <?php echo $filtros['estatus_usuario'] === 'activo' ? 'selected' : ''; ?>>Activo</option>
+                            <option value="amonestado" <?php echo $filtros['estatus_usuario'] === 'amonestado' ? 'selected' : ''; ?>>Amonestado</option>
+                            <option value="suspendido" <?php echo $filtros['estatus_usuario'] === 'suspendido' ? 'selected' : ''; ?>>Suspendido</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Nombre -->
+                    <div>
+                        <label for="filtro_nombre" class="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
+                        <input type="text" name="filtro_nombre" id="filtro_nombre" value="<?php echo htmlspecialchars($filtros['nombre']); ?>" placeholder="Buscar por nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Filtro por Correo -->
+                    <div>
+                        <label for="filtro_correo" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+                        <input type="text" name="filtro_correo" id="filtro_correo" value="<?php echo htmlspecialchars($filtros['correo']); ?>" placeholder="Buscar por correo" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Registros por página -->
+                    <div>
+                        <label for="registros_por_pagina" class="block text-sm font-medium text-gray-700 mb-1">Registros por página</label>
+                        <select name="registros_por_pagina" id="registros_por_pagina" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                            <option value="10" <?php echo $registros_por_pagina == 10 ? 'selected' : ''; ?>>10</option>
+                            <option value="30" <?php echo $registros_por_pagina == 30 ? 'selected' : ''; ?>>30</option>
+                            <option value="50" <?php echo $registros_por_pagina == 50 ? 'selected' : ''; ?>>50</option>
+                            <option value="todos" <?php echo $registros_por_pagina == 'todos' ? 'selected' : ''; ?>>Todos</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex gap-2 items-end">
+                        <button type="submit" class="bg-cambridge1 text-white px-4 py-2 rounded-md hover:bg-cambridge2 transition-colors">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                        <a href="gestion_usuarios.php" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                            <i class="bi bi-arrow-clockwise"></i> Limpiar
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Información de resultados -->
+                <div class="mt-4 text-sm text-gray-600">
+                    Mostrando <?php echo count($usuarios); ?> de <?php echo $total_registros; ?> usuarios
+                    <?php if (!empty(array_filter($filtros))): ?>
+                        (con filtros aplicados)
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
 
         <?php if (empty($usuarios)): ?>
             <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
@@ -424,6 +597,76 @@ if ($db) {
                     </table>
                 </div>
             </div>
+
+            <!-- Paginación -->
+            <?php if ($registros_por_pagina !== 'todos' && $total_paginas > 1): ?>
+                <div class="bg-white border-t border-cambridge2 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            Página <?php echo $pagina_actual; ?> de <?php echo $total_paginas; ?>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <?php
+                            // Construir parámetros de URL para mantener filtros
+                            $url_params = array_filter($filtros);
+                            $url_params['registros_por_pagina'] = $registros_por_pagina;
+                            $query_string = http_build_query($url_params);
+                            ?>
+
+                            <!-- Botón Anterior -->
+                            <?php if ($pagina_actual > 1): ?>
+                                <a href="?<?php echo $query_string; ?>&pagina=<?php echo $pagina_actual - 1; ?>"
+                                    class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                    ← Anterior
+                                </a>
+                            <?php endif; ?>
+
+                            <!-- Números de página -->
+                            <div class="flex space-x-1">
+                                <?php
+                                $inicio = max(1, $pagina_actual - 2);
+                                $fin = min($total_paginas, $pagina_actual + 2);
+
+                                if ($inicio > 1): ?>
+                                    <a href="?<?php echo $query_string; ?>&pagina=1"
+                                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                        1
+                                    </a>
+                                    <?php if ($inicio > 2): ?>
+                                        <span class="px-2 py-2 text-gray-400">...</span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
+                                <?php for ($i = $inicio; $i <= $fin; $i++): ?>
+                                    <a href="?<?php echo $query_string; ?>&pagina=<?php echo $i; ?>"
+                                        class="px-3 py-2 text-sm rounded-md transition-colors <?php echo $i == $pagina_actual ? 'bg-cambridge1 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                <?php endfor; ?>
+
+                                <?php if ($fin < $total_paginas): ?>
+                                    <?php if ($fin < $total_paginas - 1): ?>
+                                        <span class="px-2 py-2 text-gray-400">...</span>
+                                    <?php endif; ?>
+                                    <a href="?<?php echo $query_string; ?>&pagina=<?php echo $total_paginas; ?>"
+                                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                        <?php echo $total_paginas; ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Botón Siguiente -->
+                            <?php if ($pagina_actual < $total_paginas): ?>
+                                <a href="?<?php echo $query_string; ?>&pagina=<?php echo $pagina_actual + 1; ?>"
+                                    class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                    Siguiente →
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <!-- Modal para Agregar/Editar Usuario -->
@@ -605,6 +848,7 @@ if ($db) {
 
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="js/main.js"></script>
+    <script src="js/table-filters.js"></script>
     <script>
         // Funciones para manejar modales
         function openModal(modalId) {

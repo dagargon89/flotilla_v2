@@ -233,10 +233,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
-// --- Obtener todas las solicitudes para mostrar en la tabla ---
+// --- Configuración de filtros y paginación ---
+$filtros = [
+    'estatus' => $_GET['filtro_estatus'] ?? '',
+    'usuario' => $_GET['filtro_usuario'] ?? '',
+    'vehiculo' => $_GET['filtro_vehiculo'] ?? '',
+    'fecha_desde' => $_GET['filtro_fecha_desde'] ?? '',
+    'fecha_hasta' => $_GET['filtro_fecha_hasta'] ?? '',
+    'evento' => $_GET['filtro_evento'] ?? ''
+];
+
+$registros_por_pagina = $_GET['registros_por_pagina'] ?? 10;
+$pagina_actual = $_GET['pagina'] ?? 1;
+
+// Validar registros por página
+$opciones_registros = [10, 30, 50, 'todos'];
+if (!in_array($registros_por_pagina, $opciones_registros)) {
+    $registros_por_pagina = 10;
+}
+
+// --- Obtener todas las solicitudes con filtros y paginación ---
 if ($db) {
     try {
-        $stmt = $db->query("
+        // Construir la consulta base
+        $sql_base = "
             SELECT
                 s.id AS solicitud_id,
                 u.nombre AS usuario_nombre,
@@ -254,8 +274,82 @@ if ($db) {
             FROM solicitudes_vehiculos s
             JOIN usuarios u ON s.usuario_id = u.id
             LEFT JOIN vehiculos v ON s.vehiculo_id = v.id
-            ORDER BY s.fecha_creacion DESC
-        ");
+        ";
+
+        // Construir las condiciones WHERE
+        $where_conditions = [];
+        $params = [];
+
+        if (!empty($filtros['estatus'])) {
+            $where_conditions[] = "s.estatus_solicitud = :estatus";
+            $params[':estatus'] = $filtros['estatus'];
+        }
+
+        if (!empty($filtros['usuario'])) {
+            $where_conditions[] = "u.nombre LIKE :usuario";
+            $params[':usuario'] = '%' . $filtros['usuario'] . '%';
+        }
+
+        if (!empty($filtros['vehiculo'])) {
+            $where_conditions[] = "(v.marca LIKE :vehiculo OR v.modelo LIKE :vehiculo OR v.placas LIKE :vehiculo)";
+            $params[':vehiculo'] = '%' . $filtros['vehiculo'] . '%';
+        }
+
+        if (!empty($filtros['evento'])) {
+            $where_conditions[] = "s.evento LIKE :evento";
+            $params[':evento'] = '%' . $filtros['evento'] . '%';
+        }
+
+        if (!empty($filtros['fecha_desde'])) {
+            $where_conditions[] = "s.fecha_salida_solicitada >= :fecha_desde";
+            $params[':fecha_desde'] = $filtros['fecha_desde'] . ' 00:00:00';
+        }
+
+        if (!empty($filtros['fecha_hasta'])) {
+            $where_conditions[] = "s.fecha_salida_solicitada <= :fecha_hasta";
+            $params[':fecha_hasta'] = $filtros['fecha_hasta'] . ' 23:59:59';
+        }
+
+        // Agregar condiciones WHERE si existen
+        if (!empty($where_conditions)) {
+            $sql_base .= " WHERE " . implode(' AND ', $where_conditions);
+        }
+
+        $sql_base .= " ORDER BY s.fecha_creacion DESC";
+
+        // Obtener el total de registros para paginación
+        $sql_count = "SELECT COUNT(*) FROM solicitudes_vehiculos s JOIN usuarios u ON s.usuario_id = u.id LEFT JOIN vehiculos v ON s.vehiculo_id = v.id";
+        if (!empty($where_conditions)) {
+            $sql_count .= " WHERE " . implode(' AND ', $where_conditions);
+        }
+
+        $stmt_count = $db->prepare($sql_count);
+        foreach ($params as $key => $value) {
+            $stmt_count->bindValue($key, $value);
+        }
+        $stmt_count->execute();
+        $total_registros = $stmt_count->fetchColumn();
+
+        // Calcular paginación
+        $total_paginas = 1;
+        $offset = 0;
+
+        if ($registros_por_pagina !== 'todos') {
+            $total_paginas = ceil($total_registros / $registros_por_pagina);
+            $offset = ($pagina_actual - 1) * $registros_por_pagina;
+
+            // Agregar LIMIT a la consulta
+            $sql_base .= " LIMIT :limit OFFSET :offset";
+            $params[':limit'] = (int)$registros_por_pagina;
+            $params[':offset'] = $offset;
+        }
+
+        // Ejecutar la consulta principal
+        $stmt = $db->prepare($sql_base);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+        $stmt->execute();
         $solicitudes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // --- Obtener todos los vehículos para el dropdown en los modales (incluyendo los que no están 'disponibles') ---
@@ -321,6 +415,88 @@ if ($db) {
                 <?php echo $error_message; ?>
             </div>
         <?php endif; ?>
+
+        <!-- Filtros y Controles -->
+        <div class="bg-white rounded-xl shadow-lg border border-cambridge2 mb-6">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-darkpurple mb-4">Filtros y Controles</h3>
+
+                <form method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    <!-- Filtro por Estatus -->
+                    <div>
+                        <label for="filtro_estatus" class="block text-sm font-medium text-gray-700 mb-1">Estatus</label>
+                        <select name="filtro_estatus" id="filtro_estatus" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                            <option value="">Todos los estatus</option>
+                            <option value="pendiente" <?php echo $filtros['estatus'] === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                            <option value="aprobada" <?php echo $filtros['estatus'] === 'aprobada' ? 'selected' : ''; ?>>Aprobada</option>
+                            <option value="rechazada" <?php echo $filtros['estatus'] === 'rechazada' ? 'selected' : ''; ?>>Rechazada</option>
+                            <option value="en_curso" <?php echo $filtros['estatus'] === 'en_curso' ? 'selected' : ''; ?>>En Curso</option>
+                            <option value="completada" <?php echo $filtros['estatus'] === 'completada' ? 'selected' : ''; ?>>Completada</option>
+                            <option value="cancelada" <?php echo $filtros['estatus'] === 'cancelada' ? 'selected' : ''; ?>>Cancelada</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Usuario -->
+                    <div>
+                        <label for="filtro_usuario" class="block text-sm font-medium text-gray-700 mb-1">Solicitante</label>
+                        <input type="text" name="filtro_usuario" id="filtro_usuario" value="<?php echo htmlspecialchars($filtros['usuario']); ?>" placeholder="Buscar por nombre" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Filtro por Vehículo -->
+                    <div>
+                        <label for="filtro_vehiculo" class="block text-sm font-medium text-gray-700 mb-1">Vehículo</label>
+                        <input type="text" name="filtro_vehiculo" id="filtro_vehiculo" value="<?php echo htmlspecialchars($filtros['vehiculo']); ?>" placeholder="Marca, modelo o placas" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Filtro por Evento -->
+                    <div>
+                        <label for="filtro_evento" class="block text-sm font-medium text-gray-700 mb-1">Evento</label>
+                        <input type="text" name="filtro_evento" id="filtro_evento" value="<?php echo htmlspecialchars($filtros['evento']); ?>" placeholder="Buscar por evento" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Filtro por Fecha Desde -->
+                    <div>
+                        <label for="filtro_fecha_desde" class="block text-sm font-medium text-gray-700 mb-1">Fecha Desde</label>
+                        <input type="date" name="filtro_fecha_desde" id="filtro_fecha_desde" value="<?php echo htmlspecialchars($filtros['fecha_desde']); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Filtro por Fecha Hasta -->
+                    <div>
+                        <label for="filtro_fecha_hasta" class="block text-sm font-medium text-gray-700 mb-1">Fecha Hasta</label>
+                        <input type="date" name="filtro_fecha_hasta" id="filtro_fecha_hasta" value="<?php echo htmlspecialchars($filtros['fecha_hasta']); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                    </div>
+
+                    <!-- Registros por página -->
+                    <div>
+                        <label for="registros_por_pagina" class="block text-sm font-medium text-gray-700 mb-1">Registros por página</label>
+                        <select name="registros_por_pagina" id="registros_por_pagina" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1">
+                            <option value="10" <?php echo $registros_por_pagina == 10 ? 'selected' : ''; ?>>10</option>
+                            <option value="30" <?php echo $registros_por_pagina == 30 ? 'selected' : ''; ?>>30</option>
+                            <option value="50" <?php echo $registros_por_pagina == 50 ? 'selected' : ''; ?>>50</option>
+                            <option value="todos" <?php echo $registros_por_pagina == 'todos' ? 'selected' : ''; ?>>Todos</option>
+                        </select>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex gap-2 items-end">
+                        <button type="submit" class="bg-cambridge1 text-white px-4 py-2 rounded-md hover:bg-cambridge2 transition-colors">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                        <a href="gestion_solicitudes.php" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                            <i class="bi bi-arrow-clockwise"></i> Limpiar
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Información de resultados -->
+                <div class="mt-4 text-sm text-gray-600">
+                    Mostrando <?php echo count($solicitudes); ?> de <?php echo $total_registros; ?> solicitudes
+                    <?php if (!empty(array_filter($filtros))): ?>
+                        (con filtros aplicados)
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
 
         <?php if (empty($solicitudes)): ?>
             <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
@@ -462,6 +638,76 @@ if ($db) {
                     </table>
                 </div>
             </div>
+
+            <!-- Paginación -->
+            <?php if ($registros_por_pagina !== 'todos' && $total_paginas > 1): ?>
+                <div class="bg-white border-t border-cambridge2 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-gray-600">
+                            Página <?php echo $pagina_actual; ?> de <?php echo $total_paginas; ?>
+                        </div>
+
+                        <div class="flex items-center space-x-2">
+                            <?php
+                            // Construir parámetros de URL para mantener filtros
+                            $url_params = array_filter($filtros);
+                            $url_params['registros_por_pagina'] = $registros_por_pagina;
+                            $query_string = http_build_query($url_params);
+                            ?>
+
+                            <!-- Botón Anterior -->
+                            <?php if ($pagina_actual > 1): ?>
+                                <a href="?<?php echo $query_string; ?>&pagina=<?php echo $pagina_actual - 1; ?>"
+                                    class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                    ← Anterior
+                                </a>
+                            <?php endif; ?>
+
+                            <!-- Números de página -->
+                            <div class="flex space-x-1">
+                                <?php
+                                $inicio = max(1, $pagina_actual - 2);
+                                $fin = min($total_paginas, $pagina_actual + 2);
+
+                                if ($inicio > 1): ?>
+                                    <a href="?<?php echo $query_string; ?>&pagina=1"
+                                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                        1
+                                    </a>
+                                    <?php if ($inicio > 2): ?>
+                                        <span class="px-2 py-2 text-gray-400">...</span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+
+                                <?php for ($i = $inicio; $i <= $fin; $i++): ?>
+                                    <a href="?<?php echo $query_string; ?>&pagina=<?php echo $i; ?>"
+                                        class="px-3 py-2 text-sm rounded-md transition-colors <?php echo $i == $pagina_actual ? 'bg-cambridge1 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'; ?>">
+                                        <?php echo $i; ?>
+                                    </a>
+                                <?php endfor; ?>
+
+                                <?php if ($fin < $total_paginas): ?>
+                                    <?php if ($fin < $total_paginas - 1): ?>
+                                        <span class="px-2 py-2 text-gray-400">...</span>
+                                    <?php endif; ?>
+                                    <a href="?<?php echo $query_string; ?>&pagina=<?php echo $total_paginas; ?>"
+                                        class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                        <?php echo $total_paginas; ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Botón Siguiente -->
+                            <?php if ($pagina_actual < $total_paginas): ?>
+                                <a href="?<?php echo $query_string; ?>&pagina=<?php echo $pagina_actual + 1; ?>"
+                                    class="px-3 py-2 text-sm bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors">
+                                    Siguiente →
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         <?php endif; ?>
 
         <!-- Modal para Aprobar/Rechazar Solicitud -->
@@ -595,6 +841,7 @@ if ($db) {
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="js/main.js"></script>
+    <script src="js/table-filters.js"></script>
     <script>
         // Funciones para manejar modales
         function openModal(modalId) {
