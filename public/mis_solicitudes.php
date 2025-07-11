@@ -403,6 +403,9 @@ if (isset($_GET['error'])) {
     </script>
     <link rel="stylesheet" href="css/colors.css">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Agregar FilePond CSS y plugins -->
+    <link href="https://unpkg.com/filepond@4.30.4/dist/filepond.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/filepond-plugin-image-preview@4.6.11/dist/filepond-plugin-image-preview.min.css" rel="stylesheet">
     <style>
         #vehicle-status {
             padding: 4px 8px;
@@ -731,7 +734,7 @@ if (isset($_GET['error'])) {
                         </div>
                         <div>
                             <label for="fotos_medidores" class="block text-sm font-medium text-gray-700 mb-2">Fotos de Evidencia del Kilometraje y Nivel de Combustible</label>
-                            <input type="file" class="w-full px-3 py-2 border border-cambridge1 rounded-lg focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-darkpurple bg-parchment transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cambridge1 file:text-white hover:file:bg-cambridge2" id="fotos_medidores" name="fotos_medidores[]" accept="image/*" multiple capture="environment">
+                            <input type="file" class="filepond" id="fotos_medidores" name="fotos_medidores[]" accept="image/*" multiple data-max-files="10">
                             <small class="text-sm text-gray-500">Sube o toma fotos claras del tablero mostrando el kilometraje y del medidor de combustible (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
                             <div id="preview_fotos_medidores" class="flex flex-wrap gap-2 mt-2"></div>
                         </div>
@@ -749,7 +752,7 @@ if (isset($_GET['error'])) {
                             </div>
                             <div>
                                 <label for="fotos_observaciones" class="block text-sm font-medium text-gray-700 mb-2">Fotos de Evidencia de las Observaciones</label>
-                                <input type="file" class="w-full px-3 py-2 border border-cambridge1 rounded-lg focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-darkpurple bg-parchment transition file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cambridge1 file:text-white hover:file:bg-cambridge2" id="fotos_observaciones" name="fotos_observaciones[]" accept="image/*" multiple capture="environment">
+                                <input type="file" class="filepond" id="fotos_observaciones" name="fotos_observaciones[]" accept="image/*" multiple data-max-files="10">
                                 <small class="text-sm text-gray-500">Sube o toma fotos que evidencien los detalles mencionados en las observaciones (golpes, limpieza, etc.) (máx. <?php echo ini_get('upload_max_filesize'); ?> por archivo).</small>
                                 <div id="preview_fotos_observaciones" class="flex flex-wrap gap-2 mt-2"></div>
                             </div>
@@ -1055,6 +1058,25 @@ if (isset($_GET['error'])) {
                 document.getElementById('fotos_observaciones').addEventListener('change', function() {
                     previewImages(this, 'preview_fotos_observaciones');
                 });
+            }
+
+            // Inicializar FilePond para los inputs de fotos
+            FilePond.registerPlugin(
+                FilePondPluginImagePreview,
+                FilePondPluginFileValidateType,
+                FilePondPluginFileValidateSize
+            );
+            FilePond.setOptions({
+                labelIdle: 'Arrastra o <span class="filepond--label-action">explora</span> para seleccionar o tomar fotos',
+                allowMultiple: true,
+                maxFiles: 10,
+                acceptedFileTypes: ['image/*'],
+                allowReorder: true,
+                instantUpload: false
+            });
+            FilePond.create(document.getElementById('fotos_medidores'));
+            if (document.getElementById('fotos_observaciones')) {
+                FilePond.create(document.getElementById('fotos_observaciones'));
             }
         });
     </script>
