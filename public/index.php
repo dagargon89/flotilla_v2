@@ -110,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
     <link rel="stylesheet" href="css/colors.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/password-toggle.css">
 </head>
 
 <body class="min-h-screen flex items-center justify-center bg-parchment">
@@ -136,17 +137,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <hr class="my-6 border-cambridge2">
 
-        <div class="text-center">
+        <!--<div class="text-center">
             <button type="button" class="w-full py-2 px-4 rounded-lg border border-cambridge1 text-cambridge1 font-semibold bg-white flex items-center justify-center gap-2 mb-2 cursor-not-allowed opacity-60" disabled>
                 <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google icon">
                 Iniciar Sesión con Google (próximamente)
             </button>
-        </div>
+        </div>-->
         <p class="text-center mt-4 text-sm text-mountbatten">
             ¿No tienes cuenta? <a href="register.php" class="text-cambridge1 hover:underline">Regístrate aquí</a>
         </p>
     </div>
     <script src="js/main.js"></script>
+    <script src="js/password-toggle.js"></script>
 </body>
 
 </html>
