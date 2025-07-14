@@ -450,7 +450,7 @@ if ($db) {
                                     <td class="px-4 py-3 text-sm text-mountbatten"><?php echo htmlspecialchars($vehiculo['ubicacion_actual'] ?? 'N/A'); ?></td>
                                     <td class="px-4 py-3">
                                         <div class="flex flex-wrap gap-1">
-                                            <a href="detalle_vehiculo.php?id=<?php echo $vehiculo['id']; ?>" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition">
+                                            <a href="detalle_vehiculo.php?id=<?php echo $vehiculo['id']; ?>" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition">
                                                 Ver Detalles
                                             </a>
                                             <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="addEditVehicleModal" data-action="edit"

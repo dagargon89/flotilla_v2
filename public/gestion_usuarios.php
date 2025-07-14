@@ -570,7 +570,7 @@ if ($db) {
                                                 data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
                                                 Amonestar
                                             </button>
-                                            <button type="button" class="bg-gray-600 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewUserHistoryModal"
+                                            <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="viewUserHistoryModal"
                                                 data-user-id="<?php echo $usuario['id']; ?>"
                                                 data-user-name="<?php echo htmlspecialchars($usuario['nombre']); ?>">
                                                 Historial

@@ -690,7 +690,7 @@ if ($db) {
                                             </div>
                                         <?php else: ?>
                                             <div class="flex flex-wrap gap-1">
-                                                <button type="button" class="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-gray-600 transition" data-modal-target="viewDetailsModal"
+                                                <button type="button" class="bg-cambridge1 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-cambridge2 transition" data-modal-target="viewDetailsModal"
                                                     data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>"
                                                     data-usuario="<?php echo htmlspecialchars($solicitud['usuario_nombre']); ?>"
                                                     data-salida="<?php echo htmlspecialchars($solicitud['fecha_salida_solicitada']); ?>"
