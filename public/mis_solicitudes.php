@@ -68,6 +68,89 @@ $error_message = $error_message ?? ''; // Mantener el error si ya viene del bloq
 
 $solicitudes_usuario = [];
 
+// --- Lógica para cancelar solicitudes ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'cancelar_solicitud') {
+    // Bloquear si el usuario está suspendido O amonestado
+    if ($current_user_estatus_usuario === 'suspendido' || $current_user_estatus_usuario === 'amonestado') {
+        $error_message = 'No puedes cancelar solicitudes porque tu cuenta está ' . htmlspecialchars(ucfirst($current_user_estatus_usuario)) . '. Contacta al administrador.';
+        header('Location: mis_solicitudes.php?error=' . urlencode($error_message));
+        exit();
+    }
+
+    $solicitud_id = filter_var($_POST['solicitud_id'] ?? null, FILTER_VALIDATE_INT);
+    $motivo_cancelacion = trim($_POST['motivo_cancelacion'] ?? '');
+
+    if ($solicitud_id === false || $solicitud_id <= 0) {
+        $error_message = 'ID de solicitud inválido.';
+    } elseif (empty($motivo_cancelacion)) {
+        $error_message = 'Debes proporcionar un motivo para la cancelación.';
+    } else {
+        try {
+            $db->beginTransaction();
+
+            // Verificar que la solicitud pertenece al usuario y puede ser cancelada
+            $stmt_check = $db->prepare("
+                SELECT id, estatus_solicitud, vehiculo_id 
+                FROM solicitudes_vehiculos 
+                WHERE id = :solicitud_id AND usuario_id = :user_id
+            ");
+            $stmt_check->bindParam(':solicitud_id', $solicitud_id);
+            $stmt_check->bindParam(':user_id', $user_id);
+            $stmt_check->execute();
+            $solicitud_info = $stmt_check->fetch(PDO::FETCH_ASSOC);
+
+            if (!$solicitud_info) {
+                throw new Exception("La solicitud no existe o no tienes permisos para cancelarla.");
+            }
+
+            // Solo permitir cancelar solicitudes pendientes o aprobadas (que no estén en curso)
+            if (!in_array($solicitud_info['estatus_solicitud'], ['pendiente', 'aprobada'])) {
+                throw new Exception("No se puede cancelar una solicitud con estatus '" . $solicitud_info['estatus_solicitud'] . "'.");
+            }
+
+            // Verificar que no esté en uso (no tenga historial de salida)
+            $stmt_historial = $db->prepare("SELECT id FROM historial_uso_vehiculos WHERE solicitud_id = :solicitud_id");
+            $stmt_historial->bindParam(':solicitud_id', $solicitud_id);
+            $stmt_historial->execute();
+
+            if ($stmt_historial->fetch()) {
+                throw new Exception("No se puede cancelar una solicitud que ya está en uso.");
+            }
+
+            // Actualizar el estatus de la solicitud a cancelada
+            $stmt_update = $db->prepare("
+                UPDATE solicitudes_vehiculos 
+                SET estatus_solicitud = 'cancelada', 
+                    observaciones_aprobacion = CONCAT(COALESCE(observaciones_aprobacion, ''), '\n\nCancelada por el usuario el ', NOW(), '. Motivo: ', :motivo)
+                WHERE id = :solicitud_id
+            ");
+            $stmt_update->bindParam(':motivo', $motivo_cancelacion);
+            $stmt_update->bindParam(':solicitud_id', $solicitud_id);
+            $stmt_update->execute();
+
+            // Si la solicitud estaba aprobada y tenía vehículo asignado, liberar el vehículo
+            if ($solicitud_info['estatus_solicitud'] === 'aprobada' && $solicitud_info['vehiculo_id']) {
+                $stmt_liberar_vehiculo = $db->prepare("
+                    UPDATE vehiculos 
+                    SET estatus = 'disponible' 
+                    WHERE id = :vehiculo_id AND estatus = 'asignado'
+                ");
+                $stmt_liberar_vehiculo->bindParam(':vehiculo_id', $solicitud_info['vehiculo_id']);
+                $stmt_liberar_vehiculo->execute();
+            }
+
+            $db->commit();
+            $success_message = 'Solicitud cancelada exitosamente.';
+            header('Location: mis_solicitudes.php?success=' . urlencode($success_message));
+            exit();
+        } catch (Exception $e) {
+            $db->rollBack();
+            error_log("Error al cancelar solicitud: " . $e->getMessage());
+            $error_message = 'Error: ' . $e->getMessage();
+        }
+    }
+}
+
 // Ruta base para guardar las imágenes (FUERA DE PUBLIC_HTML POR SEGURIDAD)
 $upload_dir = __DIR__ . '/../storage/uploads/vehiculo_evidencias/';
 
@@ -620,6 +703,12 @@ if (isset($_GET['error'])) {
                                                     Regreso
                                                 </button>
                                             <?php endif; ?>
+
+                                            <?php if (in_array($solicitud['estatus_solicitud'], ['pendiente', 'aprobada']) && !$solicitud['historial_id']): ?>
+                                                <button type="button" class="bg-orange-500 text-white px-2 py-1 rounded text-xs font-semibold hover:bg-orange-600 transition" data-modal-target="cancelSolicitudModal" data-solicitud-id="<?php echo $solicitud['solicitud_id']; ?>" data-solicitud-info="<?php echo htmlspecialchars($solicitud['evento'] . ' - ' . $solicitud['marca'] . ' ' . $solicitud['modelo']); ?>">
+                                                    Cancelar
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
@@ -829,6 +918,53 @@ if (isset($_GET['error'])) {
         </div>
     </div>
 
+    <!-- Modal para Cancelar Solicitud -->
+    <div id="cancelSolicitudModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h5 class="text-lg font-semibold text-gray-900">Cancelar Solicitud</h5>
+                <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" onclick="closeModal('cancelSolicitudModal')">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form action="mis_solicitudes.php" method="POST">
+                <div class="p-6 space-y-4">
+                    <input type="hidden" name="action" value="cancelar_solicitud">
+                    <input type="hidden" name="solicitud_id" id="cancelSolicitudId">
+
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-sm text-yellow-700">
+                            <strong>⚠️ Advertencia:</strong> Esta acción no se puede deshacer. La solicitud será marcada como cancelada.
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-700 mb-2">¿Estás seguro de que quieres cancelar la siguiente solicitud?</p>
+                        <p class="text-gray-900 font-semibold" id="cancelSolicitudInfo"></p>
+                    </div>
+
+                    <div>
+                        <label for="motivo_cancelacion" class="block text-sm font-medium text-gray-700 mb-2">Motivo de la cancelación *</label>
+                        <textarea
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cambridge1 focus:border-cambridge1"
+                            id="motivo_cancelacion"
+                            name="motivo_cancelacion"
+                            rows="3"
+                            placeholder="Explica el motivo de la cancelación..."
+                            required></textarea>
+                        <small class="text-sm text-gray-500">Este motivo será registrado en el sistema.</small>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                    <button type="button" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors" onclick="closeModal('cancelSolicitudModal')">No, mantener</button>
+                    <button type="submit" class="px-4 py-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors">Sí, cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="js/main.js"></script>
     <script src="js/table-filters.js"></script>
@@ -863,6 +999,8 @@ if (isset($_GET['error'])) {
                         setupUseVehicleModal(this);
                     } else if (modalId === 'viewDetailsModal') {
                         setupViewDetailsModal(this);
+                    } else if (modalId === 'cancelSolicitudModal') {
+                        setupCancelSolicitudModal(this);
                     }
 
                     openModal(modalId);
@@ -944,7 +1082,7 @@ if (isset($_GET['error'])) {
                         estatusElement.classList.add('bg-gray-100', 'text-gray-800');
                         break;
                     case 'cancelada':
-                        estatusElement.classList.add('bg-blue-100', 'text-blue-800');
+                        estatusElement.classList.add('bg-orange-100', 'text-orange-800');
                         break;
                 }
 
@@ -1001,6 +1139,14 @@ if (isset($_GET['error'])) {
                     document.getElementById('regresoDetails').classList.add('hidden');
                     document.getElementById('noRegresoDetails').classList.remove('hidden');
                 }
+            }
+
+            function setupCancelSolicitudModal(button) {
+                var solicitudId = button.getAttribute('data-solicitud-id');
+                var solicitudInfo = button.getAttribute('data-solicitud-info');
+
+                document.getElementById('cancelSolicitudId').value = solicitudId;
+                document.getElementById('cancelSolicitudInfo').textContent = solicitudInfo;
             }
 
             // Mostrar/ocultar sección de observaciones según selección
